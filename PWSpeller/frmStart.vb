@@ -4,7 +4,7 @@ Imports System.Text
 Imports System.Security.Cryptography
 Imports System.Windows.Forms
 
-Public Class Form1
+Public Class frmStart
     Private randomBytes() As Byte
     Private randomInt32Value As Integer
     Private possibleChars As String
