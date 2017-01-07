@@ -1,5 +1,5 @@
 ﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
-Partial Class Form1
+Partial Class frmStart
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
@@ -161,7 +161,7 @@ Partial Class Form1
         Me.Label1.TabIndex = 13
         Me.Label1.Text = "Spelling language"
         '
-        'Form1
+        'frmStart
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
@@ -179,7 +179,7 @@ Partial Class Form1
         Me.Controls.Add(Me.numPasswdSize)
         Me.Controls.Add(Me.btnGenerate)
         Me.Controls.Add(Me.grdTeksten)
-        Me.Name = "Form1"
+        Me.Name = "frmStart"
         Me.Text = "PWSpeller"
         CType(Me.numPasswdSize, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.grdTeksten, System.ComponentModel.ISupportInitialize).EndInit()
