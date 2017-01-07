@@ -85,10 +85,6 @@ Public Class Form1
         fill_txtSpelled(Me.txtPassword.Text)
     End Sub
 
-    Private Sub Label1_Click(sender As Object, e As EventArgs) Handles Label1.Click
-
-    End Sub
-
     Private Sub LeesCSV()
         Dim path As String
         path = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase).Replace("\bin\Debug", "")
@@ -96,7 +92,7 @@ Public Class Form1
         ' Using ioReader As New Microsoft.VisualBasic.FileIO.TextFieldParser(path & "D:\Files\Sources\Repos\PWSpeller\PWSpeller\talen.csv")
         Using ioReader As New Microsoft.VisualBasic.FileIO.TextFieldParser(path & "\talen.csv")
             ioReader.TextFieldType = FileIO.FieldType.Delimited
-            ioReader.SetDelimiters(",")
+            ioReader.SetDelimiters(";")
 
             Dim TextFileTable As DataTable = Nothing
             Dim Column As DataColumn
@@ -115,8 +111,8 @@ Public Class Form1
                             For ColumnCount = 0 To UpperBound
                                 Column = New DataColumn()
                                 Column.DataType = System.Type.GetType("System.String")
-                                Column.ColumnName = "Column" & ColumnCount
-                                Column.Caption = "Column" & ColumnCount
+                                Column.ColumnName = "Taal" & ColumnCount
+                                Column.Caption = "Taal" & ColumnCount
                                 Column.ReadOnly = True
                                 Column.Unique = False
                                 cmbTaal.Items.Add(CurrentRow(ColumnCount).ToString)
@@ -125,7 +121,7 @@ Public Class Form1
                         End If
                         Row = TextFileTable.NewRow
                         For ColumnCount = 0 To UpperBound
-                            Row("Column" & ColumnCount) = CurrentRow(ColumnCount).ToString
+                            Row("Taal" & ColumnCount) = CurrentRow(ColumnCount).ToString
                         Next
                         TextFileTable.Rows.Add(Row)
                     End If
