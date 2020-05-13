@@ -22,6 +22,7 @@ Partial Class frmStart
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(frmStart))
         Me.btnGenerate = New System.Windows.Forms.Button()
         Me.numPasswdSize = New System.Windows.Forms.NumericUpDown()
         Me.Label2 = New System.Windows.Forms.Label()
@@ -68,7 +69,7 @@ Partial Class frmStart
         '
         'txtPassword
         '
-        Me.txtPassword.Location = New System.Drawing.Point(12, 74)
+        Me.txtPassword.Location = New System.Drawing.Point(26, 75)
         Me.txtPassword.Name = "txtPassword"
         Me.txtPassword.Size = New System.Drawing.Size(247, 20)
         Me.txtPassword.TabIndex = 4
@@ -124,6 +125,7 @@ Partial Class frmStart
         Me.txtSpelled.Location = New System.Drawing.Point(26, 141)
         Me.txtSpelled.Multiline = True
         Me.txtSpelled.Name = "txtSpelled"
+        Me.txtSpelled.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
         Me.txtSpelled.Size = New System.Drawing.Size(488, 257)
         Me.txtSpelled.TabIndex = 9
         '
@@ -179,6 +181,7 @@ Partial Class frmStart
         Me.Controls.Add(Me.numPasswdSize)
         Me.Controls.Add(Me.btnGenerate)
         Me.Controls.Add(Me.grdTeksten)
+        Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Name = "frmStart"
         Me.Text = "PWSpeller"
         CType(Me.numPasswdSize, System.ComponentModel.ISupportInitialize).EndInit()

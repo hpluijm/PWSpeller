@@ -26,7 +26,7 @@ Public Class frmStart
         possibleChars1 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         possibleChars2 = "abcdefghijklmnopqrstuvwxyz"
         possibleChars3 = "0123456789"
-        possibleChars4 = "!@#$%^&*()_+"
+        possibleChars4 = "!@#$%^&*()_+-?<>"
         LeesCSV()
     End Sub
 
@@ -83,6 +83,14 @@ Public Class frmStart
 
     Private Sub btnSpell_Click(sender As Object, e As EventArgs) Handles btnSpell.Click
         fill_txtSpelled(Me.txtPassword.Text)
+    End Sub
+
+    Private Sub frmStart_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+    End Sub
+
+    Private Sub chkSPC_CheckedChanged(sender As Object, e As EventArgs) Handles chkSPC.CheckedChanged
+
     End Sub
 
     Private Sub LeesCSV()
