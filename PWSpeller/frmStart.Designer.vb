@@ -36,6 +36,7 @@ Partial Class frmStart
         Me.grdTeksten = New System.Windows.Forms.DataGridView()
         Me.cmbTaal = New System.Windows.Forms.ComboBox()
         Me.Label1 = New System.Windows.Forms.Label()
+        Me.rtbPassword = New System.Windows.Forms.RichTextBox()
         CType(Me.numPasswdSize, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.grdTeksten, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
@@ -56,7 +57,7 @@ Partial Class frmStart
         Me.numPasswdSize.Name = "numPasswdSize"
         Me.numPasswdSize.Size = New System.Drawing.Size(59, 20)
         Me.numPasswdSize.TabIndex = 2
-        Me.numPasswdSize.Value = New Decimal(New Integer() {8, 0, 0, 0})
+        Me.numPasswdSize.Value = New Decimal(New Integer() {15, 0, 0, 0})
         '
         'Label2
         '
@@ -69,60 +70,69 @@ Partial Class frmStart
         '
         'txtPassword
         '
-        Me.txtPassword.Location = New System.Drawing.Point(26, 75)
+        Me.txtPassword.BackColor = System.Drawing.SystemColors.ControlDark
+        Me.txtPassword.Location = New System.Drawing.Point(26, 104)
         Me.txtPassword.Name = "txtPassword"
-        Me.txtPassword.Size = New System.Drawing.Size(247, 20)
+        Me.txtPassword.Size = New System.Drawing.Size(292, 20)
         Me.txtPassword.TabIndex = 4
         '
         'chkAZCap
         '
         Me.chkAZCap.AutoSize = True
+        Me.chkAZCap.BackColor = System.Drawing.SystemColors.ControlDark
         Me.chkAZCap.Checked = True
         Me.chkAZCap.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.chkAZCap.ForeColor = System.Drawing.Color.White
         Me.chkAZCap.Location = New System.Drawing.Point(12, 33)
         Me.chkAZCap.Name = "chkAZCap"
         Me.chkAZCap.Size = New System.Drawing.Size(43, 17)
         Me.chkAZCap.TabIndex = 5
         Me.chkAZCap.Text = "A-Z"
-        Me.chkAZCap.UseVisualStyleBackColor = True
+        Me.chkAZCap.UseVisualStyleBackColor = False
         '
         'chkAZlow
         '
         Me.chkAZlow.AutoSize = True
+        Me.chkAZlow.BackColor = System.Drawing.SystemColors.Control
         Me.chkAZlow.Checked = True
         Me.chkAZlow.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.chkAZlow.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(0, Byte), Integer))
         Me.chkAZlow.Location = New System.Drawing.Point(61, 33)
         Me.chkAZlow.Name = "chkAZlow"
         Me.chkAZlow.Size = New System.Drawing.Size(40, 17)
         Me.chkAZlow.TabIndex = 6
         Me.chkAZlow.Text = "a-z"
-        Me.chkAZlow.UseVisualStyleBackColor = True
+        Me.chkAZlow.UseVisualStyleBackColor = False
         '
         'chk09
         '
         Me.chk09.AutoSize = True
+        Me.chk09.BackColor = System.Drawing.SystemColors.ControlDark
         Me.chk09.Checked = True
         Me.chk09.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.chk09.ForeColor = System.Drawing.Color.Yellow
         Me.chk09.Location = New System.Drawing.Point(107, 33)
         Me.chk09.Name = "chk09"
         Me.chk09.Size = New System.Drawing.Size(41, 17)
         Me.chk09.TabIndex = 7
         Me.chk09.Text = "0-9"
-        Me.chk09.UseVisualStyleBackColor = True
+        Me.chk09.UseVisualStyleBackColor = False
         '
         'chkSPC
         '
         Me.chkSPC.AutoSize = True
+        Me.chkSPC.BackColor = System.Drawing.Color.Transparent
+        Me.chkSPC.ForeColor = System.Drawing.Color.Red
         Me.chkSPC.Location = New System.Drawing.Point(154, 33)
         Me.chkSPC.Name = "chkSPC"
         Me.chkSPC.Size = New System.Drawing.Size(77, 17)
         Me.chkSPC.TabIndex = 8
         Me.chkSPC.Text = "!@#$%^&*()"
-        Me.chkSPC.UseVisualStyleBackColor = True
+        Me.chkSPC.UseVisualStyleBackColor = False
         '
         'txtSpelled
         '
-        Me.txtSpelled.Location = New System.Drawing.Point(26, 141)
+        Me.txtSpelled.Location = New System.Drawing.Point(26, 244)
         Me.txtSpelled.Multiline = True
         Me.txtSpelled.Name = "txtSpelled"
         Me.txtSpelled.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
@@ -141,7 +151,7 @@ Partial Class frmStart
         'grdTeksten
         '
         Me.grdTeksten.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.grdTeksten.Location = New System.Drawing.Point(138, 177)
+        Me.grdTeksten.Location = New System.Drawing.Point(142, 295)
         Me.grdTeksten.Name = "grdTeksten"
         Me.grdTeksten.Size = New System.Drawing.Size(240, 150)
         Me.grdTeksten.TabIndex = 11
@@ -163,11 +173,21 @@ Partial Class frmStart
         Me.Label1.TabIndex = 13
         Me.Label1.Text = "Spelling language"
         '
+        'rtbPassword
+        '
+        Me.rtbPassword.Font = New System.Drawing.Font("Microsoft Sans Serif", 14.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.rtbPassword.Location = New System.Drawing.Point(26, 166)
+        Me.rtbPassword.Name = "rtbPassword"
+        Me.rtbPassword.Size = New System.Drawing.Size(478, 48)
+        Me.rtbPassword.TabIndex = 14
+        Me.rtbPassword.Text = ""
+        '
         'frmStart
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(545, 410)
+        Me.ClientSize = New System.Drawing.Size(615, 543)
+        Me.Controls.Add(Me.rtbPassword)
         Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.cmbTaal)
         Me.Controls.Add(Me.btnSpell)
@@ -204,4 +224,5 @@ Partial Class frmStart
     Friend WithEvents grdTeksten As DataGridView
     Friend WithEvents cmbTaal As ComboBox
     Friend WithEvents Label1 As Label
+    Friend WithEvents rtbPassword As RichTextBox
 End Class

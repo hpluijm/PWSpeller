@@ -17,7 +17,7 @@ Public Class frmStart
     Private GetPasswordGenProfiler As New PasswordGenProfiler
     Private sData() As String
     Private rowTel, colTel As Long
-    
+
     Public Sub New()
         ' This call is required by the designer.
         InitializeComponent()
@@ -26,7 +26,7 @@ Public Class frmStart
         possibleChars1 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         possibleChars2 = "abcdefghijklmnopqrstuvwxyz"
         possibleChars3 = "0123456789"
-        possibleChars4 = "!@#$%^&*()_+-?<>"
+        possibleChars4 = "'-!#$%&()*,./:;?@[]^_`{|}~+<=>"
         LeesCSV()
     End Sub
 
@@ -90,6 +90,43 @@ Public Class frmStart
     End Sub
 
     Private Sub chkSPC_CheckedChanged(sender As Object, e As EventArgs) Handles chkSPC.CheckedChanged
+
+    End Sub
+
+    Private Sub chkAZCap_CheckedChanged(sender As Object, e As EventArgs) Handles chkAZCap.CheckedChanged
+
+    End Sub
+
+    Private Sub txtPassword_TextChanged(sender As Object, e As EventArgs) Handles txtPassword.TextChanged
+        txtPassword.BackColor = Color.DarkGray
+        rtbPassword.BackColor = Color.DarkGray
+        Dim testtext As String
+        Dim AscWaarde As Long
+        rtbPassword.Text = txtPassword.Text
+        For teller = 1 To rtbPassword.TextLength
+            With rtbPassword
+                .SelectionStart = teller - 1
+                .SelectionLength = 1
+                AscWaarde = Asc(rtbPassword.SelectedText)
+                Select Case AscWaarde
+                    Case 0 To 32
+                        .SelectionColor = Color.Chocolate
+                    Case 33 To 47, 58 To 64, 91 To 96, 123 To 126
+                        .SelectionColor = Color.Red
+                    Case 48 To 57
+                        .SelectionColor = Color.Yellow
+                    Case 65 To 90
+                        .SelectionColor = Color.White
+                    Case 97 To 122
+                        .SelectionColor = Color.Green
+                    Case Else
+                        .SelectionColor = Color.Chocolate
+                End Select
+            End With
+        Next
+    End Sub
+
+    Private Sub numPasswdSize_ValueChanged(sender As Object, e As EventArgs) Handles numPasswdSize.ValueChanged
 
     End Sub
 

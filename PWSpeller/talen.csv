@@ -93,7 +93,7 @@ Backslash;Backslash;Backslash
 Blokhaar rechts;Right Bracket;Blokhaak recchts
 Dakje;Caret;Dakje
 Underscore;Underscore;Underscore
-;;
+Accent;Accent;Accent
 kleineletter Anna;small Amsterdam;Arthur
 kleineletter Bernard;small Baltimore;Brussel
 kleineletter Cornelis;small Casablanca;Carolina
@@ -119,4 +119,8 @@ kleineletter Victor;small Valencia;Victor
 kleineletter Willem;small Washington;Waterloo
 kleineletter Xantippe;small Xantippe;Xavier
 kleineletter Ypsilon;small Yokohama;Yvonne
-kleineletter Zacharias;small ZǬrich;Zola
+kleineletter Zacharias;small Zurich;Zola
+Accolade open; Opening Brace; Accolade open
+Verticale streep; Vertical bar; Verticale streep
+Accolade sluiten; Closing Brace; Accolade sluiten
+Tilde; Tilde; Tilde
