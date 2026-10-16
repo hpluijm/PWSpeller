@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 15: de kopieertest gebruikt een nepbord, want de app handelt het verzoek nu zelf af.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 14 fixronde 1: tests voor groepjes bij eigen tekst, de cache, focus op een knop en het wissen van de eigen tekst.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -21,7 +24,26 @@ use pwspeller::instellingen::Instellingen;
 use pwspeller::resultaat::groepjes;
 use pwspeller::splash::SPLASHDUUR;
 use pwspeller::thema;
+use std::cell::RefCell;
+use std::rc::Rc;
 use std::time::Instant;
+
+#[derive(Clone, Default)]
+struct NepBord(Rc<RefCell<Option<String>>>);
+
+impl pwspeller::klembord::Bord for NepBord {
+    fn zet_vertrouwelijk(&mut self, tekst: &str) -> Result<(), String> {
+        *self.0.borrow_mut() = Some(tekst.to_string());
+        Ok(())
+    }
+    fn lees(&mut self) -> Option<String> {
+        self.0.borrow().clone()
+    }
+    fn wis(&mut self) -> Result<(), String> {
+        *self.0.borrow_mut() = None;
+        Ok(())
+    }
+}
 
 type Harnas = Harness<'static, (PwApp, Instant)>;
 
@@ -228,6 +250,8 @@ fn wachtzin_tab_spelt_per_woord_en_knop_per_teken_schakelt() {
 #[test]
 fn sneltoetsen_enter_f5_en_kopieer() {
     let mut h = hoofd();
+    let bord = NepBord::default();
+    h.state_mut().0.zet_bord(Box::new(bord.clone()));
     h.key_press(Key::Enter);
     stap(&mut h);
     assert!(h.state().0.hoofd.wachtwoord.is_some(), "Enter genereert");
@@ -237,7 +261,9 @@ fn sneltoetsen_enter_f5_en_kopieer() {
     assert!(h.state().0.hoofd.voorlezen_gevraagd);
     h.key_press_modifiers(Modifiers::COMMAND, Key::C);
     stap(&mut h);
-    assert!(h.state_mut().0.neem_kopieer_verzoek());
+    // De app handelt het verzoek zelf af (Taak 15): het nepbord heeft de tekst, het verzoek is weg.
+    let verwacht = h.state().0.huidige_tekst().unwrap().to_string();
+    assert_eq!(bord.0.borrow().as_deref(), Some(verwacht.as_str()));
     assert!(!h.state_mut().0.neem_kopieer_verzoek());
 }
 

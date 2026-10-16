@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 15: klembordstap per beeld en melding bij mislukken.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 14 fixronde 1: spelling en groepjes in een cache die zichzelf wist; Eigen tekst ook in groepjes; sneltoetsen alleen zonder focus op een widget; eigen tekst wissen bij tab-wissel.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -52,6 +55,8 @@ pub struct HoofdState {
     /// Gezet door F5 of de knop; de voorleesmodus (Taak 16) neemt het over.
     pub voorlezen_gevraagd: bool,
     kopieer_gevraagd: bool,
+    /// Kopiëren of wissen naar het systeemklembord is mislukt (korte melding).
+    pub klembord_mislukt: bool,
     /// Spelregels en groepjes van wat in beeld staat; zichzelf wissend bij vervangen.
     pub cache: Option<SpelCache>,
     /// Hoe vaak de cache is opgebouwd (voor de test dat dit niet elk beeld gebeurt).
@@ -72,6 +77,7 @@ impl Default for HoofdState {
             lengte_opgehoogd: false,
             voorlezen_gevraagd: false,
             kopieer_gevraagd: false,
+            klembord_mislukt: false,
             cache: None,
             cache_opbouwen: 0,
             vorige_tab: Tab::default(),
@@ -258,6 +264,10 @@ impl PwApp {
             ui.ctx().request_repaint();
         }
         self.wis_eigen_tekst_indien_nodig();
+        if let Some(moment) = self.klembord_stap(nu) {
+            ui.ctx()
+                .request_repaint_after(moment.saturating_duration_since(nu));
+        }
         if self.instellingen != self.bewaard {
             self.bewaar_instellingen();
             self.bewaard = self.instellingen.clone();
@@ -323,6 +333,9 @@ impl PwApp {
         self.ververs_cache();
         if let Some(c) = &self.hoofd.cache {
             resultaat::teken_resultaat(ui, &c.groepen);
+        }
+        if self.hoofd.klembord_mislukt {
+            ui.label(interfacetekst(taal, "melding.klembord_mislukt"));
         }
         if let Some(fout) = &self.hoofd.fout {
             ui.colored_label(crate::thema::SPECIAAL_LICHT, fout);

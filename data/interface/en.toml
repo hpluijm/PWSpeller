@@ -6,6 +6,9 @@
 # Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 #
 # 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Sleutel melding.klembord_mislukt toegevoegd (Taak 15).
+#
+# 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 #   Zes sleutels voor het hoofdvenster toegevoegd (Taak 14).
 #
 # 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -40,6 +43,7 @@
 "label.spellingstaal" = "Spelling language"
 "label.sterkte" = "Strength"
 "label.woordenlijst_volg" = "Follow the spelling language"
+"melding.klembord_mislukt" = "Copying to the clipboard failed."
 "melding.lengte_opgehoogd" = "The length was increased so that all chosen options fit."
 "melding.moeilijk_teken" = "Note: this character is hard to convey over the phone."
 "optie.cijfers" = "Digits"

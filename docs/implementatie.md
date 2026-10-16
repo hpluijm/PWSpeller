@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 15: sectie Klembord, met de markering per platform. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 14 fixronde 1: sectie Hoofdvenster, met de beperkte garantie voor het wissen van eigen tekst. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fixronde 1: inactiviteit ook op de wandklok; ontsleutel controleert eerst. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 11: sectie Geschiedenis en afgewezen alternatieven voor de geschiedenis. |
@@ -60,6 +61,26 @@ Het ontwerp staat in [het ontwerpdocument](superpowers/specs/2026-10-16-pwspelle
   undo-geschiedenis, accessibility-boom) en een gegroeide buffer laat een oude kopie achter. Die liggen
   buiten ons bereik, dus dit verkleint het risico en sluit het niet uit. Gegenereerde wachtwoorden
   staan wel in `Zeroizing`.
+
+## Klembord (app, `klembord.rs`)
+
+- `Klembordbeheer<B: Bord>` onthoudt alleen een SHA-256 van wat wij zetten, nooit de tekst. Bij
+  wissen wordt het bord gelezen, de gelezen `String` gaat in `Zeroizing` en wordt na de
+  vergelijking gewist; alleen bij gelijke hash wordt gewist. Heeft de gebruiker intussen iets
+  anders gekopieerd, dan blijft dat staan.
+- `tik` (elk beeld) wist na `klembord_seconden`; `bij_sluiten` wist alleen als `klembord_wissen`
+  aanstaat. Staat het uit, dan is er geen enkele aanroep op het bord (getest met een telnepbord).
+- `PwApp` bezit `Option<Klembordbeheer<Box<dyn Bord>>>` (`None` zonder systeemklembord, zoals
+  Linux in CI) en vraagt `request_repaint_after` tot het wis-moment. Fouten: `log::warn!` zonder
+  inhoud en de melding `melding.klembord_mislukt`; nooit paniek. `bij_sluiten_klembord` wordt in
+  Taak 17 aan `on_exit` gekoppeld.
+- **Markering als vertrouwelijk (arboard 3.7.0, `exclude_from_history`):** macOS zet
+  `org.nspasteboard.ConcealedType` (arboard doet dat zelf, geen eigen objc-code nodig). Windows
+  zet `ExcludeClipboardContentFromMonitorProcessing`-formaten via `exclude_from_history` en
+  `exclude_from_cloud` (`CanIncludeInClipboardHistory`, `CanUploadToCloudClipboard` op 0). Linux
+  gebruikt `exclude_from_history`, dat alleen onder Wayland (data-control) iets doet; onder X11
+  is er geen markering. De Windows- en Linux-takken zijn op macOS niet gecompileerd, dat doet CI.
+- `image-data` van arboard staat uit: er wordt alleen tekst gebruikt.
 
 ## Afgewezen alternatieven
 

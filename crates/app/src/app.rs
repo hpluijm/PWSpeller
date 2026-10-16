@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 15: klembord aangesloten (kopieer-verzoek, wissen per beeld, bij_sluiten_klembord).
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 14: hoofdvenster ingebouwd; PwApp kreeg hoofdstate en geschiedenis; instellingenpad is optioneel (tests schrijven niet).
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -20,6 +23,7 @@
 
 use crate::hoofd::HoofdState;
 use crate::instellingen::{Instellingen, interfacetaal};
+use crate::klembord::{Bord, Klembordbeheer, Systeembord};
 use crate::splash::{self, Fase, volgende_fase};
 use crate::thema;
 use eframe::egui;
@@ -37,6 +41,8 @@ pub struct PwApp {
     pub(crate) bewaard: Instellingen,
     pub hoofd: HoofdState,
     pub geschiedenis: Geschiedenis,
+    /// `None` als er geen systeemklembord is (of in tests).
+    klembord: Option<Klembordbeheer<Box<dyn Bord>>>,
     logo: Option<egui::TextureHandle>,
     logo_geprobeerd: bool,
 }
@@ -52,7 +58,10 @@ impl PwApp {
         if let Some(cc) = cc {
             thema::zet_thema(&cc.egui_ctx);
         }
-        Self::van(instellingen, Some(instellingenpad), nu)
+        let mut app = Self::van(instellingen, Some(instellingenpad), nu);
+        app.klembord =
+            Systeembord::nieuw().map(|b| Klembordbeheer::nieuw(Box::new(b) as Box<dyn Bord>));
+        app
     }
 
     /// App voor tests: standaardinstellingen, Nederlandse interface en een pad dat nooit beschreven wordt.
@@ -77,8 +86,45 @@ impl PwApp {
             fase: Fase::Splash { start: nu },
             hoofd: HoofdState::default(),
             geschiedenis: Geschiedenis::nieuw(time_out),
+            klembord: None,
             logo: None,
             logo_geprobeerd: false,
+        }
+    }
+
+    /// Vervangt het klembord (tests gebruiken een nepbord).
+    pub fn zet_bord(&mut self, bord: Box<dyn Bord>) {
+        self.klembord = Some(Klembordbeheer::nieuw(bord));
+    }
+
+    /// Eén klembordstap per beeld: kopieerverzoek afhandelen, wissen als het moment er is.
+    /// Geeft het moment terug waarop opnieuw getekend moet worden om te wissen.
+    pub fn klembord_stap(&mut self, nu: Instant) -> Option<Instant> {
+        let gevraagd = self.neem_kopieer_verzoek();
+        let tekst = if gevraagd {
+            self.huidige_tekst()
+                .map(|t| zeroize::Zeroizing::new(t.to_owned()))
+        } else {
+            None
+        };
+        let Some(beheer) = self.klembord.as_mut() else {
+            if gevraagd {
+                self.hoofd.klembord_mislukt = true;
+            }
+            return None;
+        };
+        if let Some(tekst) = tekst {
+            beheer.kopieer(&tekst, nu);
+        }
+        beheer.tik(nu, &self.instellingen);
+        self.hoofd.klembord_mislukt = beheer.mislukt();
+        beheer.wis_moment(&self.instellingen)
+    }
+
+    /// Wist het klembord bij het sluiten (Taak 17 koppelt dit aan `on_exit`).
+    pub fn bij_sluiten_klembord(&mut self) {
+        if let Some(beheer) = self.klembord.as_mut() {
+            beheer.bij_sluiten(&self.instellingen);
         }
     }
 

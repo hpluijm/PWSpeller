@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 15: module klembord toegevoegd.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 14: modules hoofd, opties en resultaat toegevoegd.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -18,6 +21,7 @@
 pub mod app;
 pub mod hoofd;
 pub mod instellingen;
+pub mod klembord;
 pub mod logboek;
 pub mod opties;
 pub mod resultaat;
