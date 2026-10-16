@@ -8,11 +8,28 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Taak 3–5 en de overdracht naar de andere Mac. |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Eerste entry voor PWSpeller 2. |
 
 ---
 
 # Voortgang
+
+## 2026-10-16, later (Claude Code) — taak 3 t/m 5, overdracht
+
+- Taak 3: `pwspeller-data` leest en controleert alle databestanden. De review dwong een strengere
+  controle af: exacte sleutels (geen `Q` naast `q`), geen lege teksten, geen verweesde
+  blokkeerlijst, `interface/en.toml` verplicht, blokkeren hoofdletterongevoelig, en geen twee
+  tekens met dezelfde omschrijving binnen een taal.
+- Taak 4: alfabetten (nl en vl uit de VB-tabel, fr na 1939, de volgens DIN 5009:2022, navo volgens
+  ICAO) en omschrijvingen in vier talen. Gemeten: `talen.csv` van de VB-versie is cp850, niet
+  cp1252; alleen zo komen "Desiré" en "Quotiënt" goed door. "Urecht" in de VB-tabel was een
+  typefout voor "Utrecht".
+- Taak 5: woordenlijsten en blokkeerlijsten (nl 7.527/473, fr 5.511/232, de 6.278/354, EFF 7.772).
+  De drempeltests (nl ≥ 7.500, fr en de ≥ 5.500) begrenzen hoe streng er geblokkeerd kan worden;
+  een paar milde woorden zijn daarom teruggezet. De originelen staan in `docs/bronnen/woordenlijsten/`.
+- Werk overgedragen naar de andere Mac. mac-setup zet daar nu ook de Rust-toolchain en het PATH.
+  Het uitvoeringslogboek staat in `docs/superpowers/plans/2026-10-16-pwspeller-rust-logboek.md`.
 
 ## 2026-10-16 (Claude Code)
 
@@ -24,7 +41,8 @@
 
 ## Openstaande punten
 
-- Taken 3 en verder uit het implementatieplan.
+- Review van Taak 5, daarna Taak 10, 6, 7, 8, 9 en 11 (rest van fase B), dan fase C en D.
+- Hans keurt de blokkeerlijsten `nl-`, `fr-` en `de-geblokkeerd.txt` goed.
 - Ondertekenen en app stores: zie het ontwerp, hoofdstuk 14.
 
 ---

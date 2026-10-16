@@ -15,6 +15,7 @@ geven zijn. Versie 2 wordt opnieuw gebouwd in Rust voor Windows, macOS en Linux.
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Verwijzingen naar plan, logboek en bronnen van de woordenlijsten. |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | README opnieuw opgezet voor PWSpeller 2 (Rust). |
 
 ---
@@ -43,6 +44,8 @@ Zie de uitrolstappen in het [implementatiedocument](docs/implementatie.md); die 
 - [docs/implementatie.md](docs/implementatie.md): hoe het in elkaar zit en afgewezen alternatieven
 - [docs/voortgang.md](docs/voortgang.md): verloop en beslissingen
 - [docs/superpowers/specs/2026-10-16-pwspeller-rust-design.md](docs/superpowers/specs/2026-10-16-pwspeller-rust-design.md): het ontwerp
+- [docs/superpowers/plans/2026-10-16-pwspeller-rust.md](docs/superpowers/plans/2026-10-16-pwspeller-rust.md): het implementatieplan, met het [logboek](docs/superpowers/plans/2026-10-16-pwspeller-rust-logboek.md)
+- [docs/bronnen/woordenlijsten/](docs/bronnen/woordenlijsten/README.md): de originele woordenlijsten
 
 ## AI-ontwikkeltools
 
