@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Geneste if samengevoegd (clippy).
+//
+// 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Kopbloktest toegevoegd.
 // ──────────────────────────────────────────────────────────
 
@@ -63,12 +66,12 @@ fn controleer_tekst(pad: &str, inhoud: &str) -> Vec<String> {
             continue;
         }
         // Markdown: `| 2026-10-16 | Wie | Met | Wat |`, de kolom Met moet geldig zijn.
-        if let Some(rest) = regel.strip_prefix('|') {
-            if begint_met_datum(rest.trim_start()) {
-                let kolommen: Vec<&str> = rest.split('|').map(str::trim).collect();
-                if kolommen.get(2).is_none_or(|met| !MET_WAARDEN.contains(met)) {
-                    fouten.push(melding());
-                }
+        if let Some(rest) = regel.strip_prefix('|')
+            && begint_met_datum(rest.trim_start())
+        {
+            let kolommen: Vec<&str> = rest.split('|').map(str::trim).collect();
+            if kolommen.get(2).is_none_or(|met| !MET_WAARDEN.contains(met)) {
+                fouten.push(melding());
             }
         }
     }

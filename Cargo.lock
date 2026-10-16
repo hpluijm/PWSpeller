@@ -52,6 +52,9 @@ dependencies = [
 [[package]]
 name = "pwspeller-kern"
 version = "2.0.0"
+dependencies = [
+ "pwspeller-data",
+]
 
 [[package]]
 name = "quote"
