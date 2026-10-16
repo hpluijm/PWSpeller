@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 17 fixronde 1: tests voor wissen van het resultaat, invoer als gebruik en een sterkere schijftest.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 17: aangemaakt.
 // ──────────────────────────────────────────────────────────
 
@@ -77,6 +80,16 @@ fn kies_tab(h: &mut Harnas, tab: Tab) {
 fn open_paneel(h: &mut Harnas) {
     h.state_mut().0.geschiedenis_open = true;
     stap(h);
+}
+
+fn komt_voor(inhoud: &str, tekst: &str, heel_woord: bool) -> bool {
+    if heel_woord {
+        inhoud
+            .split(|c: char| !c.is_alphanumeric())
+            .any(|w| w == tekst)
+    } else {
+        inhoud.contains(tekst)
+    }
 }
 
 #[test]
@@ -171,6 +184,54 @@ fn inactiviteit_tijdens_voorlezen_uit_geschiedenis_crasht_niet() {
 }
 
 #[test]
+fn inactiviteit_wist_ook_het_huidige_resultaat() {
+    let mut h = hoofd();
+    genereer(&mut h);
+    assert!(h.state().0.huidige_tekst().is_some());
+    assert!(h.state().0.hoofd.cache.is_some());
+    let nu = h.state().1;
+    h.state_mut().1 = nu + Duration::from_secs(16 * 60);
+    stap(&mut h);
+    let app = &h.state().0;
+    assert!(app.huidige_tekst().is_none());
+    assert!(app.hoofd.cache.is_none());
+    assert!(app.hoofd.wachtwoord.is_none() && app.hoofd.wachtzin.is_none());
+    assert!(
+        h.query_by_label("De geschiedenis is gewist na inactiviteit.")
+            .is_some()
+    );
+}
+
+#[test]
+fn bij_afsluiten_wist_ook_het_huidige_resultaat() {
+    let mut h = hoofd();
+    genereer(&mut h);
+    h.state_mut().0.bij_afsluiten();
+    let app = &h.state().0;
+    assert!(app.huidige_tekst().is_none());
+    assert!(app.hoofd.cache.is_none());
+}
+
+#[test]
+fn invoer_telt_als_gebruik() {
+    let mut h = hoofd();
+    genereer(&mut h);
+    let t = h.state().1;
+    h.state_mut().1 = t + Duration::from_secs(14 * 60);
+    h.key_press(Key::A);
+    stap(&mut h);
+    assert_eq!(h.state().0.geschiedenis.items().len(), 1);
+    // 16 minuten na het begin, maar maar 2 na de laatste invoer: nog niet gewist.
+    h.state_mut().1 = t + Duration::from_secs(16 * 60);
+    stap(&mut h);
+    assert_eq!(h.state().0.geschiedenis.items().len(), 1);
+    // 15 minuten na de laatste invoer: wel.
+    h.state_mut().1 = t + Duration::from_secs(30 * 60);
+    stap(&mut h);
+    assert!(h.state().0.geschiedenis.items().is_empty());
+}
+
+#[test]
 fn inactiviteit_sluit_getoonde_items() {
     let mut h = hoofd();
     genereer(&mut h);
@@ -250,7 +311,8 @@ fn geen_wachtwoord_in_instellingen_of_logboek() {
     let t0 = Instant::now();
     let app = PwApp::nieuw_met_paden(instellingenpad.clone(), &logpad, t0);
     let mut h = harnas_met(app, t0);
-    let mut teksten: Vec<String> = Vec::new();
+    // (tekst, alleen als heel woord vergelijken)
+    let mut teksten: Vec<(String, bool)> = Vec::new();
     for i in 0..20 {
         kies_tab(
             &mut h,
@@ -268,9 +330,10 @@ fn geen_wachtwoord_in_instellingen_of_logboek() {
             app.hoofd.wachtzin.as_ref()
         }
         .expect("gegenereerd");
-        teksten.push(g.tekst.to_string());
+        teksten.push((g.tekst.to_string(), false));
         if let Some(w) = &g.woorden {
-            teksten.extend(w.iter().filter(|w| w.len() >= 4).cloned());
+            // Korte woorden alleen als heel woord, anders geven "true" en dergelijke valse treffers.
+            teksten.extend(w.iter().map(|w| (w.clone(), w.chars().count() < 6)));
         }
     }
     // Een instelling wijzigen zodat het bestand zeker geschreven wordt.
@@ -280,17 +343,25 @@ fn geen_wachtwoord_in_instellingen_of_logboek() {
     drop(h);
     let instellingen = std::fs::read_to_string(&instellingenpad).expect("instellingen bewaard");
     assert!(instellingen.contains("klembord_seconden = 61"));
-    let logboek = std::fs::read_to_string(&logpad).unwrap_or_default();
-    assert_eq!(
-        teksten.iter().filter(|t| t.len() >= 4).count(),
-        teksten.len()
-    );
-    for t in &teksten {
-        assert!(
-            !instellingen.contains(t.as_str()),
-            "wachtwoord in instellingen"
-        );
-        assert!(!logboek.contains(t.as_str()), "wachtwoord in logboek");
+    let logboek = std::fs::read_to_string(&logpad).expect("logboek bestaat");
+    assert!(!logboek.trim().is_empty(), "het logboek is niet leeg");
+    // Alleen de waarden van de instellingen tellen; sleutels als `cijfer` zijn geen lek.
+    let waarden: String = instellingen
+        .lines()
+        .filter_map(|r| r.split_once('=').map(|(_, w)| w))
+        .collect::<Vec<_>>()
+        .join("\n");
+    let mut bestanden = vec![("instellingen", waarden), ("logboek", logboek)];
+    for extra in ["instellingen.toml.tmp", "instellingen.toml.kapot"] {
+        if let Ok(t) = std::fs::read_to_string(map.join(extra)) {
+            bestanden.push((extra, t));
+        }
+    }
+    assert!(!teksten.is_empty());
+    for (naam, inhoud) in &bestanden {
+        for (t, heel) in &teksten {
+            assert!(!komt_voor(inhoud, t, *heel), "gegenereerde tekst in {naam}");
+        }
     }
     let _ = std::fs::remove_dir_all(&map);
 }

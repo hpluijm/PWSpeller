@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 17 fixronde 1: laad begrenst waarden buiten het bereik (begrens).
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 12 fixronde 1: een kapot instellingenbestand wordt eerst hernoemd naar .kapot.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -82,22 +85,36 @@ impl Instellingen {
                 return Self::default();
             }
         };
-        toml::from_str(&tekst).unwrap_or_else(|e| {
-            let kapot = pad.with_extension("toml.kapot");
-            match std::fs::rename(pad, &kapot) {
-                Ok(()) => log::warn!(
-                    "instellingen {} kapot: {e}; bewaard als {}, standaard gebruikt",
-                    pad.display(),
-                    kapot.display()
-                ),
-                Err(r) => log::warn!(
-                    "instellingen {} kapot: {e}; kopie als {} mislukt: {r}; standaard gebruikt",
-                    pad.display(),
-                    kapot.display()
-                ),
-            }
-            Self::default()
-        })
+        toml::from_str::<Self>(&tekst)
+            .map(Self::begrens)
+            .unwrap_or_else(|e| {
+                let kapot = pad.with_extension("toml.kapot");
+                match std::fs::rename(pad, &kapot) {
+                    Ok(()) => log::warn!(
+                        "instellingen {} kapot: {e}; bewaard als {}, standaard gebruikt",
+                        pad.display(),
+                        kapot.display()
+                    ),
+                    Err(r) => log::warn!(
+                        "instellingen {} kapot: {e}; kopie als {} mislukt: {r}; standaard gebruikt",
+                        pad.display(),
+                        kapot.display()
+                    ),
+                }
+                Self::default()
+            })
+    }
+
+    /// Brengt waarden die buiten het bereik van de interface liggen terug naar het bereik.
+    /// Een handmatig bewerkt bestand kan dus geen onzin of een bijna oneindige tijd opleveren.
+    pub fn begrens(mut self) -> Self {
+        self.klembord_seconden = self.klembord_seconden.clamp(5, 300);
+        self.geschiedenis_minuten = self.geschiedenis_minuten.map(|m| m.clamp(1, 60));
+        self.wachtwoord.lengte = self.wachtwoord.lengte.clamp(5, 128);
+        self.wachtwoord.min_cijfers = self.wachtwoord.min_cijfers.clamp(1, 9);
+        self.wachtwoord.min_speciaal = self.wachtwoord.min_speciaal.clamp(1, 9);
+        self.wachtzin.woorden = self.wachtzin.woorden.clamp(3, 20);
+        self
     }
 
     /// Schrijft de instellingen atomisch: eerst een tijdelijk bestand, dan een rename.

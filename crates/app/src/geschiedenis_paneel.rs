@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 17 fixronde 1: wissen na inactiviteit wist ook het huidige resultaat; invoer telt als gebruik.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 17: aangemaakt.
 // ──────────────────────────────────────────────────────────
 
@@ -46,11 +49,31 @@ impl PwApp {
         self.geschiedenis.zet_time_out(time_out);
         if self.geschiedenis.controleer_inactiviteit(nu) {
             self.getoond.clear();
-            // De voorleesmodus toont wat uit de geschiedenis komt; die gaat dicht.
-            self.voorlezen = None;
+            // Ook wat nu in beeld staat gaat weg, en de voorleesmodus sluit.
+            self.wis_resultaat();
             self.gewist_melding = true;
             log::info!("geschiedenis gewist na inactiviteit");
             ctx.request_repaint();
+        }
+        // Elke invoer telt als gebruik (muisbewegen alleen niet).
+        let invoer = ctx.input(|i| {
+            i.pointer.any_pressed()
+                || i.events.iter().any(|e| {
+                    matches!(
+                        e,
+                        egui::Event::Key { .. }
+                            | egui::Event::Text(_)
+                            | egui::Event::PointerButton { .. }
+                            | egui::Event::MouseWheel { .. }
+                            | egui::Event::Touch { .. }
+                            | egui::Event::Copy
+                            | egui::Event::Cut
+                            | egui::Event::Paste(_)
+                    )
+                })
+        });
+        if invoer {
+            self.geschiedenis.markeer_gebruik(nu);
         }
         let ids: Vec<u64> = self.geschiedenis.items().iter().map(|i| i.id).collect();
         self.getoond.retain(|(id, _)| ids.contains(id));

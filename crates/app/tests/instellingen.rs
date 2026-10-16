@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 17 fixronde 1: test voor het begrenzen bij laden.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 12 fixronde 1: test dat een kapot bestand als .kapot bewaard blijft.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -117,6 +120,39 @@ fn interfacetaal_van_de_instellingen_geeft_een_taal_uit_de_catalogus() {
         ..Default::default()
     };
     assert_eq!(interfacetaal(&i), "en");
+}
+
+#[test]
+fn laden_begrenst_waarden_buiten_het_bereik() {
+    let map = testmap("begrens");
+    let pad = map.join("instellingen.toml");
+    let mut i = Instellingen {
+        klembord_seconden: 100_000,
+        geschiedenis_minuten: Some(5000),
+        ..Default::default()
+    };
+    i.wachtwoord.lengte = 255;
+    i.wachtwoord.min_cijfers = 200;
+    i.wachtwoord.min_speciaal = 0;
+    i.wachtzin.woorden = 1;
+    i.bewaar(&pad).unwrap();
+    let g = Instellingen::laad(&pad);
+    assert_eq!(g.klembord_seconden, 300);
+    assert_eq!(g.geschiedenis_minuten, Some(60));
+    assert_eq!(g.wachtwoord.lengte, 128);
+    assert_eq!(g.wachtwoord.min_cijfers, 9);
+    assert_eq!(g.wachtwoord.min_speciaal, 1);
+    assert_eq!(g.wachtzin.woorden, 3);
+    let laag = Instellingen {
+        klembord_seconden: 0,
+        geschiedenis_minuten: None,
+        ..Default::default()
+    };
+    laag.bewaar(&pad).unwrap();
+    let g = Instellingen::laad(&pad);
+    assert_eq!(g.klembord_seconden, 5);
+    assert_eq!(g.geschiedenis_minuten, None, "alleen bij sluiten blijft");
+    let _ = std::fs::remove_dir_all(&map);
 }
 
 // © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).

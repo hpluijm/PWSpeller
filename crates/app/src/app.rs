@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 17 fixronde 1: bij_afsluiten wist ook het huidige resultaat.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 17: panelen, wissen na inactiviteit, on_exit/bij_afsluiten en nieuw_met_paden.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -169,7 +172,7 @@ impl PwApp {
         self.geschiedenis.wis();
         self.getoond.clear();
         self.extra_kopie = None;
-        self.voorlezen = None;
+        self.wis_resultaat();
         self.bij_sluiten_klembord();
         log::info!("afgesloten");
     }

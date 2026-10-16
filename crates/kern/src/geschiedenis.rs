@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 17 fixronde 1: markeer_gebruik (invoer telt als gebruik).
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 17: zet_time_out toegevoegd (instellingen wijzigen de time-out van een lopende geschiedenis).
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -157,8 +160,15 @@ impl Geschiedenis {
         rand::rng().fill_bytes(&mut self.sleutel[..]);
     }
 
-    /// Wijzigt de time-out van een lopende geschiedenis; de teller van de inactiviteit loopt
-    /// door vanaf het laatste gebruik.
+    /// Telt als gebruik: zet de teller van de inactiviteit op `nu` (en de wandklok op nu).
+    /// De app roept dit aan bij elke invoer van de gebruiker.
+    pub fn markeer_gebruik(&mut self, nu: Instant) {
+        self.laatst_gebruikt = nu;
+        self.laatst_gebruikt_wand = SystemTime::now();
+    }
+
+    /// Wijzigt de time-out van een lopende geschiedenis; de teller van de inactiviteit wordt
+    /// niet teruggezet en loopt door vanaf het laatste gebruik.
     pub fn zet_time_out(&mut self, time_out: Option<Duration>) {
         self.time_out = time_out;
     }

@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 17 fixronde 1: wis_resultaat.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 17: knoppen Geschiedenis en Instellingen, panelen, melding na wissen.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -105,6 +108,16 @@ impl PwApp {
             Tab::EigenTekst => Some(h.eigen_tekst.as_str()),
         };
         tekst.filter(|t| !t.is_empty())
+    }
+
+    /// Wist wat in beeld staat: de gegenereerde resultaten, de spelling-cache en de eigen tekst.
+    pub fn wis_resultaat(&mut self) {
+        let h = &mut self.hoofd;
+        h.wachtwoord = None;
+        h.wachtzin = None;
+        h.cache = None;
+        h.eigen_tekst.zeroize();
+        self.voorlezen = None;
     }
 
     /// Vraagt om kopiëren (knop of Ctrl/Cmd+C). Taak 15 haalt het verzoek op met `neem_kopieer_verzoek`.

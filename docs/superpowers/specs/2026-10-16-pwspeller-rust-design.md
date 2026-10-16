@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | §9: wissen bij normaal afsluiten (niet bij geforceerd beëindigen), invoer telt als gebruik, inactiviteit wist ook het huidige resultaat. |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Franse en Duitse woordenlijst toegevoegd (alleen a–z). |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Ontwerp vastgelegd na de brainstorm. |
 
@@ -301,9 +302,11 @@ vorige, Esc terug.
 - Ontsleutelen alleen bij tonen, kopiëren of spellen, in een buffer die zichzelf overschrijft
   (`zeroize`). Waar het besturingssysteem het toestaat, wordt het geheugen met de sleutel
   vergrendeld (`mlock`/`VirtualLock`); lukt dat niet, dan werkt de app door.
-- Wissen van sleutel en items: bij sluiten (venster, Cmd+Q, Alt+F4, afmelden, afsluiten), na
-  inactiviteit (standaard 15 minuten, in te stellen 1–60 of "alleen bij sluiten") en met de knop
-  *Wis geschiedenis*.
+- Wissen van sleutel en items: bij normaal afsluiten (venster sluiten, Cmd+Q, Alt+F4); bij
+  geforceerd beëindigen verdwijnt het geheugen met het proces. Verder na inactiviteit
+  (standaard 15 minuten, in te stellen 1–60 of "alleen bij sluiten") en met de knop
+  *Wis geschiedenis*. Elke invoer (toets, klik, scroll) telt als gebruik. Bij inactiviteit wordt
+  ook het huidige resultaat gewist.
 - Weergave gemaskeerd, met tonen, kopiëren en opnieuw spellen per item.
 - De persistentie van egui staat uit voor alles behalve gewone instellingen.
 - Grens: wat al met beheerdersrechten in het geheugen van de draaiende app meekijkt, houdt niets

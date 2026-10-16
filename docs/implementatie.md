@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 17 fixronde 1: wissen wist ook het resultaat, invoer telt als gebruik, instellingen begrensd, grenzen vastgelegd. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 17: sectie Geschiedenis- en instellingenpaneel, wissen bij sluiten en na inactiviteit. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 15 fixronde 1: hash wordt vóór het lezen weggenomen (bewust, geen lus). |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 15: sectie Klembord, met de markering per platform. |
@@ -102,8 +103,22 @@ Het ontwerp staat in [het ontwerpdocument](superpowers/specs/2026-10-16-pwspelle
   voorleesmodus sluit bij elke wisbeurt, ook als hij het huidige resultaat toont: eenvoudiger en
   veiliger dan onderscheid maken. `request_repaint_after(1 s)` alleen zolang er items zijn en
   een time-out staat.
+- Bij een inactiviteitswis gaat ook het huidige resultaat weg (`wis_resultaat`: gegenereerde
+  resultaten, spelling-cache, eigen tekst, voorleesmodus, getoonde items); `bij_afsluiten` doet hetzelfde.
+- **Invoer telt als gebruik:** toets, tekst, klik, scroll, aanraking en klembordacties roepen
+  `Geschiedenis::markeer_gebruik` aan (muisbewegen alleen niet). Dat gebeurt ná de wiscontrole van
+  dat beeld, zodat een eerste toetsaanslag na lange stilte de wis niet meer kan voorkomen.
 - De time-out volgt de instelling elk beeld (`Geschiedenis::zet_time_out`), dus een wijziging in het
-  instellingenpaneel geldt direct; de teller loopt door vanaf het laatste gebruik.
+  instellingenpaneel geldt direct. `zet_time_out` zet de teller niet terug: die loopt door vanaf
+  het laatste gebruik.
+- `Instellingen::laad` begrenst waarden (klembord 5-300 s, geschiedenis 1-60 min met 0 als "alleen
+  bij sluiten", lengte 5-128, woorden 3-20, minima 1-9), zodat een met de hand bewerkt bestand
+  niets onbruikbaars oplevert.
+- **Grenzen, eerlijk:** `on_exit` draait bij het sluiten van het venster en bij normaal afsluiten via
+  eframe. Bij kill, crash of geforceerd afmelden niet: het geheugen verdwijnt dan met het proces,
+  het klembord niet. Bij een geminimaliseerd venster kan het wissen pas bij het volgende beeld
+  gebeuren; dat is nog handmatig te meten. Ontsleutelde items staan ook in egui's galley-cache en
+  in de AccessKit-boom, buiten ons bereik.
 - **Sluiten:** `eframe::App::on_exit` roept `bij_afsluiten` aan: geschiedenis wissen, getoonde
   items en voorleesmodus loslaten, klembord wissen volgens de instelling.
 - **Niets op schijf:** instellingen bevatten alleen opties; het logboek alleen meldingen zonder

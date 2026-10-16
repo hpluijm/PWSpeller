@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 17 fixronde 1: test voor markeer_gebruik.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 17: test voor zet_time_out.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -210,6 +213,17 @@ fn zet_time_out_geldt_voor_een_lopende_geschiedenis() {
     h.zet_time_out(Some(Duration::from_secs(60)));
     assert!(h.controleer_inactiviteit_op(t0 + Duration::from_secs(61), SystemTime::now()));
     assert!(h.items().is_empty());
+}
+
+#[test]
+fn markeer_gebruik_zet_de_teller_terug() {
+    let t0 = Instant::now();
+    let mut h = Geschiedenis::nieuw(Some(Duration::from_secs(60)));
+    h.voeg_toe(&wachtwoord("abc"), "nl", t0);
+    h.markeer_gebruik(t0 + Duration::from_secs(50));
+    assert!(!h.controleer_inactiviteit_op(t0 + Duration::from_secs(100), SystemTime::now()));
+    assert_eq!(h.items().len(), 1);
+    assert!(h.controleer_inactiviteit_op(t0 + Duration::from_secs(110), SystemTime::now()));
 }
 
 // © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
