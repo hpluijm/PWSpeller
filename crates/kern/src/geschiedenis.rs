@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 18 fixronde: sleutel in een eigen, pagina-uitgelijnde en gelockte pagina (geen gedeelde lock meer).
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 17 fixronde 1: markeer_gebruik (invoer telt als gebruik).
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -24,6 +27,7 @@
 use crate::generator::{Gegenereerd, Modus};
 use chacha20poly1305::{AeadInOut, KeyInit, XChaCha20Poly1305, XNonce};
 use rand::Rng;
+use std::alloc::{self, Layout};
 use std::collections::VecDeque;
 use std::fmt;
 use std::time::{Duration, Instant, SystemTime};
@@ -50,13 +54,87 @@ struct Item {
     ciphertext: Vec<u8>,
 }
 
-/// De geschiedenis. De sleutel staat in een `Box`, zodat het adres stabiel blijft voor
-/// `region::lock`.
+const SLEUTEL_LENGTE: usize = 32;
+
+/// Een eigen geheugenpagina voor de sleutel, pagina-uitgelijnd en zo groot als één pagina.
+///
+/// Waarom een eigen pagina: het besturingssysteem vergrendelt per pagina en telt niet mee.
+/// Deelden twee sleutels (bijv. twee `Box`-allocaties van 32 bytes) een pagina, dan hief het
+/// ontgrendelen van de ene de vergrendeling van de andere op; op Windows faalde de tweede
+/// `VirtualUnlock` daarna met ERROR_NOT_LOCKED (158).
+struct SleutelPagina {
+    ptr: std::ptr::NonNull<u8>,
+    layout: Layout,
+    gelockt: bool,
+}
+
+// SAFETY: de pagina is uitsluitend van deze waarde; er bestaan geen andere verwijzingen naar.
+unsafe impl Send for SleutelPagina {}
+// SAFETY: gedeelde toegang geeft alleen leestoegang (`&[u8; 32]`).
+unsafe impl Sync for SleutelPagina {}
+
+impl SleutelPagina {
+    fn nieuw() -> Self {
+        let pagina = region::page::size();
+        let layout =
+            Layout::from_size_align(pagina, pagina).expect("paginagrootte is een macht van twee");
+        // SAFETY: de layout heeft een grootte groter dan nul.
+        let ruw = unsafe { alloc::alloc_zeroed(layout) };
+        let Some(ptr) = std::ptr::NonNull::new(ruw) else {
+            alloc::handle_alloc_error(layout);
+        };
+        let gelockt = match region::lock(ptr.as_ptr().cast_const(), pagina) {
+            Ok(guard) => {
+                // De guard ontgrendelt bij drop met een debug_assert; dat doen we zelf in `Drop`.
+                std::mem::forget(guard);
+                true
+            }
+            Err(fout) => {
+                log::warn!("Geheugen met de sleutel kon niet worden vergrendeld: {fout}");
+                false
+            }
+        };
+        Self {
+            ptr,
+            layout,
+            gelockt,
+        }
+    }
+
+    fn sleutel(&self) -> &[u8; SLEUTEL_LENGTE] {
+        // SAFETY: de pagina is minstens SLEUTEL_LENGTE bytes, geïnitialiseerd en uitgelijnd.
+        unsafe { &*self.ptr.as_ptr().cast::<[u8; SLEUTEL_LENGTE]>() }
+    }
+
+    fn sleutel_mut(&mut self) -> &mut [u8; SLEUTEL_LENGTE] {
+        // SAFETY: als hierboven, en `&mut self` geeft unieke toegang.
+        unsafe { &mut *self.ptr.as_ptr().cast::<[u8; SLEUTEL_LENGTE]>() }
+    }
+}
+
+impl Drop for SleutelPagina {
+    fn drop(&mut self) {
+        // Eerst wissen, dan ontgrendelen, dan vrijgeven.
+        // SAFETY: de hele pagina is van ons en geïnitialiseerd.
+        let alles =
+            unsafe { std::slice::from_raw_parts_mut(self.ptr.as_ptr(), self.layout.size()) };
+        alles.zeroize();
+        if self.gelockt {
+            // SAFETY: deze pagina is alleen door ons vergrendeld; niemand anders deelt hem.
+            if let Err(fout) =
+                unsafe { region::unlock(self.ptr.as_ptr().cast_const(), self.layout.size()) }
+            {
+                log::warn!("Geheugen met de sleutel kon niet worden ontgrendeld: {fout}");
+            }
+        }
+        // SAFETY: toegewezen met precies deze layout in `nieuw`.
+        unsafe { alloc::dealloc(self.ptr.as_ptr(), self.layout) };
+    }
+}
+
+/// De geschiedenis. De sleutel staat in een eigen, gelockte geheugenpagina.
 pub struct Geschiedenis {
-    // Eerst het slot, dan de sleutel: bij het vrijgeven van de velden gaat het slot los vóór
-    // de sleutel verdwijnt. `Drop` wist de sleutel zelf al.
-    _slot: Option<region::LockGuard>,
-    sleutel: Box<Zeroizing<[u8; 32]>>,
+    sleutel: SleutelPagina,
     items: VecDeque<Item>,
     volgende_id: u64,
     laatst_gebruikt: Instant,
@@ -78,17 +156,9 @@ impl Geschiedenis {
     /// Maakt een lege geschiedenis met een nieuwe willekeurige sleutel. `time_out` is de duur
     /// van inactiviteit waarna alles gewist wordt; `None` betekent alleen bij sluiten.
     pub fn nieuw(time_out: Option<Duration>) -> Self {
-        let mut sleutel = Box::new(Zeroizing::new([0u8; 32]));
-        rand::rng().fill_bytes(&mut sleutel[..]);
-        let slot = match region::lock(sleutel.as_ptr(), sleutel.len()) {
-            Ok(guard) => Some(guard),
-            Err(fout) => {
-                log::warn!("Geheugen met de sleutel kon niet worden vergrendeld: {fout}");
-                None
-            }
-        };
+        let mut sleutel = SleutelPagina::nieuw();
+        rand::rng().fill_bytes(sleutel.sleutel_mut());
         Self {
-            _slot: slot,
             sleutel,
             items: VecDeque::new(),
             volgende_id: 0,
@@ -99,7 +169,7 @@ impl Geschiedenis {
     }
 
     fn cipher(&self) -> XChaCha20Poly1305 {
-        XChaCha20Poly1305::new_from_slice(&self.sleutel[..]).expect("sleutel is 32 bytes")
+        XChaCha20Poly1305::new_from_slice(self.sleutel.sleutel()).expect("sleutel is 32 bytes")
     }
 
     /// Versleutelt en bewaart een waarde; geeft het id terug. Is de geschiedenis vol, dan valt
@@ -156,8 +226,8 @@ impl Geschiedenis {
     /// eerst overschreven). Id's worden niet hergebruikt.
     pub fn wis(&mut self) {
         self.items.clear();
-        self.sleutel.zeroize();
-        rand::rng().fill_bytes(&mut self.sleutel[..]);
+        self.sleutel.sleutel_mut().zeroize();
+        rand::rng().fill_bytes(self.sleutel.sleutel_mut());
     }
 
     /// Telt als gebruik: zet de teller van de inactiviteit op `nu` (en de wandklok op nu).
@@ -370,11 +440,44 @@ mod tests {
     }
 
     #[test]
+    fn sleutels_staan_elk_op_een_eigen_pagina() {
+        let pagina = region::page::size();
+        let a = Geschiedenis::nieuw(None);
+        let b = Geschiedenis::nieuw(None);
+        let pa = a.sleutel.ptr.as_ptr() as usize;
+        let pb = b.sleutel.ptr.as_ptr() as usize;
+        assert_eq!(pa % pagina, 0);
+        assert_eq!(pb % pagina, 0);
+        assert_ne!(pa, pb);
+    }
+
+    #[test]
+    fn meerdere_geschiedenissen_droppen_in_wisselende_volgorde() {
+        // Vroeger deelden kleine sleutels een pagina en paniekte de tweede unlock op Windows.
+        for volgorde in [[0, 1, 2], [2, 1, 0], [1, 0, 2], [1, 2, 0]] {
+            let mut alle: Vec<Option<Geschiedenis>> =
+                (0..3).map(|_| Some(Geschiedenis::nieuw(None))).collect();
+            let nu = Instant::now();
+            for h in alle.iter_mut().flatten() {
+                let id = h.voeg_toe(&voorbeeld(), "nl", nu);
+                assert!(h.ontsleutel(id, nu).is_some());
+            }
+            for i in volgorde {
+                drop(alle[i].take());
+                for h in alle.iter_mut().flatten() {
+                    let id = h.voeg_toe(&voorbeeld(), "nl", nu);
+                    assert!(h.ontsleutel(id, nu).is_some());
+                }
+            }
+        }
+    }
+
+    #[test]
     fn wis_verandert_de_sleutel() {
         let mut h = Geschiedenis::nieuw(None);
-        let oud = **h.sleutel;
+        let oud = *h.sleutel.sleutel();
         h.wis();
-        assert_ne!(oud, **h.sleutel);
+        assert_ne!(oud, *h.sleutel.sleutel());
     }
 }
 

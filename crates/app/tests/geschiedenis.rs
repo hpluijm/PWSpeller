@@ -360,7 +360,12 @@ fn geen_wachtwoord_in_instellingen_of_logboek() {
     assert!(!teksten.is_empty());
     for (naam, inhoud) in &bestanden {
         for (t, heel) in &teksten {
-            assert!(!komt_voor(inhoud, t, *heel), "gegenereerde tekst in {naam}");
+            if komt_voor(inhoud, t, *heel) {
+                let regels: Vec<&str> = inhoud.lines().filter(|r| r.contains(t.as_str())).collect();
+                panic!(
+                    "DIAGNOSE gegenereerde tekst in {naam}: {t:?} (heel={heel}) regels: {regels:?}"
+                );
+            }
         }
     }
     let _ = std::fs::remove_dir_all(&map);
