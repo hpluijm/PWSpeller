@@ -148,3 +148,6 @@ pub fn genereer_wachtwoord<R: Rng + ?Sized>(
         entropie_bits: wachtwoord_bits(lengte, alles.len()),
     })
 }
+
+// © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+// Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.

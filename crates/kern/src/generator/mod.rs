@@ -21,6 +21,7 @@ pub mod wachtwoord;
 
 pub use wachtwoord::{
     DUBBELZINNIG, SPECIALE_TEKENS, WachtwoordOpties, effectieve_lengte, genereer_wachtwoord,
+    genereer_wachtwoord_os,
 };
 
 /// Waarom een generator niets kon maken.
