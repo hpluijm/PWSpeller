@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fixronde 1: inactiviteit ook op de wandklok; ontsleutel controleert eerst. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 11: sectie Geschiedenis en afgewezen alternatieven voor de geschiedenis. |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Opbouw en afgewezen alternatieven opgenomen. |
 
@@ -39,6 +40,11 @@ Het ontwerp staat in [het ontwerpdocument](superpowers/specs/2026-10-16-pwspelle
 - Maximaal 100 items (het oudste valt eraf). `wis()` leegt de items, overschrijft de sleutel met
   nieuwe willekeurige bytes en laat de id-teller doorlopen. `controleer_inactiviteit` wist bij
   `nu - laatst_gebruikt >= time_out`; toevoegen en geslaagd ontsleutelen tellen als gebruik.
+- `Instant` loopt op macOS en Linux niet door tijdens slaapstand, dus de geschiedenis houdt ook
+  een wandklok-tijdstip (`SystemTime`) van het laatste gebruik bij. `controleer_inactiviteit`
+  (en testbaar `controleer_inactiviteit_op(nu, wand)`) wist als een van beide klokken de time-out
+  haalt. Staat de wandklok achteruit (`duration_since` geeft een fout), dan beslist alleen
+  `Instant`. `ontsleutel` controleert eerst de inactiviteit en geeft `None` als er gewist is.
 - `Debug` toont alleen het aantal items.
 
 ## Afgewezen alternatieven

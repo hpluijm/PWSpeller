@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Fixronde 1: inactiviteit ook op de wandklok (slaapstand), ontsleutel controleert eerst.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 11: module aangemaakt (XChaCha20-Poly1305, gelockte sleutel, wissen na inactiviteit).
 // ──────────────────────────────────────────────────────────
 
@@ -51,6 +54,8 @@ pub struct Geschiedenis {
     items: VecDeque<Item>,
     volgende_id: u64,
     laatst_gebruikt: Instant,
+    /// Wandklok bij hetzelfde moment: `Instant` loopt op macOS en Linux niet door tijdens slaapstand.
+    laatst_gebruikt_wand: SystemTime,
     time_out: Option<Duration>,
 }
 
@@ -82,6 +87,7 @@ impl Geschiedenis {
             items: VecDeque::new(),
             volgende_id: 0,
             laatst_gebruikt: Instant::now(),
+            laatst_gebruikt_wand: SystemTime::now(),
             time_out,
         }
     }
@@ -113,6 +119,7 @@ impl Geschiedenis {
         });
         self.items.truncate(MAX_ITEMS);
         self.laatst_gebruikt = nu;
+        self.laatst_gebruikt_wand = SystemTime::now();
         id
     }
 
@@ -124,6 +131,9 @@ impl Geschiedenis {
     /// Ontsleutelt één item. `None` bij een onbekend id of een beschadigd item. Een geslaagde
     /// ontsleuteling telt als gebruik.
     pub fn ontsleutel(&mut self, id: u64, nu: Instant) -> Option<Gegenereerd> {
+        if self.controleer_inactiviteit(nu) {
+            return None;
+        }
         let item = self.items.iter().find(|i| i.info.id == id)?;
         let mut buffer = Zeroizing::new(Vec::with_capacity(item.ciphertext.len()));
         buffer.extend_from_slice(&item.ciphertext);
@@ -132,6 +142,7 @@ impl Geschiedenis {
             .ok()?;
         let resultaat = decodeer(&buffer)?;
         self.laatst_gebruikt = nu;
+        self.laatst_gebruikt_wand = SystemTime::now();
         Some(resultaat)
     }
 
@@ -143,12 +154,25 @@ impl Geschiedenis {
         rand::rng().fill_bytes(&mut self.sleutel[..]);
     }
 
-    /// Wist als de inactiviteit de time-out heeft bereikt (`>=`). Geeft `true` als er gewist is.
+    /// Wist als de inactiviteit de time-out heeft bereikt (`>=`), gemeten met `nu` én met de
+    /// wandklok. Geeft `true` als er gewist is.
     pub fn controleer_inactiviteit(&mut self, nu: Instant) -> bool {
+        self.controleer_inactiviteit_op(nu, SystemTime::now())
+    }
+
+    /// Als `controleer_inactiviteit`, met een opgegeven wandklok (testbaar). Een van beide
+    /// klokken die de time-out haalt, wist: de wandklok loopt door tijdens slaapstand. Staat
+    /// de wandklok achteruit, dan telt alleen `nu`.
+    pub fn controleer_inactiviteit_op(&mut self, nu: Instant, wand: SystemTime) -> bool {
         let Some(time_out) = self.time_out else {
             return false;
         };
-        if self.items.is_empty() || nu.saturating_duration_since(self.laatst_gebruikt) < time_out {
+        if self.items.is_empty() {
+            return false;
+        }
+        let instant_verstreken = nu.saturating_duration_since(self.laatst_gebruikt);
+        let wand_verstreken = wand.duration_since(self.laatst_gebruikt_wand).ok();
+        if instant_verstreken < time_out && wand_verstreken.is_none_or(|d| d < time_out) {
             return false;
         }
         self.wis();

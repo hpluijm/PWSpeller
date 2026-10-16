@@ -6,12 +6,15 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Fixronde 1: tests voor wandklok en ontsleutelen na time-out.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 11: tests van de geschiedenis.
 // ──────────────────────────────────────────────────────────
 
 use pwspeller_kern::generator::{Gegenereerd, Modus};
 use pwspeller_kern::geschiedenis::{Geschiedenis, MAX_ITEMS};
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant, SystemTime};
 use zeroize::Zeroizing;
 
 fn wachtwoord(t: &str) -> Gegenereerd {
@@ -159,6 +162,40 @@ fn debug_toont_geen_inhoud() {
     let d = format!("{h:?}");
     assert!(!d.contains("GeheimeTekst"));
     assert!(d.contains('1'));
+}
+
+#[test]
+fn wandklok_wist_ook_als_instant_niet_verstreken_is() {
+    let nu = Instant::now();
+    let mut h = Geschiedenis::nieuw(Some(Duration::from_secs(15 * 60)));
+    h.voeg_toe(&wachtwoord("x"), "nl", nu);
+    let wand = SystemTime::now() + Duration::from_secs(16 * 60);
+    assert!(h.controleer_inactiviteit_op(nu, wand));
+    assert!(h.items().is_empty());
+}
+
+#[test]
+fn wandklok_achteruit_geeft_geen_paniek_en_instant_beslist() {
+    let nu = Instant::now();
+    let mut h = Geschiedenis::nieuw(Some(Duration::from_secs(15 * 60)));
+    h.voeg_toe(&wachtwoord("x"), "nl", nu);
+    let achteruit = SystemTime::now() - Duration::from_secs(3600);
+    assert!(!h.controleer_inactiviteit_op(nu + Duration::from_secs(60), achteruit));
+    assert_eq!(h.items().len(), 1);
+    assert!(h.controleer_inactiviteit_op(nu + Duration::from_secs(15 * 60), achteruit));
+    assert!(h.items().is_empty());
+}
+
+#[test]
+fn ontsleutelen_na_time_out_geeft_none_en_wist() {
+    let nu = Instant::now();
+    let mut h = Geschiedenis::nieuw(Some(Duration::from_secs(15 * 60)));
+    let id = h.voeg_toe(&wachtwoord("x"), "nl", nu);
+    assert!(
+        h.ontsleutel(id, nu + Duration::from_secs(16 * 60))
+            .is_none()
+    );
+    assert!(h.items().is_empty());
 }
 
 // © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
