@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Visuele controle: voorleesmodus, groepjes, splash 1,5 s. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fix: tabblad Wachtzin toont hele woorden met scheidingsteken en woordnummer, niet groepjes van vier die woorden middenin afbraken; wachtwoord en eigen tekst blijven groepjes. De voorleesmodus breekt een wachtzin alleen na een scheidingsteken. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fase C afgerond: taak 12 t/m 17 (de app). |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fase B afgerond: taak 5 t/m 11. |
@@ -17,6 +18,15 @@
 ---
 
 # Voortgang
+
+## 2026-10-17, avond (Claude Code) — visuele controle van de app
+
+Met toestemming voor schermopname kon de app voor het eerst echt bekeken worden (alleen het eigen venster, via `screencapture -l`). Dat vond wat de tests misten:
+
+- **Voorleesmodus toonde het teken en de spelling niet.** De knoppenrij onderin (`with_layout(left_to_right(Align::Center))`) nam alle hoogte en duwde het midden weg. De tests controleerden alleen of alles binnen het venster lag; nu meten ze de hoogte en de plaats van het teken.
+- **Groepjes van vier sneden wachtzinnen in woorden**, en bij eigen tekst leek de code `U+0020` van een spatie op extra cijfers. Besluit Hans: groepjes alleen bij een gegenereerd wachtwoord; woorden uit de woordenlijsten blijven heel; eigen tekst doorlopend, met een spatie als grijze `·`-markering.
+- **Splashscreen 1,5 seconde** in plaats van drie: afspraak 24 is daarvoor globaal aangepast (mac-setup), op verzoek van Hans.
+- Kleinigheden: "Cijfer aan elk woord" heet nu "Cijfer toevoegen" (er komt één cijfer), en de spellinglijst nummert doorlopend.
 
 ## 2026-10-17, later (Claude Code) — fase C afgerond: taak 12 t/m 17
 

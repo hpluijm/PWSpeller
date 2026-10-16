@@ -143,6 +143,17 @@ Task 17: complete (commits 3f0d2eb..7ab7da9, review clean)
 Fase C: klaar — stoppunt, wacht op akkoord Hans voor fase D. Visuele controle niet mogelijk (screencapture geweigerd) → bij Hans.
 Open vraag aan Hans (2026-10-17): schermafbeeldingen — optie 1 VS Code rechten (Schermopname + Toegankelijkheid), optie 2 egui_kittest-snapshots (wgpu, alleen in tests) aan begin fase D. Hans start VS Code opnieuw (vermoedelijk voor optie 1). Fase D wacht op akkoord.
 Hervatten: lees dit logboek; volgende = fase D (taak 18, 19); briefs maken met awk (zie boven).
+Visuele controle (screencapture -l, 2026-10-17): voorleesmodus toont GEEN teken en GEEN omschrijving — middenzone ingeklapt (ScrollArea uit fixronde taak 16), in 560x668 en 480x560. Tests misten het.
+Ruling: taak 16 fixronde 2 met verse implementer + test op werkelijke hoogte/zichtbaarheid van het tekenlabel — echte fout in kernfunctie voor de helpdesk.
+FIX_BASE taak 16 r2: f2fa7f3
+Task 16: fix round 2/5 (voorleesmodus-midden zichtbaar; controller zag schermafbeelding 480x560: OK) — commit 0ba3337
+Task 16: complete (opnieuw), review clean na visuele controle.
+Hans meldt (visueel): wachtzin wordt in groepjes van 4 opgeknipt, ook midden in woorden. Bevestigd in hoofd.rs:190 (groepjes_weergave voor alle tabs).
+Ruling: wachtzin toont hele woorden zonder groepjes (positienummers per woord); groepjes blijven voor wachtwoord en eigen tekst tot Hans beslist — spec §8 bedoelde groepjes voor tekens, niet voor woorden.
+FIX_BASE groepjes: 0ba3337
+Fix groepjes: wachtzin in hele woorden (5b972bf); controller zag schermafbeelding: OK. Open: label 'Cijfer aan elk woord' misleidend (één cijfer); nummering spelling per woord springt (8→15, telt tekens); Hans beslist over groepjes bij wachtwoord.
+Fix 2 (31666c9) + spatie als markering (f48e79f): groepjes alleen gegenereerd wachtwoord, eigen tekst doorlopend, wachtzin hele woorden, splash 1,5 s (afspraak 24 globaal aangepast in mac-setup), 'Cijfer toevoegen', spelling doorlopend genummerd. Controller zag schermafbeeldingen: OK.
+Fase C: opnieuw afgerond na visuele controle — stoppunt, wacht op akkoord Hans voor fase D.
 
 ---
 
