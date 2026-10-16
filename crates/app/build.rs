@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 12 fixronde 1: ook nieuwe commits op dezelfde branch herberekenen de versie.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 12: build-script aangemaakt.
 // ──────────────────────────────────────────────────────────
 
@@ -13,8 +16,17 @@ use std::process::Command;
 
 fn main() {
     println!("cargo:rerun-if-env-changed=PWSPELLER_VERSIE");
-    println!("cargo:rerun-if-changed=../../.git/HEAD");
-    println!("cargo:rerun-if-changed=../../.git/refs/tags");
+    // Alleen bestaande paden: een ontbrekend pad laat Cargo bij elke build opnieuw draaien.
+    for pad in [
+        ".git/HEAD",
+        ".git/refs/heads",
+        ".git/refs/tags",
+        ".git/packed-refs",
+    ] {
+        if std::path::Path::new("../..").join(pad).exists() {
+            println!("cargo:rerun-if-changed=../../{pad}");
+        }
+    }
     let versie = std::env::var("PWSPELLER_VERSIE")
         .ok()
         .filter(|v| !v.trim().is_empty())

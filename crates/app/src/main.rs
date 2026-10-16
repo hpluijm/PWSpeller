@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 12 fixronde 1: fouten bij start van logboek en venster ook naar pwspeller-fout.log.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 12: venster, logboek en thema gekoppeld; gebruikt nu de bibliotheek.
 // ──────────────────────────────────────────────────────────
 
@@ -19,7 +22,7 @@ use pwspeller_kern::talen::interfacetekst;
 
 fn main() -> eframe::Result {
     if let Err(e) = logboek::start_logboek(&logboekpad()) {
-        eprintln!("logboek niet gestart: {e}");
+        meld_fout(&format!("logboek niet gestart: {e}"));
     }
     let app = PwApp::nieuw(instellingenpad());
     log::info!("PWSpeller {} gestart", pwspeller::instellingen::VERSIE);
@@ -31,14 +34,27 @@ fn main() -> eframe::Result {
             .with_min_inner_size([480.0, 560.0]),
         ..Default::default()
     };
-    eframe::run_native(
+    let resultaat = eframe::run_native(
         &titel,
         opties,
         Box::new(move |cc| {
             thema::zet_thema(&cc.egui_ctx);
             Ok(Box::new(app))
         }),
-    )
+    );
+    if let Err(e) = &resultaat {
+        log::error!("venster gestopt met een fout: {e}");
+        meld_fout(&format!("venster gestopt met een fout: {e}"));
+    }
+    resultaat
+}
+
+/// Onder `windows_subsystem = "windows"` is de console onzichtbaar; schrijf een fout daarom
+/// ook naar een bestand in de tijdelijke map.
+fn meld_fout(tekst: &str) {
+    eprintln!("{tekst}");
+    let pad = std::env::temp_dir().join("pwspeller-fout.log");
+    let _ = std::fs::write(&pad, format!("{tekst}\n"));
 }
 
 // © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).

@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 12 fixronde 1: test dat een kapot bestand als .kapot bewaard blijft.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 12: tests voor instellingen aangemaakt.
 // ──────────────────────────────────────────────────────────
 
@@ -49,6 +52,16 @@ fn kapot_bestand_geeft_default() {
     let pad = map.join("instellingen.toml");
     std::fs::write(&pad, "dit is geen = [ toml").unwrap();
     assert_eq!(Instellingen::laad(&pad), Instellingen::default());
+    let kapot = map.join("instellingen.toml.kapot");
+    assert_eq!(
+        std::fs::read_to_string(&kapot).unwrap(),
+        "dit is geen = [ toml"
+    );
+    assert!(!pad.exists(), "het kapotte bestand is hernoemd");
+    // Een tweede kapot bestand overschrijft de oude kopie.
+    std::fs::write(&pad, "nog = [ kapot").unwrap();
+    Instellingen::laad(&pad);
+    assert_eq!(std::fs::read_to_string(&kapot).unwrap(), "nog = [ kapot");
     let _ = std::fs::remove_dir_all(&map);
 }
 

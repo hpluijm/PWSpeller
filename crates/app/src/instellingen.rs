@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 12 fixronde 1: een kapot instellingenbestand wordt eerst hernoemd naar .kapot.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 12: instellingen, instellingenpad en interfacetaal aangemaakt.
 // ──────────────────────────────────────────────────────────
 
@@ -80,10 +83,19 @@ impl Instellingen {
             }
         };
         toml::from_str(&tekst).unwrap_or_else(|e| {
-            log::warn!(
-                "instellingen {} kapot: {e}; standaard gebruikt",
-                pad.display()
-            );
+            let kapot = pad.with_extension("toml.kapot");
+            match std::fs::rename(pad, &kapot) {
+                Ok(()) => log::warn!(
+                    "instellingen {} kapot: {e}; bewaard als {}, standaard gebruikt",
+                    pad.display(),
+                    kapot.display()
+                ),
+                Err(r) => log::warn!(
+                    "instellingen {} kapot: {e}; kopie als {} mislukt: {r}; standaard gebruikt",
+                    pad.display(),
+                    kapot.display()
+                ),
+            }
             Self::default()
         })
     }
