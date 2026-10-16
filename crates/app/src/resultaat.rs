@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 14 fixronde 1: SpelCache (wist zichzelf), groepjes met onzichtbare tekens als code, opmaak per run.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 14: aangemaakt.
 // ──────────────────────────────────────────────────────────
 
@@ -16,6 +19,7 @@ use eframe::egui::{self, Color32, FontFamily, FontId, ProgressBar, RichText, Tex
 use pwspeller_kern::spelling::{Regel, Soort};
 use pwspeller_kern::sterkte::{Niveau, niveau};
 use pwspeller_kern::talen::interfacetekst;
+use zeroize::Zeroize;
 
 const RESULTAAT_GROOTTE: f32 = 28.0;
 /// Bij een sterkte van deze bits is de balk vol.
@@ -23,12 +27,62 @@ const BALK_VOL_BITS: f64 = 128.0;
 
 /// Deelt tekst in groepjes van vier tekens, met de startpositie (1-based) van elk groepje.
 pub fn groepjes(tekst: &str) -> Vec<(usize, String)> {
-    let tekens: Vec<char> = tekst.chars().collect();
-    tekens
+    let mut tekens: Vec<char> = tekst.chars().collect();
+    let uit = tekens
         .chunks(4)
         .enumerate()
         .map(|(i, groep)| (i * 4 + 1, groep.iter().collect()))
-        .collect()
+        .collect();
+    tekens.zeroize();
+    uit
+}
+
+/// Groepjes zoals ze in beeld komen: een onzichtbaar teken staat er als `U+xxxx`.
+pub fn groepjes_weergave(tekst: &str) -> Vec<(usize, String)> {
+    let mut groepen = groepjes(tekst);
+    for (_, groep) in &mut groepen {
+        let mut nieuw: String = groep
+            .chars()
+            .map(|c| weergave_fragment(c.encode_utf8(&mut [0; 4])))
+            .collect();
+        std::mem::swap(groep, &mut nieuw);
+        nieuw.zeroize();
+    }
+    groepen
+}
+
+/// Wat het hoofdvenster van de spelling onthoudt zolang de tekst gelijk blijft. Bij het
+/// vervangen of vrijgeven worden de teksten met nullen overschreven.
+pub struct SpelCache {
+    pub(crate) sleutel: (crate::hoofd::Tab, bool, String, String, u64),
+    pub groepen: Vec<(usize, String)>,
+    pub regels: Vec<Regel>,
+}
+
+impl SpelCache {
+    pub fn nieuw(
+        sleutel: (crate::hoofd::Tab, bool, String, String, u64),
+        groepen: Vec<(usize, String)>,
+        regels: Vec<Regel>,
+    ) -> Self {
+        Self {
+            sleutel,
+            groepen,
+            regels,
+        }
+    }
+}
+
+impl Drop for SpelCache {
+    fn drop(&mut self) {
+        for (_, g) in &mut self.groepen {
+            g.zeroize();
+        }
+        for r in &mut self.regels {
+            r.fragment.zeroize();
+            r.omschrijving.zeroize();
+        }
+    }
 }
 
 /// Een teken dat je niet ziet of dat in het lettertype ontbreekt, komt als code in beeld.
@@ -76,20 +130,28 @@ fn teken_opmaak(c: char, grootte: f32, standaard: Color32, donker: bool) -> Text
     }
 }
 
+/// Eén append per run van tekens met dezelfde opmaak.
 fn opgemaakt(tekst: &str, grootte: f32, standaard: Color32, donker: bool) -> text::LayoutJob {
     let mut job = text::LayoutJob::default();
+    let mut run = String::new();
+    let mut huidig: Option<TextFormat> = None;
     for c in tekst.chars() {
-        job.append(
-            &c.to_string(),
-            0.0,
-            teken_opmaak(c, grootte, standaard, donker),
-        );
+        let f = teken_opmaak(c, grootte, standaard, donker);
+        if huidig.as_ref().is_some_and(|h| *h != f) {
+            job.append(&run, 0.0, huidig.take().unwrap_or_default());
+            run.clear();
+        }
+        huidig.get_or_insert(f);
+        run.push(c);
+    }
+    if let Some(f) = huidig {
+        job.append(&run, 0.0, f);
     }
     job
 }
 
 /// Tekent de tekst in groepjes van vier, het startnummer klein erboven.
-pub fn teken_resultaat(ui: &mut egui::Ui, tekst: &str) {
+pub fn teken_resultaat(ui: &mut egui::Ui, alle: &[(usize, String)]) {
     let donker = ui.visuals().dark_mode;
     let standaard = ui.visuals().text_color();
     let groep_breedte = ui.fonts_mut(|f| {
@@ -102,7 +164,6 @@ pub fn teken_resultaat(ui: &mut egui::Ui, tekst: &str) {
         .x
     }) + ui.spacing().item_spacing.x * 2.0;
     let per_rij = ((ui.available_width() / groep_breedte).floor() as usize).max(1);
-    let alle = groepjes(tekst);
     for rij in alle.chunks(per_rij) {
         ui.horizontal(|ui| {
             for (start, groep) in rij {

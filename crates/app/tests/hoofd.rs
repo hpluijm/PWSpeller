@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 14 fixronde 1: tests voor groepjes bij eigen tekst, de cache, focus op een knop en het wissen van de eigen tekst.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 14: tests voor het hoofdvenster aangemaakt.
 // ──────────────────────────────────────────────────────────
 
@@ -271,6 +274,88 @@ fn instellingen_worden_bewaard_bij_elke_wijziging() {
 fn app_voor_test_schrijft_nooit() {
     let app = PwApp::voor_test(Instant::now());
     assert!(app.instellingenpad.is_none());
+}
+
+#[test]
+fn eigen_tekst_toont_groepjes_met_positienummers_en_codes() {
+    let mut h = hoofd();
+    h.state_mut().0.hoofd.tab = Tab::EigenTekst;
+    h.state_mut().0.hoofd.eigen_tekst = "abcde\tf".to_string();
+    stap(&mut h);
+    assert!(h.query_by_label("abcd").is_some(), "eerste groepje");
+    assert!(
+        h.query_by_label("eU+0009f").is_some(),
+        "tweede groepje met code"
+    );
+    assert!(h.query_by_label("1").is_some());
+    assert!(h.query_by_label("5").is_some());
+}
+
+#[test]
+fn cache_wordt_alleen_opnieuw_gebouwd_bij_een_wijziging() {
+    let mut h = hoofd();
+    h.get_by_label("Genereer").click();
+    stap(&mut h);
+    let n = h.state().0.hoofd.cache_opbouwen;
+    assert!(n >= 1);
+    for _ in 0..5 {
+        h.step();
+    }
+    assert_eq!(
+        h.state().0.hoofd.cache_opbouwen,
+        n,
+        "zonder wijziging geen nieuwe opbouw"
+    );
+    h.state_mut().0.instellingen.spellingstaal = "en".to_string();
+    stap(&mut h);
+    assert_eq!(h.state().0.hoofd.cache_opbouwen, n + 1);
+    h.state_mut().0.hoofd.per_teken = true;
+    stap(&mut h);
+    assert_eq!(h.state().0.hoofd.cache_opbouwen, n + 2);
+}
+
+#[test]
+fn enter_op_gefocuste_knop_genereert_niet() {
+    let mut h = hoofd();
+    h.key_press(Key::Enter);
+    stap(&mut h);
+    let eerste = h
+        .state()
+        .0
+        .hoofd
+        .wachtwoord
+        .as_ref()
+        .map(|g| g.tekst.to_string());
+    assert!(eerste.is_some());
+    h.get_by_label("Kopieer").focus();
+    stap(&mut h);
+    h.key_press(Key::Enter);
+    stap(&mut h);
+    let nu = h
+        .state()
+        .0
+        .hoofd
+        .wachtwoord
+        .as_ref()
+        .map(|g| g.tekst.to_string());
+    assert_eq!(
+        eerste, nu,
+        "Enter op een knop activeert die knop, en genereert niet"
+    );
+    assert_eq!(h.state().0.geschiedenis.items().len(), 1);
+}
+
+#[test]
+fn eigen_tekst_wordt_gewist_bij_tabwissel_en_leegmaken() {
+    let mut h = hoofd();
+    h.state_mut().0.hoofd.tab = Tab::EigenTekst;
+    h.state_mut().0.hoofd.eigen_tekst = "geheim".to_string();
+    stap(&mut h);
+    assert_eq!(h.state().0.hoofd.eigen_tekst, "geheim");
+    h.state_mut().0.hoofd.tab = Tab::Wachtwoord;
+    stap(&mut h);
+    assert!(h.state().0.hoofd.eigen_tekst.is_empty());
+    assert!(h.state().0.hoofd.cache.is_none());
 }
 
 // © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).

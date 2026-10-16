@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 14 fixronde 1: sectie Hoofdvenster, met de beperkte garantie voor het wissen van eigen tekst. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fixronde 1: inactiviteit ook op de wandklok; ontsleutel controleert eerst. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 11: sectie Geschiedenis en afgewezen alternatieven voor de geschiedenis. |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Opbouw en afgewezen alternatieven opgenomen. |
@@ -46,6 +47,19 @@ Het ontwerp staat in [het ontwerpdocument](superpowers/specs/2026-10-16-pwspelle
   haalt. Staat de wandklok achteruit (`duration_since` geeft een fout), dan beslist alleen
   `Instant`. `ontsleutel` controleert eerst de inactiviteit en geeft `None` als er gewist is.
 - `Debug` toont alleen het aantal items.
+
+## Hoofdvenster (app, `hoofd.rs`, `resultaat.rs`, `opties.rs`)
+
+- Spelregels en groepjes staan in een cache (`SpelCache`) die alleen opnieuw wordt opgebouwd bij een
+  andere tab, tekst, spellingstaal, interfacetaal of spelwijze. De cache overschrijft zijn teksten met
+  nullen als hij vervangen of vrijgegeven wordt.
+- Sneltoetsen (Enter, F5, Cmd/Ctrl+C) werken alleen als geen enkel widget focus heeft.
+- **Eigen tekst wissen is beperkt.** De eigen tekst staat in een gewone `String` (het tekstveld van egui
+  vereist dat). We roepen `zeroize()` aan bij het verlaten van het tabblad en bij leegmaken, en beginnen
+  met een ruime capaciteit zodat de buffer niet vaak verhuist. Maar egui houdt eigen kopieen (galleys,
+  undo-geschiedenis, accessibility-boom) en een gegroeide buffer laat een oude kopie achter. Die liggen
+  buiten ons bereik, dus dit verkleint het risico en sluit het niet uit. Gegenereerde wachtwoorden
+  staan wel in `Zeroizing`.
 
 ## Afgewezen alternatieven
 

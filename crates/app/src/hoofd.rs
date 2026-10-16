@@ -6,11 +6,15 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 14 fixronde 1: spelling en groepjes in een cache die zichzelf wist; Eigen tekst ook in groepjes; sneltoetsen alleen zonder focus op een widget; eigen tekst wissen bij tab-wissel.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 14: aangemaakt.
 // ──────────────────────────────────────────────────────────
 
 use crate::app::PwApp;
-use crate::{opties, resultaat};
+use crate::opties;
+use crate::resultaat::{self, SpelCache, groepjes_weergave};
 use eframe::egui::{self, Event, FontFamily, FontId, Key, Modifiers, TextEdit};
 use pwspeller_kern::generator::{
     Gegenereerd, WachtwoordOpties, effectieve_lengte, genereer_wachtwoord_os, genereer_wachtzin_os,
@@ -18,11 +22,13 @@ use pwspeller_kern::generator::{
 use pwspeller_kern::spelling::{Regel, Speller};
 use pwspeller_kern::sterkte::schatting_bits;
 use pwspeller_kern::talen::{catalogus, interfacetekst, omschrijvingen_voor};
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 use std::time::Instant;
 use zeroize::Zeroize;
 
 /// De tabbladen van het hoofdvenster.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub enum Tab {
     #[default]
     Wachtwoord,
@@ -31,11 +37,13 @@ pub enum Tab {
 }
 
 /// Wat het hoofdvenster onthoudt tussen twee beelden.
-#[derive(Default)]
 pub struct HoofdState {
     pub tab: Tab,
     pub wachtwoord: Option<Gegenereerd>,
     pub wachtzin: Option<Gegenereerd>,
+    /// De eigen tekst. Wordt met `zeroize()` gewist bij tab-wissel en bij leegmaken. Dat is
+    /// beperkt: egui houdt eigen kopieen (galley, undo) die buiten ons bereik liggen, en een
+    /// `String` die groeit kopieert zijn buffer; daarom begint hij met ruime capaciteit.
     pub eigen_tekst: String,
     /// Wachtzin per teken spellen in plaats van per woord.
     pub per_teken: bool,
@@ -44,6 +52,32 @@ pub struct HoofdState {
     /// Gezet door F5 of de knop; de voorleesmodus (Taak 16) neemt het over.
     pub voorlezen_gevraagd: bool,
     kopieer_gevraagd: bool,
+    /// Spelregels en groepjes van wat in beeld staat; zichzelf wissend bij vervangen.
+    pub cache: Option<SpelCache>,
+    /// Hoe vaak de cache is opgebouwd (voor de test dat dit niet elk beeld gebeurt).
+    pub cache_opbouwen: usize,
+    vorige_tab: Tab,
+    eigen_was_gevuld: bool,
+}
+
+impl Default for HoofdState {
+    fn default() -> Self {
+        Self {
+            tab: Tab::default(),
+            wachtwoord: None,
+            wachtzin: None,
+            eigen_tekst: String::with_capacity(256),
+            per_teken: false,
+            fout: None,
+            lengte_opgehoogd: false,
+            voorlezen_gevraagd: false,
+            kopieer_gevraagd: false,
+            cache: None,
+            cache_opbouwen: 0,
+            vorige_tab: Tab::default(),
+            eigen_was_gevuld: false,
+        }
+    }
 }
 
 impl Drop for HoofdState {
@@ -95,8 +129,8 @@ impl PwApp {
             && !h.per_teken
             && let Some(g) = &h.wachtzin
             && let Some(woorden) = &g.woorden
+            && let Some(scheiding) = g.scheidingsteken.as_deref()
         {
-            let scheiding = g.scheidingsteken.as_deref().unwrap_or("-");
             return speller.wachtzin(woorden, scheiding);
         }
         speller.per_teken(tekst)
@@ -109,6 +143,31 @@ impl PwApp {
             .find(|t| t.code == self.instellingen.spellingstaal)
             .or_else(|| talen.first())
             .expect("de catalogus bevat minstens één spellingstaal")
+    }
+
+    /// Bouwt spelregels en groepjes opnieuw op als wat in beeld staat veranderd is: andere tab,
+    /// tekst, spellingstaal, interfacetaal of spelwijze. Anders blijft de cache staan.
+    fn ververs_cache(&mut self) {
+        let h = &self.hoofd;
+        let Some(tekst) = self.huidige_tekst() else {
+            self.hoofd.cache = None;
+            return;
+        };
+        let mut hasher = DefaultHasher::new();
+        tekst.hash(&mut hasher);
+        let sleutel = (
+            h.tab,
+            h.per_teken,
+            self.instellingen.spellingstaal.clone(),
+            self.interfacetaal.clone(),
+            hasher.finish(),
+        );
+        if h.cache.as_ref().is_some_and(|c| c.sleutel == sleutel) {
+            return;
+        }
+        let nieuw = SpelCache::nieuw(sleutel, groepjes_weergave(tekst), self.spelregels());
+        self.hoofd.cache = Some(nieuw);
+        self.hoofd.cache_opbouwen += 1;
     }
 
     /// Verhoogt de lengte tot wat de minima vragen; geeft terug of dat gebeurde.
@@ -155,9 +214,10 @@ impl PwApp {
         }
     }
 
-    /// Leest de sneltoetsen, maar alleen als geen tekstveld het toetsenbord wil hebben.
+    /// Leest de sneltoetsen, maar alleen als geen enkel widget focus heeft.
     fn sneltoetsen(&mut self, ctx: &egui::Context) -> bool {
-        if ctx.egui_wants_keyboard_input() {
+        // Heeft een widget focus (tekstveld, maar ook een knop via Tab), dan is Enter voor dat widget.
+        if ctx.egui_wants_keyboard_input() || ctx.memory(|m| m.focused().is_some()) {
             return false;
         }
         let (enter, f5, kopieer) = ctx.input_mut(|i| {
@@ -181,7 +241,6 @@ impl PwApp {
     pub fn teken_hoofd(&mut self, ui: &mut egui::Ui, nu: Instant) {
         let taal = self.interfacetaal.clone();
         let mut genereer = self.sneltoetsen(ui.ctx());
-        self.verhoog_lengte();
         let voor = self.instellingen.wachtwoord;
         egui::Panel::top("tabbladen").show(ui, |ui| self.teken_balk(ui, &taal));
         egui::CentralPanel::default().show(ui, |ui| {
@@ -189,18 +248,31 @@ impl PwApp {
                 genereer |= self.teken_midden(ui, &taal);
             });
         });
-        if genereer {
-            self.genereer(nu);
-        }
         if self.verhoog_lengte() {
-            self.hoofd.lengte_opgehoogd = true;
+            ui.ctx().request_repaint();
         } else if self.instellingen.wachtwoord != voor {
             self.hoofd.lengte_opgehoogd = false;
         }
+        if genereer {
+            self.genereer(nu);
+            ui.ctx().request_repaint();
+        }
+        self.wis_eigen_tekst_indien_nodig();
         if self.instellingen != self.bewaard {
             self.bewaar_instellingen();
             self.bewaard = self.instellingen.clone();
         }
+    }
+
+    /// Wist de eigen tekst als je van het tabblad weggaat of hem leegmaakt.
+    fn wis_eigen_tekst_indien_nodig(&mut self) {
+        let h = &mut self.hoofd;
+        let weg = h.vorige_tab == Tab::EigenTekst && h.tab != Tab::EigenTekst;
+        if weg || (h.eigen_tekst.is_empty() && h.eigen_was_gevuld) {
+            h.eigen_tekst.zeroize();
+        }
+        h.vorige_tab = h.tab;
+        h.eigen_was_gevuld = !h.eigen_tekst.is_empty();
     }
 
     fn bewaar_instellingen(&self) {
@@ -247,8 +319,10 @@ impl PwApp {
                     .password(false)
                     .desired_width(f32::INFINITY),
             );
-        } else if let Some(t) = self.huidige_tekst() {
-            resultaat::teken_resultaat(ui, t);
+        }
+        self.ververs_cache();
+        if let Some(c) = &self.hoofd.cache {
+            resultaat::teken_resultaat(ui, &c.groepen);
         }
         if let Some(fout) = &self.hoofd.fout {
             ui.colored_label(crate::thema::SPECIAAL_LICHT, fout);
@@ -304,7 +378,9 @@ impl PwApp {
         }
         ui.separator();
         ui.heading(interfacetekst(taal, "label.spelling"));
-        resultaat::teken_spelling(ui, taal, &self.spelregels());
+        if let Some(c) = &self.hoofd.cache {
+            resultaat::teken_spelling(ui, taal, &c.regels);
+        }
         genereer
     }
 

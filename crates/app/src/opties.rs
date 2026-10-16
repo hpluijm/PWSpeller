@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 14 fixronde 1: opmerking dat de woordenlijsten al gesorteerd zijn.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 14: aangemaakt.
 // ──────────────────────────────────────────────────────────
 
@@ -73,6 +76,7 @@ pub fn wachtzin_opties(
         .selected_text(woordenlijst.as_deref().unwrap_or(volg))
         .show_ui(ui, |ui| {
             ui.selectable_value(woordenlijst, None, volg);
+            // `woordenlijsten` is een BTreeMap: de codes komen al gesorteerd.
             for code in catalogus().woordenlijsten.keys() {
                 ui.selectable_value(woordenlijst, Some(code.clone()), code);
             }
