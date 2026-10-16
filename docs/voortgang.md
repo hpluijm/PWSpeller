@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fix: tabblad Wachtzin toont hele woorden met scheidingsteken en woordnummer, niet groepjes van vier die woorden middenin afbraken; wachtwoord en eigen tekst blijven groepjes. De voorleesmodus breekt een wachtzin alleen na een scheidingsteken. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fase C afgerond: taak 12 t/m 17 (de app). |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fase B afgerond: taak 5 t/m 11. |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Taak 3–5 en de overdracht naar de andere Mac. |

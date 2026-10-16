@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Fix: de wachtzin komt in hele woorden met het scheidingsteken in beeld (woord_tokens, teken_wachtzin), niet in groepjes van vier.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 14 fixronde 1: SpelCache (wist zichzelf), groepjes met onzichtbare tekens als code, opmaak per run.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -49,6 +52,24 @@ pub fn groepjes_weergave(tekst: &str) -> Vec<(usize, String)> {
         nieuw.zeroize();
     }
     groepen
+}
+
+/// De wachtzin als weer te geven stukken: elk woord met het scheidingsteken erachter (behalve het
+/// laatste), genummerd vanaf 1. Zo breekt een regel nooit midden in een woord.
+pub fn woord_tokens(woorden: &[String], scheidingsteken: &str) -> Vec<(usize, String)> {
+    let laatste = woorden.len().saturating_sub(1);
+    woorden
+        .iter()
+        .enumerate()
+        .map(|(i, w)| {
+            let mut stuk = String::with_capacity(w.len() + scheidingsteken.len());
+            stuk.push_str(w);
+            if i < laatste {
+                stuk.push_str(scheidingsteken);
+            }
+            (i + 1, stuk)
+        })
+        .collect()
 }
 
 /// Wat het hoofdvenster van de spelling onthoudt zolang de tekst gelijk blijft. Bij het
@@ -172,6 +193,51 @@ pub fn teken_resultaat(ui: &mut egui::Ui, alle: &[(usize, String)]) {
                     ui.label(opgemaakt(groep, RESULTAAT_GROOTTE, standaard, donker));
                 });
                 ui.add_space(8.0);
+            }
+        });
+    }
+}
+
+/// Tekent de wachtzin in hele woorden met het scheidingsteken erachter, het woordnummer klein
+/// erboven. De regel breekt alleen tussen twee woorden.
+pub fn teken_wachtzin(ui: &mut egui::Ui, stukken: &[(usize, String)]) {
+    let donker = ui.visuals().dark_mode;
+    let standaard = ui.visuals().text_color();
+    let ruimte = ui.spacing().item_spacing.x;
+    let beschikbaar = ui.available_width();
+    let breedtes: Vec<f32> = stukken
+        .iter()
+        .map(|(_, stuk)| {
+            let job = opgemaakt(stuk, RESULTAAT_GROOTTE, standaard, donker);
+            ui.fonts_mut(|f| f.layout_job(job).size().x)
+        })
+        .collect();
+    let mut rijen: Vec<std::ops::Range<usize>> = Vec::new();
+    let (mut begin, mut gebruikt) = (0, 0.0_f32);
+    for (i, b) in breedtes.iter().enumerate() {
+        let nodig = if i == begin {
+            *b
+        } else {
+            gebruikt + ruimte + b
+        };
+        if i > begin && nodig > beschikbaar {
+            rijen.push(begin..i);
+            begin = i;
+            gebruikt = *b;
+        } else {
+            gebruikt = nodig;
+        }
+    }
+    if begin < stukken.len() {
+        rijen.push(begin..stukken.len());
+    }
+    for rij in rijen {
+        ui.horizontal(|ui| {
+            for (nummer, stuk) in &stukken[rij] {
+                ui.vertical(|ui| {
+                    ui.label(RichText::new(nummer.to_string()).size(11.0).weak());
+                    ui.label(opgemaakt(stuk, RESULTAAT_GROOTTE, standaard, donker));
+                });
             }
         });
     }

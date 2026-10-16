@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Fix: tests dat de wachtzin in hele woorden komt en het wachtwoord in groepjes van vier blijft.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 16: de F5-test controleert dat de voorleesmodus opent en sluit met Esc.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -248,6 +251,60 @@ fn wachtzin_tab_spelt_per_woord_en_knop_per_teken_schakelt() {
     h.get_by_label("Per woord").click();
     stap(&mut h);
     assert_eq!(h.state().0.spelregels().len(), per_woord);
+}
+
+#[test]
+fn wachtzin_toont_hele_woorden_en_geen_groepjes() {
+    let mut h = hoofd();
+    h.state_mut().0.hoofd.tab = Tab::Wachtzin;
+    h.state_mut().0.instellingen.wachtzin.woorden = 6;
+    stap(&mut h);
+    h.get_by_label("Genereer").click();
+    stap(&mut h);
+    let (woorden, scheiding, tekst) = {
+        let g = h.state().0.hoofd.wachtzin.as_ref().expect("wachtzin");
+        (
+            g.woorden.as_ref().expect("woorden").to_vec(),
+            g.scheidingsteken.clone().expect("scheidingsteken"),
+            g.tekst.to_string(),
+        )
+    };
+    assert_eq!(woorden.len(), 6);
+    for (i, w) in woorden.iter().enumerate() {
+        let verwacht = if i + 1 < woorden.len() {
+            format!("{w}{scheiding}")
+        } else {
+            w.clone()
+        };
+        assert!(
+            h.query_by_label(&verwacht).is_some(),
+            "woord {verwacht} niet heel in beeld"
+        );
+        assert!(h.query_by_label(&(i + 1).to_string()).is_some());
+    }
+    // Geen groepjes van vier: het eerste groepje van de tekst is geen label (tenzij het een heel woord is).
+    let eerste: String = tekst.chars().take(4).collect();
+    let is_woord = woorden.contains(&eerste);
+    assert!(is_woord || h.query_by_label(&eerste).is_none());
+}
+
+#[test]
+fn wachtwoord_toont_nog_groepjes_van_vier() {
+    let mut h = hoofd();
+    h.get_by_label("Genereer").click();
+    stap(&mut h);
+    let tekst = h
+        .state()
+        .0
+        .hoofd
+        .wachtwoord
+        .as_ref()
+        .unwrap()
+        .tekst
+        .to_string();
+    for (_, groep) in groepjes(&tekst) {
+        assert!(h.query_by_label(&groep).is_some(), "groepje {groep}");
+    }
 }
 
 #[test]

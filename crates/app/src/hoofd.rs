@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Fix: tabblad Wachtzin toont hele woorden met scheidingsteken in plaats van groepjes van vier.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 17 fixronde 1: wis_resultaat.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -158,6 +161,19 @@ impl PwApp {
         speller.per_teken(tekst)
     }
 
+    /// Op het tabblad Wachtzin: de woorden en het scheidingsteken van de huidige wachtzin.
+    fn wachtzin_delen(&self) -> Option<(&[String], &str)> {
+        let h = &self.hoofd;
+        if h.tab != Tab::Wachtzin {
+            return None;
+        }
+        let g = h.wachtzin.as_ref()?;
+        Some((
+            g.woorden.as_ref()?.as_slice(),
+            g.scheidingsteken.as_deref()?,
+        ))
+    }
+
     fn spellingstaal(&self) -> &'static pwspeller_kern::talen::Spellingstaal {
         let talen = &catalogus().spellingstalen;
         talen
@@ -187,7 +203,11 @@ impl PwApp {
         if h.cache.as_ref().is_some_and(|c| c.sleutel == sleutel) {
             return;
         }
-        let nieuw = SpelCache::nieuw(sleutel, groepjes_weergave(tekst), self.spelregels());
+        let stukken = match self.wachtzin_delen() {
+            Some((woorden, scheiding)) => resultaat::woord_tokens(woorden, scheiding),
+            None => groepjes_weergave(tekst),
+        };
+        let nieuw = SpelCache::nieuw(sleutel, stukken, self.spelregels());
         self.hoofd.cache = Some(nieuw);
         self.hoofd.cache_opbouwen += 1;
     }
@@ -359,7 +379,11 @@ impl PwApp {
         }
         self.ververs_cache();
         if let Some(c) = &self.hoofd.cache {
-            resultaat::teken_resultaat(ui, &c.groepen);
+            if tab == Tab::Wachtzin && self.wachtzin_delen().is_some() {
+                resultaat::teken_wachtzin(ui, &c.groepen);
+            } else {
+                resultaat::teken_resultaat(ui, &c.groepen);
+            }
         }
         if self.hoofd.klembord_mislukt {
             ui.label(interfacetekst(taal, "melding.klembord_mislukt"));

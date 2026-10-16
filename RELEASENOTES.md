@@ -24,6 +24,7 @@
 ### Wat er verandert
 
 - PWSpeller wordt opnieuw gebouwd voor Windows, macOS en Linux; de vorige versie blijft beschikbaar als release v1.0-vb.
+- Een wachtzin staat in beeld in hele woorden, met het scheidingsteken ertussen en een klein nummer boven elk woord; een woord wordt niet meer in tweeën gebroken.
 - Wachtzinnen maak je straks ook in het Nederlands, Frans en Duits, naast het Engels; woorden die aanstootgevend kunnen zijn komen er niet in voor.
 
 ### Nog te doen

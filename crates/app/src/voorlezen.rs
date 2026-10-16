@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Fix: de bovenregel van een wachtzin breekt na een scheidingsteken, niet midden in een woord.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 16 fixronde 2: onderpaneel neemt niet langer de hele hoogte (horizontal i.p.v. with_layout, panelen niet vergrootbaar).
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -151,7 +154,9 @@ impl Voorlezen {
         };
         let mut job = LayoutJob::default();
         job.wrap.max_width = breedte;
-        job.wrap.break_anywhere = true;
+        // Een wachtzin breekt na een scheidingsteken, nooit midden in een woord (tenzij één woord
+        // niet op een regel past); een wachtwoord mag overal breken.
+        job.wrap.break_anywhere = !self.per_woord;
         let mut run = String::new();
         let mut in_markering = false;
         for (i, c) in self.tekst.chars().enumerate() {
