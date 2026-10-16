@@ -284,7 +284,7 @@ fn minimale_venstermaat_houdt_alles_in_beeld() {
         soort: Soort::Hoofdletter,
         lastig: true,
     }];
-    h.state_mut().0.voorlezen = Voorlezen::nieuw(regels, "Ö", false);
+    h.state_mut().0.voorlezen = Voorlezen::nieuw(regels, "Öabc", false);
     stap(&mut h);
     binnen(h.get_by_label("Ö").rect(), "teken");
     binnen(
