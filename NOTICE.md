@@ -10,6 +10,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Lettertype Atkinson Hyperlegible Mono (OFL 1.1) toegevoegd (Taak 12). |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Woordenlijsten toegevoegd: EFF-lijst (CC BY 3.0) en de gegenereerde Nederlandse, Franse en Duitse lijsten (Taak 5). |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | NOTICE.md aangemaakt. |
 
@@ -45,7 +46,14 @@ AI-tools zijn hulpmiddelen, geen auteurs.
 - **Woordenlijsten Nederlands, Frans en Duits (`data/woordenlijsten/{nl,fr,de}.txt`) en de
   bijbehorende blokkeerlijsten:** gegenereerd met Claude in opdracht van Petisys.
 
-Verder nog geen meegeleverde bibliotheken of lettertypen. Deze lijst vult zich in latere taken.
+- **Lettertype Atkinson Hyperlegible Mono (`crates/app/assets/AtkinsonHyperlegibleMono-*.ttf`):**
+  Copyright 2020-2024 The Atkinson Hyperlegible Mono Project Authors
+  (https://github.com/googlefonts/atkinson-hyperlegible-next-mono), licentie SIL Open Font
+  License 1.1 (volledige tekst in `crates/app/assets/OFL.txt`), bron
+  https://github.com/google/fonts/tree/main/ofl/atkinsonhyperlegiblemono. De statische
+  gewichten Regular (400) en Bold (700) zijn met fonttools uit het variabele lettertype gemaakt.
+
+Verder nog geen meegeleverde bibliotheken. Deze lijst vult zich in latere taken.
 
 ---
 

@@ -5,6 +5,9 @@
 # Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
 # Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 #
+# 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Taak 12: eframe, serde, toml, directories, sys-locale en log toegevoegd.
+#
 # 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
 #   Crate aangemaakt.
 # ──────────────────────────────────────────────────────────
@@ -17,8 +20,14 @@ license.workspace = true
 publish.workspace = true
 
 [dependencies]
-pwspeller-kern = { path = "../kern" }
+pwspeller-kern = { path = "../kern", features = ["serde"] }
 pwspeller-data = { path = "../data" }
+eframe = { version = "0.37.0", default-features = false, features = ["glow", "accesskit", "wayland", "x11"] }
+serde = { version = "1.0.229", features = ["derive"] }
+toml = "1.1.8"
+directories = "6.0.0"
+sys-locale = "0.3.2"
+log = "0.4.34"
 
 # © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
 # Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.
