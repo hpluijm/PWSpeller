@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | §8: splashscreen anderhalve seconde in plaats van drie. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | §9: wissen bij normaal afsluiten (niet bij geforceerd beëindigen), invoer telt als gebruik, inactiviteit wist ook het huidige resultaat. |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Franse en Duitse woordenlijst toegevoegd (alleen a–z). |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Ontwerp vastgelegd na de brainstorm. |
@@ -231,7 +232,7 @@ Bron voor gedrag en standaardwaarden: `bitwarden/sdk-internal`
 Spellen levert een lijst regels: `(positie, fragment, omschrijving, soort, lastig)`.
 
 - **Wachtwoord en eigen tekst, per teken:** "hoofdletter Anna", "kleine letter Bernard",
-  "cijfer zeven", "uitroepteken". Tekens genummerd, in groepjes van vier.
+  "cijfer zeven", "uitroepteken". Tekens genummerd; groepjes van vier alleen bij een gegenereerd wachtwoord, eigen tekst is één doorlopende regel.
 - **Wachtzin, per woord:** "Zonnig, met hoofdletter", "streepje", "tafel", "cijfer zeven". Een
   woord met een lastige klank uit de omschrijvingen wordt automatisch per letter gespeld en
   gemarkeerd. De knop *Per teken* spelt de hele wachtzin per teken.
@@ -250,7 +251,7 @@ Spellen levert een lijst regels: `(positie, fragment, omschrijving, soort, lasti
 
 ### Splashscreen (afspraak 24)
 
-Drie seconden, vóór het hoofdvenster: Petisys-logo, "PWSpeller", "Klant: Petisys", versienummer,
+Anderhalve seconde, vóór het hoofdvenster: Petisys-logo, "PWSpeller", "Klant: Petisys", versienummer,
 "© 2026 Petisys. Alle rechten voorbehouden.", een dunne gouden lijn. Het versienummer komt bij het
 bouwen uit de git-tag (omgevingsvariabele in de CI, anders `git describe --tags`, anders de versie
 uit `Cargo.toml`). Faalt het splashscreen, dan start de app gewoon, met een regel in het logboek.
@@ -259,7 +260,7 @@ uit `Cargo.toml`). Faalt het splashscreen, dan start de app gewoon, met een rege
 
 1. Bovenbalk: tabbladen *Wachtwoord · Wachtzin · Eigen tekst*, keuze spellingstaal, knop
    *Geschiedenis*, tandwiel voor instellingen.
-2. Resultaat groot in Atkinson Hyperlegible Mono, groepjes van vier met positienummers. Cijfers
+2. Resultaat groot in Atkinson Hyperlegible Mono, groepjes van vier met positienummers (alleen bij een wachtwoord; eigen tekst doorlopend). Cijfers
    blauw, speciale tekens rood, letters in de tekstkleur, hoofdletters vet. Kleur is nooit het enige
    verschil. Daaronder de sterktebalk met bits.
 3. Knoppen *Genereer* (Enter), *Kopieer* (Ctrl/Cmd+C), *Voorlezen* (F5).

@@ -1,9 +1,12 @@
 // ── Over dit bestand ──────────────────────────────────────
-// Doel:           Het splashscreen van drie seconden vóór het hoofdvenster: logo, naam, klant, versie en copyright.
+// Doel:           Het splashscreen van anderhalve seconde vóór het hoofdvenster: logo, naam, klant, versie en copyright.
 // Klant:          Petisys
 // Gemaakt vanuit: Petisys
 // Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Fix 2: duur 1,5 seconde in plaats van 3 (besluit opdrachtgever).
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 13 fixronde 1: logo klein als asset, laad_logo_uit voor het faalpad, merkkleur voor het copyright.
@@ -19,7 +22,7 @@ use pwspeller_kern::talen::interfacetekst;
 use std::time::{Duration, Instant};
 
 /// Hoe lang het splashscreen blijft staan.
-pub const SPLASHDUUR: Duration = Duration::from_secs(3);
+pub const SPLASHDUUR: Duration = Duration::from_millis(1500);
 
 const LOGO: &[u8] = include_bytes!("../assets/petisys-logo.png");
 const KLANT: &str = "Petisys";

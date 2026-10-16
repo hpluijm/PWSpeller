@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Fix 2: markering per groepje van vier alleen bij een gegenereerd wachtwoord; bij eigen tekst en een wachtzin per teken het huidige teken.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Fix: de bovenregel van een wachtzin breekt na een scheidingsteken, niet midden in een woord.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -40,6 +43,9 @@ pub struct Voorlezen {
     tekst: Zeroizing<String>,
     /// Een stap is een woord, scheidingsteken of cijfer (wachtzin per woord) in plaats van een teken.
     per_woord: bool,
+    /// Markeer het fragment zelf (teken of woord) in plaats van een groepje van vier; groepjes
+    /// bestaan alleen bij een gegenereerd wachtwoord.
+    markeer_fragment: bool,
 }
 
 /// Wat de gebruiker in een beeld deed.
@@ -50,10 +56,10 @@ pub enum Actie {
 }
 
 /// Het deel van de volledige tekst (in tekens) dat bij deze regel hoort: bij een wachtzin per woord
-/// het fragment zelf, anders het groepje van vier waar het teken in zit.
-pub fn markering(regel: &Regel, per_woord: bool) -> Range<usize> {
+/// het fragment zelf (ook één teken), anders het groepje van vier waar het teken in zit.
+pub fn markering(regel: &Regel, fragment: bool) -> Range<usize> {
     let begin = regel.positie.saturating_sub(1);
-    if per_woord {
+    if fragment {
         begin..begin + regel.fragment.chars().count().max(1)
     } else {
         let groep = begin / 4 * 4;
@@ -63,7 +69,12 @@ pub fn markering(regel: &Regel, per_woord: bool) -> Range<usize> {
 
 impl Voorlezen {
     /// Voorleesmodus op een tekst met haar spelregels. Zonder regels is er niets voor te lezen: `None`.
-    pub fn nieuw(regels: Vec<Regel>, tekst: &str, per_woord: bool) -> Option<Self> {
+    pub fn nieuw(
+        regels: Vec<Regel>,
+        tekst: &str,
+        per_woord: bool,
+        markeer_fragment: bool,
+    ) -> Option<Self> {
         if regels.is_empty() {
             return None;
         }
@@ -72,6 +83,7 @@ impl Voorlezen {
             index: 0,
             tekst: Zeroizing::new(tekst.to_owned()),
             per_woord,
+            markeer_fragment,
         })
     }
 
@@ -82,6 +94,7 @@ impl Voorlezen {
             index: 0,
             tekst: Zeroizing::new(String::new()),
             per_woord: false,
+            markeer_fragment: false,
         }
     }
 
@@ -141,7 +154,7 @@ impl Voorlezen {
 
     /// De bovenste regel: de hele tekst met de huidige groep of het huidige fragment gemarkeerd.
     fn volledige_tekst(&self, standaard: egui::Color32, breedte: f32) -> LayoutJob {
-        let bereik = markering(self.huidige(), self.per_woord);
+        let bereik = markering(self.huidige(), self.markeer_fragment);
         let gewoon = TextFormat {
             font_id: FontId::new(GROOTTE_VOLLEDIG, FontFamily::Monospace),
             color: standaard,
@@ -154,8 +167,8 @@ impl Voorlezen {
         };
         let mut job = LayoutJob::default();
         job.wrap.max_width = breedte;
-        // Een wachtzin breekt na een scheidingsteken, nooit midden in een woord (tenzij één woord
-        // niet op een regel past); een wachtwoord mag overal breken.
+        // Een wachtzin per woord breekt na een scheidingsteken, nooit midden in een woord (tenzij
+        // één woord niet op een regel past); wachtwoord en eigen tekst mogen overal breken.
         job.wrap.break_anywhere = !self.per_woord;
         let mut run = String::new();
         let mut in_markering = false;

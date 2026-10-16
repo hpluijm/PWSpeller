@@ -6,6 +6,9 @@
 # Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 #
 # 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Fix 2: optie.woord_cijfer zegt wat er gebeurt (één cijfer).
+#
+# 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 #   Taak 17: sleutel geschiedenis.spel toegevoegd.
 #
 # 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -62,7 +65,7 @@
 "optie.min_speciaal" = "Minimum special characters"
 "optie.scheidingsteken" = "Separator"
 "optie.speciaal" = "Special characters"
-"optie.woord_cijfer" = "Add a digit to each word"
+"optie.woord_cijfer" = "Add a number"
 "optie.woord_hoofdletter" = "Capitalize each word"
 "optie.woorden" = "Number of words"
 "optie.woordenlijst" = "Word list"

@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Fix 2: groepjes van vier alleen bij het wachtwoord; eigen tekst (en een wachtzin zonder woorden) als één doorlopende regel.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Fix: tabblad Wachtzin toont hele woorden met scheidingsteken in plaats van groepjes van vier.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -205,7 +208,8 @@ impl PwApp {
         }
         let stukken = match self.wachtzin_delen() {
             Some((woorden, scheiding)) => resultaat::woord_tokens(woorden, scheiding),
-            None => groepjes_weergave(tekst),
+            None if h.tab == Tab::Wachtwoord => groepjes_weergave(tekst),
+            None => vec![(1, resultaat::doorlopend_weergave(tekst))],
         };
         let nieuw = SpelCache::nieuw(sleutel, stukken, self.spelregels());
         self.hoofd.cache = Some(nieuw);
@@ -381,8 +385,10 @@ impl PwApp {
         if let Some(c) = &self.hoofd.cache {
             if tab == Tab::Wachtzin && self.wachtzin_delen().is_some() {
                 resultaat::teken_wachtzin(ui, &c.groepen);
-            } else {
+            } else if tab == Tab::Wachtwoord {
                 resultaat::teken_resultaat(ui, &c.groepen);
+            } else {
+                resultaat::teken_doorlopend(ui, &c.groepen);
             }
         }
         if self.hoofd.klembord_mislukt {

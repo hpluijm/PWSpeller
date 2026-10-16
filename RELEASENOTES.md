@@ -10,6 +10,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fix 2: eigen tekst doorlopend, optie "Cijfer toevoegen", korter splashscreen. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Stand na fase C bijgewerkt. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Stand na fase B bijgewerkt. |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Regel over wachtzinnen in het Nederlands, Frans en Duits toegevoegd. |
@@ -25,6 +26,7 @@
 
 - PWSpeller wordt opnieuw gebouwd voor Windows, macOS en Linux; de vorige versie blijft beschikbaar als release v1.0-vb.
 - Een wachtzin staat in beeld in hele woorden, met het scheidingsteken ertussen en een klein nummer boven elk woord; een woord wordt niet meer in tweeën gebroken.
+- Het startscherm blijft anderhalve seconde staan. Eigen tekst staat in beeld als één doorlopende regel in kleur; alleen een gegenereerd wachtwoord staat in groepjes van vier. De spelling is doorlopend genummerd.
 - Wachtzinnen maak je straks ook in het Nederlands, Frans en Duits, naast het Engels; woorden die aanstootgevend kunnen zijn komen er niet in voor.
 
 ### Nog te doen

@@ -1,9 +1,15 @@
 // ── Over dit bestand ──────────────────────────────────────
-// Doel:           Het resultaat in kleur en groepjes van vier, de sterktebalk en de spelling als genummerde lijst.
+// Doel:           Het resultaat in kleur (wachtwoord in groepjes van vier, wachtzin in woorden, eigen tekst doorlopend), de sterktebalk en de spelling als genummerde lijst.
 // Klant:          Petisys
 // Gemaakt vanuit: Petisys
 // Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Fix 2: een code U+xxxx in effen kleur (opgemaakt).
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Fix 2: groepjes alleen bij het wachtwoord; eigen tekst als één doorlopende regel (doorlopend_weergave, teken_doorlopend); spelling genummerd 1..n.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Fix: de wachtzin komt in hele woorden met het scheidingsteken in beeld (woord_tokens, teken_wachtzin), niet in groepjes van vier.
@@ -52,6 +58,15 @@ pub fn groepjes_weergave(tekst: &str) -> Vec<(usize, String)> {
         nieuw.zeroize();
     }
     groepen
+}
+
+/// De hele tekst zoals ze in beeld komt, zonder groepjes of spaties: een onzichtbaar teken staat
+/// er als `U+xxxx`.
+pub fn doorlopend_weergave(tekst: &str) -> String {
+    tekst
+        .chars()
+        .map(|c| weergave_fragment(c.encode_utf8(&mut [0; 4])))
+        .collect()
 }
 
 /// De wachtzin als weer te geven stukken: elk woord met het scheidingsteken erachter (behalve het
@@ -156,14 +171,28 @@ fn opgemaakt(tekst: &str, grootte: f32, standaard: Color32, donker: bool) -> tex
     let mut job = text::LayoutJob::default();
     let mut run = String::new();
     let mut huidig: Option<TextFormat> = None;
-    for c in tekst.chars() {
-        let f = teken_opmaak(c, grootte, standaard, donker);
+    let tekens: Vec<char> = tekst.chars().collect();
+    let mut i = 0;
+    while i < tekens.len() {
+        let c = tekens[i];
+        // Een code als U+0020 (onzichtbaar teken) blijft in één effen kleur, ook de cijfers en de plus.
+        let code = c == 'U'
+            && tekens.get(i + 1) == Some(&'+')
+            && tekens.len() >= i + 6
+            && tekens[i + 2..i + 6].iter().all(|h| h.is_ascii_hexdigit());
+        let f = if code {
+            teken_opmaak('a', grootte, standaard, donker)
+        } else {
+            teken_opmaak(c, grootte, standaard, donker)
+        };
+        let lengte = if code { 6 } else { 1 };
         if huidig.as_ref().is_some_and(|h| *h != f) {
             job.append(&run, 0.0, huidig.take().unwrap_or_default());
             run.clear();
         }
         huidig.get_or_insert(f);
-        run.push(c);
+        run.extend(&tekens[i..i + lengte]);
+        i += lengte;
     }
     if let Some(f) = huidig {
         job.append(&run, 0.0, f);
@@ -195,6 +224,18 @@ pub fn teken_resultaat(ui: &mut egui::Ui, alle: &[(usize, String)]) {
                 ui.add_space(8.0);
             }
         });
+    }
+}
+
+/// Tekent de tekst als één doorlopende regel (eigen tekst): kleur en vet per teken, zonder
+/// ingevoegde spaties of nummers. De regel breekt op elk teken.
+pub fn teken_doorlopend(ui: &mut egui::Ui, stukken: &[(usize, String)]) {
+    let donker = ui.visuals().dark_mode;
+    let standaard = ui.visuals().text_color();
+    for (_, tekst) in stukken {
+        let mut job = opgemaakt(tekst, RESULTAAT_GROOTTE, standaard, donker);
+        job.wrap.break_anywhere = true;
+        ui.label(job);
     }
 }
 
@@ -281,7 +322,8 @@ pub fn teken_spelling(ui: &mut egui::Ui, taal: &str, regels: &[Regel]) {
             interfacetekst(taal, "melding.moeilijk_teken"),
         );
     }
-    for r in regels {
+    // Doorlopend 1, 2, 3 …: wat er staat, niet de tekenpositie (bij een wachtzin per woord springt die).
+    for (nummer, r) in (1..).zip(regels) {
         let fragment = weergave_fragment(&r.fragment);
         let mut job = text::LayoutJob::default();
         let gewoon = TextFormat {
@@ -289,7 +331,7 @@ pub fn teken_spelling(ui: &mut egui::Ui, taal: &str, regels: &[Regel]) {
             color: standaard,
             ..Default::default()
         };
-        job.append(&format!("{}. ", r.positie), 0.0, gewoon.clone());
+        job.append(&format!("{nummer}. "), 0.0, gewoon.clone());
         let mut deel = fragment.chars();
         if let (Some(c), None) = (deel.next(), deel.next()) {
             job.append(&fragment, 0.0, teken_opmaak(c, 16.0, standaard, donker));

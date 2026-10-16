@@ -232,6 +232,8 @@ impl PwApp {
     /// Opent de voorleesmodus met de regels uit de cache; zonder regels gebeurt er niets.
     fn open_voorlezen(&mut self, ctx: &egui::Context) {
         let per_woord = self.hoofd.tab == crate::hoofd::Tab::Wachtzin && !self.hoofd.per_teken;
+        // Groepjes van vier bestaan alleen bij een gegenereerd wachtwoord.
+        let wachtwoord = self.hoofd.tab == crate::hoofd::Tab::Wachtwoord;
         let Some(cache) = self.hoofd.cache.as_ref() else {
             return;
         };
@@ -239,7 +241,7 @@ impl PwApp {
         let Some(tekst) = self.huidige_tekst() else {
             return;
         };
-        self.voorlezen = Voorlezen::nieuw(regels, tekst, per_woord);
+        self.voorlezen = Voorlezen::nieuw(regels, tekst, per_woord, !wachtwoord);
         if self.voorlezen.is_some() {
             // Een knop die focus had (Tab-toets) bestaat in dit beeld niet meer.
             ctx.memory_mut(|m| {

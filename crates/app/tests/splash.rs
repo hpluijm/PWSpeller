@@ -1,9 +1,12 @@
 // ── Over dit bestand ──────────────────────────────────────
-// Doel:           Test het splashscreen: de vijf gegevens, de volgorde vóór het hoofdvenster en de duur van drie seconden.
+// Doel:           Test het splashscreen: de vijf gegevens, de volgorde vóór het hoofdvenster en de duur van anderhalve seconde.
 // Klant:          Petisys
 // Gemaakt vanuit: Petisys
 // Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Fix 2: duur van het splashscreen 1,5 seconde (grens 1499 ms).
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 14: volgordetest controleert ook dat de knop Genereer pas na de splash komt.
@@ -95,17 +98,24 @@ fn kapot_logo_geeft_geen_paniek_en_splash_blijft() {
 }
 
 #[test]
-fn na_drie_seconden_hoofdvenster() {
+fn na_anderhalve_seconde_hoofdvenster() {
     let t0 = Instant::now();
     assert!(matches!(
         volgende_fase(
             &Fase::Splash { start: t0 },
-            t0 + Duration::from_millis(2999)
+            t0 + Duration::from_millis(1499)
         ),
         Fase::Splash { .. }
     ));
     assert!(matches!(
         volgende_fase(&Fase::Splash { start: t0 }, t0 + SPLASHDUUR),
+        Fase::Hoofd
+    ));
+    assert!(matches!(
+        volgende_fase(
+            &Fase::Splash { start: t0 },
+            t0 + Duration::from_millis(1500)
+        ),
         Fase::Hoofd
     ));
     assert!(matches!(volgende_fase(&Fase::Hoofd, t0), Fase::Hoofd));

@@ -287,7 +287,7 @@ fn minimale_venstermaat_houdt_alles_in_beeld() {
         soort: Soort::Hoofdletter,
         lastig: true,
     }];
-    h.state_mut().0.voorlezen = Voorlezen::nieuw(regels, "Öabc", false);
+    h.state_mut().0.voorlezen = Voorlezen::nieuw(regels, "Öabc", false, false);
     stap(&mut h);
     binnen(h.get_by_label("Ö").rect(), "teken");
     binnen(
@@ -308,7 +308,7 @@ fn lang_wachtwoord_wrapt_en_markering_blijft_in_beeld() {
         .enumerate()
         .map(|(i, c)| regel(i + 1, &c.to_string(), false))
         .collect();
-    let mut v = Voorlezen::nieuw(regels, &tekst, false).expect("regels");
+    let mut v = Voorlezen::nieuw(regels, &tekst, false, false).expect("regels");
     v.index = 127;
     h.state_mut().0.voorlezen = Some(v);
     stap(&mut h);

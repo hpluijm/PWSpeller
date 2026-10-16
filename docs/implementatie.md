@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fix 2: groepjes van vier alleen bij het wachtwoord, eigen tekst doorlopend, spellinglijst doorlopend genummerd, splashscreen 1,5 seconde. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 17 fixronde 1: wissen wist ook het resultaat, invoer telt als gebruik, instellingen begrensd, grenzen vastgelegd. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 17: sectie Geschiedenis- en instellingenpaneel, wissen bij sluiten en na inactiviteit. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 15 fixronde 1: hash wordt vóór het lezen weggenomen (bewust, geen lus). |
@@ -54,6 +55,13 @@ Het ontwerp staat in [het ontwerpdocument](superpowers/specs/2026-10-16-pwspelle
 
 ## Hoofdvenster (app, `hoofd.rs`, `resultaat.rs`, `opties.rs`)
 
+- **Weergave van het resultaat:** groepjes van vier met positienummers bestaan alleen bij een
+  gegenereerd wachtwoord (tab Wachtwoord, ook uit de geschiedenis). Een wachtzin toont hele woorden;
+  eigen tekst is één doorlopende regel in kleur (onzichtbare tekens als `U+xxxx`, breken op elk teken,
+  geen ingevoegde spaties of nummers). De spellinglijst nummert doorlopend 1, 2, 3 (weergave), niet
+  naar `Regel.positie`, want bij een wachtzin per woord springt die. De voorleesmodus markeert alleen
+  bij een wachtwoord een groepje; anders het huidige teken of woord.
+- **Splashscreen:** 1,5 seconde (`SPLASHDUUR`), besluit opdrachtgever 17 oktober 2026 (eerst 3 seconden).
 - Spelregels en groepjes staan in een cache (`SpelCache`) die alleen opnieuw wordt opgebouwd bij een
   andere tab, tekst, spellingstaal, interfacetaal of spelwijze. De cache overschrijft zijn teksten met
   nullen als hij vervangen of vrijgegeven wordt.

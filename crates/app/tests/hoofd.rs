@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Fix 2: eigen tekst zonder groepjes en spaties, wachtwoord nog in groepjes, spellinglijst doorlopend genummerd, label "Cijfer toevoegen".
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Fix: tests dat de wachtzin in hele woorden komt en het wachtwoord in groepjes van vier blijft.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -366,18 +369,62 @@ fn app_voor_test_schrijft_nooit() {
 }
 
 #[test]
-fn eigen_tekst_toont_groepjes_met_positienummers_en_codes() {
+fn eigen_tekst_toont_geen_groepjes_en_geen_ingevoegde_spaties() {
     let mut h = hoofd();
     h.state_mut().0.hoofd.tab = Tab::EigenTekst;
     h.state_mut().0.hoofd.eigen_tekst = "abcde\tf".to_string();
     stap(&mut h);
-    assert!(h.query_by_label("abcd").is_some(), "eerste groepje");
+    // Eén doorlopende regel, het onzichtbare teken als code, geen spaties ertussen.
     assert!(
-        h.query_by_label("eU+0009f").is_some(),
-        "tweede groepje met code"
+        h.query_by_label("abcdeU+0009f").is_some(),
+        "doorlopende tekst"
     );
-    assert!(h.query_by_label("1").is_some());
-    assert!(h.query_by_label("5").is_some());
+    assert!(h.query_by_label("abcd").is_none(), "groepje zonder code");
+    assert!(h.query_by_label("eU+0009f").is_none(), "tweede groepje");
+    // Geen positienummer per groepje (de spellinglijst heeft alleen labels als "5. e ...").
+    assert!(h.query_by_label("1").is_none());
+    assert!(h.query_by_label("5").is_none());
+}
+
+/// Of het label (of de waarde) van een knoop met `begin` begint.
+fn begint_met(k: &egui_kittest::Node<'_>, begin: &str) -> bool {
+    let n = k.accesskit_node();
+    n.label().is_some_and(|l| l.starts_with(begin))
+        || n.value().is_some_and(|v| v.starts_with(begin))
+}
+
+#[test]
+fn spellinglijst_bij_wachtzin_nummert_doorlopend() {
+    let mut h = hoofd();
+    h.state_mut().0.hoofd.tab = Tab::Wachtzin;
+    h.state_mut().0.instellingen.wachtzin.woorden = 6;
+    stap(&mut h);
+    h.get_by_label("Genereer").click();
+    stap(&mut h);
+    let n = h.state().0.spelregels().len();
+    assert!(n >= 6);
+    for i in 1..=n {
+        let begin = format!("{i}. ");
+        let gevonden = h
+            .query_all_by_label_contains(&begin)
+            .any(|k| begint_met(&k, &begin));
+        assert!(gevonden, "regel {i} ontbreekt in de lijst");
+    }
+    let te_hoog = format!("{}. ", n + 1);
+    assert!(
+        !h.query_all_by_label_contains(&te_hoog)
+            .any(|k| begint_met(&k, &te_hoog)),
+        "nummering loopt door na {n}"
+    );
+}
+
+#[test]
+fn optie_cijfer_heet_cijfer_toevoegen() {
+    let mut h = hoofd();
+    h.state_mut().0.hoofd.tab = Tab::Wachtzin;
+    stap(&mut h);
+    assert!(h.query_by_label("Cijfer toevoegen").is_some());
+    assert!(h.query_by_label_contains("Cijfer aan elk").is_none());
 }
 
 #[test]
