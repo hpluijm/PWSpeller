@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 15 fixronde 1: hash wordt vóór het lezen weggenomen (bewust, geen lus). |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 15: sectie Klembord, met de markering per platform. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 14 fixronde 1: sectie Hoofdvenster, met de beperkte garantie voor het wissen van eigen tekst. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fixronde 1: inactiviteit ook op de wandklok; ontsleutel controleert eerst. |
@@ -68,6 +69,8 @@ Het ontwerp staat in [het ontwerpdocument](superpowers/specs/2026-10-16-pwspelle
   wissen wordt het bord gelezen, de gelezen `String` gaat in `Zeroizing` en wordt na de
   vergelijking gewist; alleen bij gelijke hash wordt gewist. Heeft de gebruiker intussen iets
   anders gekopieerd, dan blijft dat staan.
+- De hash wordt vóór het lezen van het bord weggenomen (`take`): een mislukte lees- of
+  wispoging wordt dus niet herhaald. Bewust, om een lus van pogingen elk beeld te voorkomen.
 - `tik` (elk beeld) wist na `klembord_seconden`; `bij_sluiten` wist alleen als `klembord_wissen`
   aanstaat. Staat het uit, dan is er geen enkele aanroep op het bord (getest met een telnepbord).
 - `PwApp` bezit `Option<Klembordbeheer<Box<dyn Bord>>>` (`None` zonder systeemklembord, zoals

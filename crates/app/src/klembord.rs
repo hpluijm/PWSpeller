@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 15 fixronde 1: tekst zonder kopie aan arboard doorgegeven.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 15: Bord, Systeembord (arboard) en Klembordbeheer aangemaakt.
 // ──────────────────────────────────────────────────────────
 
@@ -69,7 +72,7 @@ impl Bord for Systeembord {
             not(any(target_os = "macos", target_os = "android", target_os = "emscripten"))
         ))]
         let zetten = arboard::SetExtLinux::exclude_from_history(zetten);
-        zetten.text(tekst.to_string()).map_err(|e| e.to_string())
+        zetten.text(tekst).map_err(|e| e.to_string())
     }
 
     fn lees(&mut self) -> Option<String> {
