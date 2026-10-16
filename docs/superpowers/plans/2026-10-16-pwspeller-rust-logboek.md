@@ -141,6 +141,8 @@ Task 17: fix round 1/5 (6 addressed, 0 open; re-review sonnet)
 Task 17: minor (deferred): resultaat in beeld na handmatige 'Wis geschiedenis' valt niet onder inactiviteitswis (lege geschiedenis → controle stopt).
 Task 17: complete (commits 3f0d2eb..7ab7da9, review clean)
 Fase C: klaar — stoppunt, wacht op akkoord Hans voor fase D. Visuele controle niet mogelijk (screencapture geweigerd) → bij Hans.
+Open vraag aan Hans (2026-10-17): schermafbeeldingen — optie 1 VS Code rechten (Schermopname + Toegankelijkheid), optie 2 egui_kittest-snapshots (wgpu, alleen in tests) aan begin fase D. Hans start VS Code opnieuw (vermoedelijk voor optie 1). Fase D wacht op akkoord.
+Hervatten: lees dit logboek; volgende = fase D (taak 18, 19); briefs maken met awk (zie boven).
 
 ---
 
