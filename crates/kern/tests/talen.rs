@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Test met tijdelijke String als sleutel toegevoegd.
+//
+// 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Tests voor talen toegevoegd.
 // ──────────────────────────────────────────────────────────
 
@@ -25,6 +28,12 @@ fn onbekende_interfacetaal_valt_terug_op_engels() {
 #[test]
 fn onbekende_sleutel_geeft_sleutel_terug() {
     assert_eq!(interfacetekst("nl", "bestaat.niet"), "bestaat.niet");
+}
+
+#[test]
+fn onbekende_sleutel_werkt_met_tijdelijke_string() {
+    let s = String::from("bestaat.niet");
+    assert_eq!(interfacetekst("nl", &s), "bestaat.niet");
 }
 
 #[test]

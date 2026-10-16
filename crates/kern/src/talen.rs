@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+//   interfacetekst geeft bij een onbekende sleutel de sleutel terug, zonder geheugenlek.
+//
+// 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Module talen toegevoegd.
 // ──────────────────────────────────────────────────────────
 
@@ -30,13 +33,13 @@ pub fn catalogus() -> &'static Catalogus {
 }
 
 /// De interfacetekst voor `sleutel`: eerst de gevraagde taal, dan Engels, dan de sleutel zelf.
-pub fn interfacetekst(taal: &str, sleutel: &str) -> &'static str {
+pub fn interfacetekst<'a>(taal: &str, sleutel: &'a str) -> &'a str {
     let interface = &catalogus().interface;
     [taal, "en"]
         .iter()
         .find_map(|t| interface.get(*t).and_then(|m| m.get(sleutel)))
         .map(String::as_str)
-        .unwrap_or_else(|| Box::leak(sleutel.to_owned().into_boxed_str()))
+        .unwrap_or(sleutel)
 }
 
 /// De omschrijvingen van een spellingstaal: de eigen, anders die van de interfacetaal, anders Engels.
