@@ -6,14 +6,18 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 13 fixronde 1: volgordetest met titel in het hoofdvenster; test voor een kapot logo.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 13: tests voor het splashscreen aangemaakt.
 // ──────────────────────────────────────────────────────────
 
+use eframe::egui;
 use egui_kittest::Harness;
 use egui_kittest::kittest::Queryable;
 use pwspeller::app::PwApp;
 use pwspeller::instellingen::VERSIE;
-use pwspeller::splash::{Fase, SPLASHDUUR, volgende_fase};
+use pwspeller::splash::{Fase, SPLASHDUUR, laad_logo_uit, volgende_fase};
 use pwspeller::thema;
 use std::time::{Duration, Instant};
 
@@ -35,6 +39,7 @@ fn splash_toont_vijf_gegevens() {
     h.step();
     assert!(matches!(h.state().0.fase, Fase::Splash { .. }));
     assert!(h.query_by_label("PWSpeller").is_some(), "naam ontbreekt");
+    assert!(h.query_all_by_label("PWSpeller").count() == 1);
     assert!(
         h.query_by_label("Klant: Petisys").is_some(),
         "klant ontbreekt"
@@ -54,13 +59,32 @@ fn splash_komt_voor_hoofdvenster() {
     let mut h = harnas(t0);
     h.step();
     assert!(matches!(h.state().0.fase, Fase::Splash { .. }));
-    // Het hoofdvenster heeft voorlopig geen eigen teksten; na de splash moeten de splashteksten weg zijn.
+    // Het hoofdvenster toont (tijdelijk) de titel als kop; de splash toont de naam ook, maar
+    // als eigen kop in vet. Het onderscheid: de splash heeft de regel "Klant: Petisys", het hoofdvenster niet.
+    assert!(h.query_by_label("Klant: Petisys").is_some());
     h.state_mut().1 = t0 + SPLASHDUUR;
     h.step();
     h.step();
     assert!(matches!(h.state().0.fase, Fase::Hoofd));
     assert!(h.query_by_label("Klant: Petisys").is_none());
-    assert!(h.query_by_label("PWSpeller").is_none());
+    assert!(h.query_by_label(VERSIE).is_none());
+    assert!(
+        h.query_by_label("PWSpeller").is_some(),
+        "hoofdvenster toont de titel"
+    );
+}
+
+#[test]
+fn kapot_logo_geeft_geen_paniek_en_splash_blijft() {
+    let ctx = egui::Context::default();
+    assert!(laad_logo_uit(&ctx, b"geen png").is_none());
+    let t0 = Instant::now();
+    let mut h = harnas(t0);
+    h.state_mut().0.zet_logo(None);
+    h.step();
+    assert!(h.query_by_label("Klant: Petisys").is_some());
+    assert!(h.query_by_label("PWSpeller").is_some());
+    assert!(h.query_by_label("Petisys").is_none(), "geen logo verwacht");
 }
 
 #[test]

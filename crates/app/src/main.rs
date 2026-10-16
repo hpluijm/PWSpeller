@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 13 fixronde 1: instellingen één keer geladen en doorgegeven.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 13: de app start met het splashscreen via PwApp::nieuw(Some(cc), nu).
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -28,7 +31,8 @@ fn main() -> eframe::Result {
     if let Err(e) = logboek::start_logboek(&logboekpad()) {
         meld_fout(&format!("logboek niet gestart: {e}"));
     }
-    let instellingen = Instellingen::laad(&instellingenpad());
+    let pad = instellingenpad();
+    let instellingen = Instellingen::laad(&pad);
     let taal = interfacetaal(&instellingen);
     log::info!("PWSpeller {} gestart", pwspeller::instellingen::VERSIE);
     let titel = interfacetekst(&taal, "app.titel").to_owned();
@@ -42,7 +46,14 @@ fn main() -> eframe::Result {
     let resultaat = eframe::run_native(
         &titel,
         opties,
-        Box::new(move |cc| Ok(Box::new(PwApp::nieuw(Some(cc), Instant::now())))),
+        Box::new(move |cc| {
+            Ok(Box::new(PwApp::nieuw(
+                Some(cc),
+                Instant::now(),
+                instellingen,
+                pad,
+            )))
+        }),
     );
     if let Err(e) = &resultaat {
         log::error!("venster gestopt met een fout: {e}");
