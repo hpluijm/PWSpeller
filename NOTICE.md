@@ -1,7 +1,5 @@
 <p align="center"><img src="docs/assets/petisys-logo.jpeg" alt="Petisys" height="113"></p>
 
-# Notice
-
 ## Over dit bestand
 
 - **Doel:** noemt de AI-tools en de overige rechthebbenden van PWSpeller.
@@ -15,6 +13,8 @@
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | NOTICE.md aangemaakt. |
 
 ---
+
+# Notice
 
 ## AI-ontwikkeltools
 

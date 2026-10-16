@@ -1,7 +1,5 @@
 <p align="center"><img src="docs/assets/petisys-logo.jpeg" alt="Petisys" height="113"></p>
 
-# Releasenotes
-
 ## Over dit bestand
 
 - **Doel:** vertelt de eindgebruiker en de helpdesk in gewone taal wat er per release verandert.
@@ -15,6 +13,8 @@
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Releasenotes aangemaakt. |
 
 ---
+
+# Releasenotes
 
 ## Nog niet uitgebracht
 

@@ -1,5 +1,3 @@
-# Implementatie
-
 ## Over dit bestand
 
 - **Doel:** beschrijft hoe PWSpeller 2 in elkaar zit en welke alternatieven bewust zijn afgewezen.
@@ -13,6 +11,8 @@
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Opbouw en afgewezen alternatieven opgenomen. |
 
 ---
+
+# Implementatie
 
 ## Opbouw
 

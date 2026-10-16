@@ -1,5 +1,19 @@
+# ── Over dit bestand ──────────────────────────────────────
+# Doel:           houdt bouwresultaten en macOS-rommel uit git.
+# Klant:          Petisys
+# Gemaakt vanuit: Petisys
+# Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
+# Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Visual Studio-regels vervangen door target/ en .DS_Store.
+# ──────────────────────────────────────────────────────────
+
 # Rust
 target/
 
 # macOS
 .DS_Store
+
+# © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+# Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.

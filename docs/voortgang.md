@@ -1,5 +1,3 @@
-# Voortgang
-
 ## Over dit bestand
 
 - **Doel:** legt per werksessie vast wat er veranderd is en waarom, nieuwste bovenaan.
@@ -13,6 +11,8 @@
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Eerste entry voor PWSpeller 2. |
 
 ---
+
+# Voortgang
 
 ## 2026-10-16 (Claude Code)
 
