@@ -23,10 +23,16 @@ fn data_map() -> PathBuf {
 
 /// Alle bestanden onder data/ als (pad met /, inhoud).
 fn lees_alles(map: &Path, voorvoegsel: &str, uit: &mut Vec<(String, String)>) {
-    let Ok(ingang) = fs::read_dir(map) else { return };
+    let Ok(ingang) = fs::read_dir(map) else {
+        return;
+    };
     for e in ingang.flatten() {
         let naam = e.file_name().to_string_lossy().into_owned();
-        let pad = if voorvoegsel.is_empty() { naam } else { format!("{voorvoegsel}/{naam}") };
+        let pad = if voorvoegsel.is_empty() {
+            naam
+        } else {
+            format!("{voorvoegsel}/{naam}")
+        };
         if e.path().is_dir() {
             lees_alles(&e.path(), &pad, uit);
         } else if pad.ends_with(".toml") || pad.ends_with(".txt") {
@@ -38,9 +44,18 @@ fn lees_alles(map: &Path, voorvoegsel: &str, uit: &mut Vec<(String, String)>) {
 fn echte_catalogus() -> Catalogus {
     let mut bestanden = Vec::new();
     lees_alles(&data_map(), "", &mut bestanden);
-    let refs: Vec<(&str, &str)> = bestanden.iter().map(|(p, i)| (p.as_str(), i.as_str())).collect();
+    let refs: Vec<(&str, &str)> = bestanden
+        .iter()
+        .map(|(p, i)| (p.as_str(), i.as_str()))
+        .collect();
     lees_catalogus(&refs).unwrap_or_else(|f| {
-        panic!("{}", f.iter().map(|x| x.to_string()).collect::<Vec<_>>().join("\n"))
+        panic!(
+            "{}",
+            f.iter()
+                .map(|x| x.to_string())
+                .collect::<Vec<_>>()
+                .join("\n")
+        )
     })
 }
 
@@ -51,7 +66,11 @@ fn echte_data_is_volledig() {
     assert!(
         fouten.is_empty(),
         "{}",
-        fouten.iter().map(|f| f.to_string()).collect::<Vec<_>>().join("\n")
+        fouten
+            .iter()
+            .map(|f| f.to_string())
+            .collect::<Vec<_>>()
+            .join("\n")
     );
 }
 
@@ -62,7 +81,10 @@ fn alle_alfabetten_omschrijvingen_en_interfaces_zijn_er() {
         assert!(c.alfabetten.contains_key(a), "alfabet {a} ontbreekt");
     }
     for o in ["nl", "en", "fr", "de"] {
-        assert!(c.omschrijvingen.contains_key(o), "omschrijvingen {o} ontbreken");
+        assert!(
+            c.omschrijvingen.contains_key(o),
+            "omschrijvingen {o} ontbreken"
+        );
     }
     for i in ["nl", "en"] {
         assert!(c.interface.contains_key(i), "interface {i} ontbreekt");
@@ -101,7 +123,10 @@ fn nl_lijst_bevat_geen_geblokkeerde_woorden() {
     let nl = &c.woordenlijsten["nl"];
     for w in ["moord", "porno", "schijt"] {
         assert!(!nl.woorden.iter().any(|x| x == w), "{w} staat in nl");
-        assert!(c.geblokkeerd["nl"].contains(w), "{w} staat niet in de blokkeerlijst");
+        assert!(
+            c.geblokkeerd["nl"].contains(w),
+            "{w} staat niet in de blokkeerlijst"
+        );
     }
 }
 
@@ -115,8 +140,14 @@ fn nl_lijst_heeft_minstens_7500_woorden() {
 fn fr_en_de_lijsten_hebben_minstens_5500_woorden() {
     let c = echte_catalogus();
     for code in ["fr", "de"] {
-        assert!(c.woordenlijsten[code].woorden.len() >= 5500, "{code} te klein");
-        assert!(c.geblokkeerd.contains_key(code), "{code}-geblokkeerd ontbreekt");
+        assert!(
+            c.woordenlijsten[code].woorden.len() >= 5500,
+            "{code} te klein"
+        );
+        assert!(
+            c.geblokkeerd.contains_key(code),
+            "{code}-geblokkeerd ontbreekt"
+        );
     }
 }
 
@@ -124,7 +155,11 @@ fn fr_en_de_lijsten_hebben_minstens_5500_woorden() {
 fn frans_en_duits_gebruiken_eigen_woordenlijst() {
     let c = echte_catalogus();
     for code in ["fr", "de"] {
-        let t = c.spellingstalen.iter().find(|t| t.code == code).expect("spellingstaal");
+        let t = c
+            .spellingstalen
+            .iter()
+            .find(|t| t.code == code)
+            .expect("spellingstaal");
         assert_eq!(t.woordenlijst, code);
         assert_eq!(t.omschrijvingen.as_deref(), Some(code));
     }

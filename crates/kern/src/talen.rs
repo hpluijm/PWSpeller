@@ -27,7 +27,10 @@ pub fn catalogus() -> &'static Catalogus {
         Ok(c) => c,
         Err(fouten) => {
             let regels: Vec<String> = fouten.iter().map(|f| f.to_string()).collect();
-            panic!("ingebouwde taaldata onleesbaar (build.rs had dit moeten afvangen):\n{}", regels.join("\n"))
+            panic!(
+                "ingebouwde taaldata onleesbaar (build.rs had dit moeten afvangen):\n{}",
+                regels.join("\n")
+            )
         }
     })
 }

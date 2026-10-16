@@ -15,24 +15,42 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-const MERKTEKENS: [&str; 4] = ["[Claude Code]", "[Copilot]", "[Claude Code, Copilot]", "[onbekend]"];
+const MERKTEKENS: [&str; 4] = [
+    "[Claude Code]",
+    "[Copilot]",
+    "[Claude Code, Copilot]",
+    "[onbekend]",
+];
 const MET_WAARDEN: [&str; 4] = ["Claude Code", "Copilot", "Claude Code, Copilot", "onbekend"];
 
 #[test]
 fn elke_historieregel_heeft_een_merkteken() {
     let fouten = controleer_repo(&repo_root());
-    assert!(fouten.is_empty(), "Historieregels zonder geldig merkteken:\n{}", fouten.join("\n"));
+    assert!(
+        fouten.is_empty(),
+        "Historieregels zonder geldig merkteken:\n{}",
+        fouten.join("\n")
+    );
 }
 
 #[test]
 fn regel_zonder_merkteken_wordt_gevonden() {
-    let fouten = controleer_tekst("x.rs", "// Over dit bestand\n// 2026-10-16  Hans (Petisys)\n");
+    let fouten = controleer_tekst(
+        "x.rs",
+        "// Over dit bestand\n// 2026-10-16  Hans (Petisys)\n",
+    );
     assert_eq!(fouten.len(), 1);
 }
 
 #[test]
 fn regel_met_merkteken_en_tabelrij_slagen() {
-    assert!(controleer_tekst("x.rs", "// Over dit bestand\n// 2026-10-16  Hans (Petisys)  [Copilot]\n").is_empty());
+    assert!(
+        controleer_tekst(
+            "x.rs",
+            "// Over dit bestand\n// 2026-10-16  Hans (Petisys)  [Copilot]\n"
+        )
+        .is_empty()
+    );
     let tabel = "## Over dit bestand\n| Wanneer | Wie | Met | Wat |\n|---|---|---|---|\n| 2026-10-16 | Hans | Claude Code, Copilot | x |\n";
     assert!(controleer_tekst("x.md", tabel).is_empty());
     let fout = "## Over dit bestand\n| 2026-10-16 | Hans | iemand | x |\n";
@@ -47,7 +65,13 @@ fn repo_root() -> PathBuf {
 fn begint_met_datum(s: &str) -> bool {
     let b = s.as_bytes();
     b.len() >= 10
-        && b[..10].iter().enumerate().all(|(i, c)| if i == 4 || i == 7 { *c == b'-' } else { c.is_ascii_digit() })
+        && b[..10].iter().enumerate().all(|(i, c)| {
+            if i == 4 || i == 7 {
+                *c == b'-'
+            } else {
+                c.is_ascii_digit()
+            }
+        })
 }
 
 fn controleer_tekst(pad: &str, inhoud: &str) -> Vec<String> {
@@ -58,7 +82,9 @@ fn controleer_tekst(pad: &str, inhoud: &str) -> Vec<String> {
     for (nr, regel) in inhoud.lines().enumerate() {
         let melding = || format!("{pad}:{}: {regel}", nr + 1);
         // Code: `// 2026-10-16 ...` of `# 2026-10-16 ...` moet op een merkteken eindigen.
-        let code = regel.strip_prefix("// ").or_else(|| regel.strip_prefix("# "));
+        let code = regel
+            .strip_prefix("// ")
+            .or_else(|| regel.strip_prefix("# "));
         if let Some(rest) = code {
             if begint_met_datum(rest) && !MERKTEKENS.iter().any(|m| regel.trim_end().ends_with(m)) {
                 fouten.push(melding());

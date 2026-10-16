@@ -21,7 +21,10 @@ fn ingebouwde_catalogus_heeft_zes_spellingstalen() {
 
 #[test]
 fn onbekende_interfacetaal_valt_terug_op_engels() {
-    assert_eq!(interfacetekst("xx", "knop.genereer"), interfacetekst("en", "knop.genereer"));
+    assert_eq!(
+        interfacetekst("xx", "knop.genereer"),
+        interfacetekst("en", "knop.genereer")
+    );
     assert_eq!(interfacetekst("en", "knop.genereer"), "Generate");
 }
 
@@ -38,7 +41,11 @@ fn onbekende_sleutel_werkt_met_tijdelijke_string() {
 
 #[test]
 fn navo_gebruikt_omschrijvingen_van_de_interfacetaal() {
-    let navo = catalogus().spellingstalen.iter().find(|t| t.code == "navo").unwrap();
+    let navo = catalogus()
+        .spellingstalen
+        .iter()
+        .find(|t| t.code == "navo")
+        .unwrap();
     assert!(navo.omschrijvingen.is_none());
     assert_eq!(omschrijvingen_voor(navo, "nl").code, "nl");
     assert_eq!(omschrijvingen_voor(navo, "de").code, "de");
@@ -47,7 +54,11 @@ fn navo_gebruikt_omschrijvingen_van_de_interfacetaal() {
 
 #[test]
 fn eigen_omschrijvingen_gaan_voor_de_interfacetaal() {
-    let vl = catalogus().spellingstalen.iter().find(|t| t.code == "vl").unwrap();
+    let vl = catalogus()
+        .spellingstalen
+        .iter()
+        .find(|t| t.code == "vl")
+        .unwrap();
     assert_eq!(omschrijvingen_voor(vl, "en").code, "nl");
 }
 

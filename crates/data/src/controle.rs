@@ -107,7 +107,8 @@ pub fn controleer(c: &Catalogus) -> Vec<DataFout> {
             );
         }
         // Twee tekens met dezelfde omschrijving zijn aan de telefoon niet te onderscheiden.
-        let mut gezien: std::collections::BTreeMap<String, String> = std::collections::BTreeMap::new();
+        let mut gezien: std::collections::BTreeMap<String, String> =
+            std::collections::BTreeMap::new();
         let alle = o
             .cijfers
             .iter()
