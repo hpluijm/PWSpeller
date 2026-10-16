@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Fix 2: test dat een spatie in de resultaatregel een middenpunt is.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Fix 2: eigen tekst zonder groepjes en spaties, wachtwoord nog in groepjes, spellinglijst doorlopend genummerd, label "Cijfer toevoegen".
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -384,6 +387,18 @@ fn eigen_tekst_toont_geen_groepjes_en_geen_ingevoegde_spaties() {
     // Geen positienummer per groepje (de spellinglijst heeft alleen labels als "5. e ...").
     assert!(h.query_by_label("1").is_none());
     assert!(h.query_by_label("5").is_none());
+}
+
+#[test]
+fn eigen_tekst_toont_spatie_als_middenpunt_in_de_resultaatregel() {
+    let mut h = hoofd();
+    h.state_mut().0.hoofd.tab = Tab::EigenTekst;
+    h.state_mut().0.hoofd.eigen_tekst = "a b".to_string();
+    stap(&mut h);
+    assert!(h.query_by_label("a·b").is_some(), "resultaatregel met ·");
+    assert!(h.query_by_label_contains("a U+0020 b").is_none());
+    // Alleen de spellinglijst noemt de code.
+    assert_eq!(h.query_all_by_label_contains("U+0020").count(), 1);
 }
 
 /// Of het label (of de waarde) van een knoop met `begin` begint.

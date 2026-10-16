@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Fix 2: spatie als middenpunt en onzichtbare tekens met achtergrond in de bovenregel.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Fix 2: markering per groepje van vier alleen bij een gegenereerd wachtwoord; bij eigen tekst en een wachtzin per teken het huidige teken.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -21,7 +24,7 @@
 //   Taak 16: aangemaakt; Voorlezen met begrensde stappen, markering, toetsen en knoppen, en wissen bij verlaten.
 // ──────────────────────────────────────────────────────────
 
-use crate::resultaat::weergave_fragment;
+use crate::resultaat::{markering_opmaak, resultaat_fragment, weergave_fragment};
 use crate::thema::GOUD;
 use eframe::egui::{self, FontFamily, FontId, Key, RichText, TextFormat, text::LayoutJob};
 use pwspeller_kern::spelling::Regel;
@@ -171,21 +174,36 @@ impl Voorlezen {
         // één woord niet op een regel past); wachtwoord en eigen tekst mogen overal breken.
         job.wrap.break_anywhere = !self.per_woord;
         let mut run = String::new();
-        let mut in_markering = false;
-        for (i, c) in self.tekst.chars().enumerate() {
-            let nu = bereik.contains(&i);
-            if nu != in_markering && !run.is_empty() {
-                let f = if in_markering { &gemarkeerd } else { &gewoon };
-                job.append(&run, 0.0, f.clone());
-                run.clear();
+        // (in de gemarkeerde groep, is een markering voor spatie of onzichtbaar teken)
+        let mut stand = (false, false);
+        let donker = standaard != egui::Color32::BLACK && standaard.r() > 0x80;
+        let leeg = |job: &mut LayoutJob, run: &mut String, stand: (bool, bool)| {
+            if run.is_empty() {
+                return;
             }
-            in_markering = nu;
-            run.push_str(&weergave_fragment(c.encode_utf8(&mut [0; 4])));
+            let f = match stand {
+                (true, _) => gemarkeerd.clone(),
+                (false, true) => TextFormat {
+                    font_id: gewoon.font_id.clone(),
+                    ..markering_opmaak(GROOTTE_VOLLEDIG, donker)
+                },
+                (false, false) => gewoon.clone(),
+            };
+            job.append(run, 0.0, f);
+            run.clear();
+        };
+        for (i, c) in self.tekst.chars().enumerate() {
+            let nu = (
+                bereik.contains(&i),
+                c == ' ' || weergave_fragment(c.encode_utf8(&mut [0; 4])).len() > c.len_utf8(),
+            );
+            if nu != stand {
+                leeg(&mut job, &mut run, stand);
+            }
+            stand = nu;
+            run.push_str(&resultaat_fragment(c));
         }
-        if !run.is_empty() {
-            let f = if in_markering { &gemarkeerd } else { &gewoon };
-            job.append(&run, 0.0, f.clone());
-        }
+        leeg(&mut job, &mut run, stand);
         run.zeroize();
         job
     }

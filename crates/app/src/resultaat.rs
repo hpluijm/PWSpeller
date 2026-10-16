@@ -6,7 +6,7 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
-//   Fix 2: een code U+xxxx in effen kleur (opgemaakt).
+//   Fix 2: spatie als grijs middenpunt met achtergrond, andere onzichtbare tekens als code met dezelfde achtergrond (resultaat_fragment, markering_opmaak).
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Fix 2: groepjes alleen bij het wachtwoord; eigen tekst als één doorlopende regel (doorlopend_weergave, teken_doorlopend); spelling genummerd 1..n.
@@ -22,7 +22,8 @@
 // ──────────────────────────────────────────────────────────
 
 use crate::thema::{
-    CIJFER_DONKER, CIJFER_LICHT, FAMILIE_VET, GOUD, SPECIAAL_DONKER, SPECIAAL_LICHT,
+    CIJFER_DONKER, CIJFER_LICHT, FAMILIE_VET, GOUD, GRIJS, LICHTGRIJS, SPECIAAL_DONKER,
+    SPECIAAL_LICHT,
 };
 use eframe::egui::{self, Color32, FontFamily, FontId, ProgressBar, RichText, TextFormat, text};
 use pwspeller_kern::spelling::{Regel, Soort};
@@ -50,10 +51,7 @@ pub fn groepjes(tekst: &str) -> Vec<(usize, String)> {
 pub fn groepjes_weergave(tekst: &str) -> Vec<(usize, String)> {
     let mut groepen = groepjes(tekst);
     for (_, groep) in &mut groepen {
-        let mut nieuw: String = groep
-            .chars()
-            .map(|c| weergave_fragment(c.encode_utf8(&mut [0; 4])))
-            .collect();
+        let mut nieuw: String = groep.chars().map(resultaat_fragment).collect();
         std::mem::swap(groep, &mut nieuw);
         nieuw.zeroize();
     }
@@ -63,10 +61,46 @@ pub fn groepjes_weergave(tekst: &str) -> Vec<(usize, String)> {
 /// De hele tekst zoals ze in beeld komt, zonder groepjes of spaties: een onzichtbaar teken staat
 /// er als `U+xxxx`.
 pub fn doorlopend_weergave(tekst: &str) -> String {
-    tekst
-        .chars()
-        .map(|c| weergave_fragment(c.encode_utf8(&mut [0; 4])))
-        .collect()
+    tekst.chars().map(resultaat_fragment).collect()
+}
+
+/// Een teken in de resultaatregel: een spatie als middenpunt `·`, een ander onzichtbaar teken
+/// als `U+xxxx`. Beide zijn markeringen en krijgen een achtergrond (zie `is_markering`).
+pub fn resultaat_fragment(c: char) -> String {
+    if c == ' ' {
+        MIDDENPUNT.to_string()
+    } else {
+        weergave_fragment(c.encode_utf8(&mut [0; 4]))
+    }
+}
+
+/// Het middenpunt dat een spatie in de resultaatregel voorstelt (aanwezig in het lettertype).
+pub const MIDDENPUNT: char = '·';
+
+/// Of de tekens vanaf `i` een markering zijn (middenpunt of code `U+xxxx`): de lengte in tekens.
+fn markering_lengte(tekens: &[char], i: usize) -> Option<usize> {
+    if tekens[i] == MIDDENPUNT {
+        return Some(1);
+    }
+    let code = tekens[i] == 'U'
+        && tekens.get(i + 1) == Some(&'+')
+        && tekens.len() >= i + 6
+        && tekens[i + 2..i + 6].iter().all(|h| h.is_ascii_hexdigit());
+    code.then_some(6)
+}
+
+/// Opmaak van een markering: grijs op een lichte achtergrond, zodat ze niet als teken leest.
+pub fn markering_opmaak(grootte: f32, donker: bool) -> TextFormat {
+    TextFormat {
+        font_id: FontId::new(grootte, FontFamily::Monospace),
+        color: if donker { LICHTGRIJS } else { GRIJS },
+        background: if donker {
+            Color32::from_rgb(0x4A, 0x48, 0x42)
+        } else {
+            LICHTGRIJS
+        },
+        ..Default::default()
+    }
 }
 
 /// De wachtzin als weer te geven stukken: elk woord met het scheidingsteken erachter (behalve het
@@ -175,17 +209,12 @@ fn opgemaakt(tekst: &str, grootte: f32, standaard: Color32, donker: bool) -> tex
     let mut i = 0;
     while i < tekens.len() {
         let c = tekens[i];
-        // Een code als U+0020 (onzichtbaar teken) blijft in één effen kleur, ook de cijfers en de plus.
-        let code = c == 'U'
-            && tekens.get(i + 1) == Some(&'+')
-            && tekens.len() >= i + 6
-            && tekens[i + 2..i + 6].iter().all(|h| h.is_ascii_hexdigit());
-        let f = if code {
-            teken_opmaak('a', grootte, standaard, donker)
-        } else {
-            teken_opmaak(c, grootte, standaard, donker)
+        let markering = markering_lengte(&tekens, i);
+        let f = match markering {
+            Some(_) => markering_opmaak(grootte, donker),
+            None => teken_opmaak(c, grootte, standaard, donker),
         };
-        let lengte = if code { 6 } else { 1 };
+        let lengte = markering.unwrap_or(1);
         if huidig.as_ref().is_some_and(|h| *h != f) {
             job.append(&run, 0.0, huidig.take().unwrap_or_default());
             run.clear();
