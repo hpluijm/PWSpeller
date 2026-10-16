@@ -1,0 +1,62 @@
+# ── Over dit bestand ──────────────────────────────────────
+# Doel:           De teksten van knoppen, labels en meldingen in de interface, taal en.
+# Klant:          Petisys
+# Gemaakt vanuit: Petisys
+# Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
+# Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Interfaceteksten en aangemaakt.
+# ──────────────────────────────────────────────────────────
+
+"app.titel" = "PWSpeller"
+"geschiedenis.gewist_inactief" = "The history was cleared after inactivity."
+"geschiedenis.leeg" = "The history is empty."
+"geschiedenis.titel" = "History"
+"geschiedenis.toon" = "Show history"
+"geschiedenis.verberg" = "Hide history"
+"geschiedenis.voeg_toe" = "Save to history"
+"geschiedenis.wis" = "Clear history"
+"instellingen.alleen_bij_sluiten" = "Only when closing the program"
+"instellingen.geschiedenis_minuten" = "Clear history after (minutes)"
+"instellingen.interfacetaal" = "Program language"
+"instellingen.klembord_seconden" = "Clear clipboard after (seconds)"
+"instellingen.klembord_wissen" = "Clear clipboard automatically"
+"instellingen.systeem" = "Follow the system"
+"instellingen.titel" = "Settings"
+"knop.genereer" = "Generate"
+"knop.kopieer" = "Copy"
+"knop.per_teken" = "By character"
+"knop.per_woord" = "By word"
+"knop.sluiten" = "Close"
+"knop.voorlezen" = "Read aloud"
+"label.spellingstaal" = "Spelling language"
+"melding.lengte_opgehoogd" = "The length was increased so that all chosen options fit."
+"melding.moeilijk_teken" = "Note: this character is hard to convey over the phone."
+"optie.cijfers" = "Digits"
+"optie.dubbelzinnig" = "Avoid ambiguous characters"
+"optie.hoofdletters" = "Capital letters"
+"optie.kleine_letters" = "Small letters"
+"optie.lengte" = "Length"
+"optie.min_cijfers" = "Minimum digits"
+"optie.min_speciaal" = "Minimum special characters"
+"optie.scheidingsteken" = "Separator"
+"optie.speciaal" = "Special characters"
+"optie.woord_cijfer" = "Add a digit to each word"
+"optie.woord_hoofdletter" = "Capitalize each word"
+"optie.woorden" = "Number of words"
+"optie.woordenlijst" = "Word list"
+"splash.copyright" = "© 2026 Petisys. All rights reserved."
+"splash.klant" = "Customer: {klant}"
+"sterkte.redelijk" = "Fair"
+"sterkte.schatting" = "Estimated strength"
+"sterkte.sterk" = "Strong"
+"sterkte.zwak" = "Weak"
+"tab.eigen" = "Own password"
+"tab.wachtwoord" = "Password"
+"tab.wachtzin" = "Passphrase"
+"voorlezen.stop" = "Stop"
+"voorlezen.voortgang" = "character {n} of {totaal}"
+
+# © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+# Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.

@@ -1,0 +1,47 @@
+# ── Over dit bestand ──────────────────────────────────────
+# Doel:           Het spellingsalfabet Vlaams: één codewoord per letter a t/m z.
+# Klant:          Petisys
+# Gemaakt vanuit: Petisys
+# Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
+# Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Alfabet Vlaams aangemaakt.
+#
+# Bron codewoorden: Overgenomen uit talen.csv van release v1.0-vb (kolom Vlaams).
+# ──────────────────────────────────────────────────────────
+
+[meta]
+code = "vl"
+naam = "Vlaams"
+
+[letters]
+a = "Arthur"
+b = "Brussel"
+c = "Carolina"
+d = "Desiré"
+e = "Emiel"
+f = "Frederik"
+g = "Gustaaf"
+h = "Hendrik"
+i = "Isidoor"
+j = "Jozef"
+k = "Kilogram"
+l = "Leopold"
+m = "Maria"
+n = "Napoleon"
+o = "Oscar"
+p = "Piano"
+q = "Quotiënt"
+r = "Robert"
+s = "Sofie"
+t = "Telefoon"
+u = "Ursula"
+v = "Victor"
+w = "Waterloo"
+x = "Xavier"
+y = "Yvonne"
+z = "Zola"
+
+# © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+# Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.

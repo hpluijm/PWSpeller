@@ -1,0 +1,62 @@
+# ── Over dit bestand ──────────────────────────────────────
+# Doel:           De teksten van knoppen, labels en meldingen in de interface, taal nl.
+# Klant:          Petisys
+# Gemaakt vanuit: Petisys
+# Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
+# Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Interfaceteksten nl aangemaakt.
+# ──────────────────────────────────────────────────────────
+
+"app.titel" = "PWSpeller"
+"geschiedenis.gewist_inactief" = "De geschiedenis is gewist na inactiviteit."
+"geschiedenis.leeg" = "De geschiedenis is leeg."
+"geschiedenis.titel" = "Geschiedenis"
+"geschiedenis.toon" = "Toon geschiedenis"
+"geschiedenis.verberg" = "Verberg geschiedenis"
+"geschiedenis.voeg_toe" = "Bewaar in geschiedenis"
+"geschiedenis.wis" = "Wis geschiedenis"
+"instellingen.alleen_bij_sluiten" = "Alleen bij sluiten van het programma"
+"instellingen.geschiedenis_minuten" = "Geschiedenis wissen na (minuten)"
+"instellingen.interfacetaal" = "Taal van het programma"
+"instellingen.klembord_seconden" = "Klembord wissen na (seconden)"
+"instellingen.klembord_wissen" = "Klembord automatisch wissen"
+"instellingen.systeem" = "Volg het systeem"
+"instellingen.titel" = "Instellingen"
+"knop.genereer" = "Genereer"
+"knop.kopieer" = "Kopieer"
+"knop.per_teken" = "Per teken"
+"knop.per_woord" = "Per woord"
+"knop.sluiten" = "Sluiten"
+"knop.voorlezen" = "Lees voor"
+"label.spellingstaal" = "Spellingstaal"
+"melding.lengte_opgehoogd" = "De lengte is verhoogd zodat alle gekozen opties passen."
+"melding.moeilijk_teken" = "Let op: dit teken is lastig aan de telefoon."
+"optie.cijfers" = "Cijfers"
+"optie.dubbelzinnig" = "Dubbelzinnige tekens vermijden"
+"optie.hoofdletters" = "Hoofdletters"
+"optie.kleine_letters" = "Kleine letters"
+"optie.lengte" = "Lengte"
+"optie.min_cijfers" = "Minimaal aantal cijfers"
+"optie.min_speciaal" = "Minimaal aantal speciale tekens"
+"optie.scheidingsteken" = "Scheidingsteken"
+"optie.speciaal" = "Speciale tekens"
+"optie.woord_cijfer" = "Cijfer aan elk woord"
+"optie.woord_hoofdletter" = "Hoofdletter aan elk woord"
+"optie.woorden" = "Aantal woorden"
+"optie.woordenlijst" = "Woordenlijst"
+"splash.copyright" = "© 2026 Petisys. Alle rechten voorbehouden."
+"splash.klant" = "Klant: {klant}"
+"sterkte.redelijk" = "Redelijk"
+"sterkte.schatting" = "Geschatte sterkte"
+"sterkte.sterk" = "Sterk"
+"sterkte.zwak" = "Zwak"
+"tab.eigen" = "Eigen wachtwoord"
+"tab.wachtwoord" = "Wachtwoord"
+"tab.wachtzin" = "Wachtzin"
+"voorlezen.stop" = "Stop"
+"voorlezen.voortgang" = "teken {n} van {totaal}"
+
+# © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+# Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.

@@ -1,0 +1,47 @@
+# ── Over dit bestand ──────────────────────────────────────
+# Doel:           Het spellingsalfabet Nederlands: één codewoord per letter a t/m z.
+# Klant:          Petisys
+# Gemaakt vanuit: Petisys
+# Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
+# Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Alfabet Nederlands aangemaakt.
+#
+# Bron codewoorden: Overgenomen uit talen.csv van release v1.0-vb (kolom Nederlands); 'Urecht' daar is hersteld naar 'Utrecht'.
+# ──────────────────────────────────────────────────────────
+
+[meta]
+code = "nl"
+naam = "Nederlands"
+
+[letters]
+a = "Anna"
+b = "Bernard"
+c = "Cornelis"
+d = "Dirk"
+e = "Eduard"
+f = "Ferdinand"
+g = "Gerard"
+h = "Hendrik"
+i = "Isaak"
+j = "Jan"
+k = "Karel"
+l = "Lodewijk"
+m = "Maria"
+n = "Nico"
+o = "Otto"
+p = "Pieter"
+q = "Quotient"
+r = "Rudolf"
+s = "Simon"
+t = "Theodoor"
+u = "Utrecht"
+v = "Victor"
+w = "Willem"
+x = "Xantippe"
+y = "Ypsilon"
+z = "Zacharias"
+
+# © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+# Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.

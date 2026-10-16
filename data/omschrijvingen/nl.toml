@@ -1,0 +1,77 @@
+# ── Over dit bestand ──────────────────────────────────────
+# Doel:           De woorden rond de codewoorden in het Nederlands: sjablonen, cijfers, leestekens en lastige klanken.
+# Klant:          Petisys
+# Gemaakt vanuit: Petisys
+# Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
+# Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Omschrijvingen Nederlands aangemaakt.
+#
+# Bron: Namen van de leestekens in het Nederlands: talen.csv van release v1.0-vb, netjes geschreven en aangevuld.
+# ──────────────────────────────────────────────────────────
+
+[meta]
+code = "nl"
+
+[sjablonen]
+hoofdletter = "hoofdletter {woord}"
+kleine_letter = "kleine letter {woord}"
+cijfer = "cijfer {naam}"
+woord = "{woord}"
+woord_met_hoofdletter = "{woord}, met hoofdletter"
+onbekend = "teken {teken} ({code})"
+
+[cijfers]
+"0" = "nul"
+"1" = "een"
+"2" = "twee"
+"3" = "drie"
+"4" = "vier"
+"5" = "vijf"
+"6" = "zes"
+"7" = "zeven"
+"8" = "acht"
+"9" = "negen"
+
+[tekens]
+" " = "spatie"
+"!" = "uitroepteken"
+"\"" = "dubbel aanhalingsteken"
+"#" = "hekje"
+"$" = "dollarteken"
+"%" = "procentteken"
+"&" = "ampersand"
+"'" = "enkel aanhalingsteken"
+"(" = "haakje openen"
+")" = "haakje sluiten"
+"*" = "sterretje"
+"+" = "plusteken"
+"," = "komma"
+"-" = "streepje"
+"." = "punt"
+"/" = "schuine streep"
+":" = "dubbele punt"
+";" = "puntkomma"
+"<" = "kleiner dan"
+"=" = "is gelijk aan"
+">" = "groter dan"
+"?" = "vraagteken"
+"@" = "apenstaartje"
+"[" = "blokhaak openen"
+"\\" = "backslash"
+"]" = "blokhaak sluiten"
+"^" = "dakje"
+"_" = "laag streepje"
+"`" = "accent grave"
+"{" = "accolade openen"
+"|" = "verticale streep"
+"}" = "accolade sluiten"
+"~" = "tilde"
+
+[lastige_klanken]
+bevat = ["ij", "ei", "au", "ou"]
+eindigt_op = ["d", "t"]
+
+# © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+# Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.

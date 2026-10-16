@@ -1,0 +1,75 @@
+# ── Over dit bestand ──────────────────────────────────────
+# Doel:           De woorden rond de codewoorden in het Duits: sjablonen, cijfers, leestekens en lastige klanken.
+# Klant:          Petisys
+# Gemaakt vanuit: Petisys
+# Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
+# Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Omschrijvingen Duits aangemaakt.
+# ──────────────────────────────────────────────────────────
+
+[meta]
+code = "de"
+
+[sjablonen]
+hoofdletter = "Großbuchstabe {woord}"
+kleine_letter = "Kleinbuchstabe {woord}"
+cijfer = "Ziffer {naam}"
+woord = "{woord}"
+woord_met_hoofdletter = "{woord}, mit Großbuchstabe"
+onbekend = "Zeichen {teken} ({code})"
+
+[cijfers]
+"0" = "null"
+"1" = "eins"
+"2" = "zwei"
+"3" = "drei"
+"4" = "vier"
+"5" = "fünf"
+"6" = "sechs"
+"7" = "sieben"
+"8" = "acht"
+"9" = "neun"
+
+[tekens]
+" " = "Leerzeichen"
+"!" = "Ausrufezeichen"
+"\"" = "Anführungszeichen"
+"#" = "Raute"
+"$" = "Dollarzeichen"
+"%" = "Prozentzeichen"
+"&" = "Und-Zeichen"
+"'" = "Apostroph"
+"(" = "Klammer auf"
+")" = "Klammer zu"
+"*" = "Stern"
+"+" = "Plus"
+"," = "Komma"
+"-" = "Bindestrich"
+"." = "Punkt"
+"/" = "Schrägstrich"
+":" = "Doppelpunkt"
+";" = "Semikolon"
+"<" = "kleiner als"
+"=" = "Gleichheitszeichen"
+">" = "größer als"
+"?" = "Fragezeichen"
+"@" = "At-Zeichen"
+"[" = "eckige Klammer auf"
+"\\" = "umgekehrter Schrägstrich"
+"]" = "eckige Klammer zu"
+"^" = "Zirkumflex"
+"_" = "Unterstrich"
+"`" = "Gravis"
+"{" = "geschweifte Klammer auf"
+"|" = "senkrechter Strich"
+"}" = "geschweifte Klammer zu"
+"~" = "Tilde"
+
+[lastige_klanken]
+bevat = []
+eindigt_op = []
+
+# © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+# Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.

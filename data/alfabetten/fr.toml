@@ -1,0 +1,47 @@
+# ── Over dit bestand ──────────────────────────────────────
+# Doel:           Het spellingsalfabet Frans: één codewoord per letter a t/m z.
+# Klant:          Petisys
+# Gemaakt vanuit: Petisys
+# Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
+# Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Alfabet Frans aangemaakt.
+#
+# Bron codewoorden: https://fr.wikipedia.org/wiki/Alphabet_téléphonique_français (kolom 'Code après', de tafel sinds 1939), nagekeken 2026-10-16.
+# ──────────────────────────────────────────────────────────
+
+[meta]
+code = "fr"
+naam = "Frans"
+
+[letters]
+a = "Anatole"
+b = "Berthe"
+c = "Célestin"
+d = "Désiré"
+e = "Eugène"
+f = "François"
+g = "Gaston"
+h = "Henri"
+i = "Irma"
+j = "Joseph"
+k = "Kléber"
+l = "Louis"
+m = "Marcel"
+n = "Nicolas"
+o = "Oscar"
+p = "Pierre"
+q = "Quintal"
+r = "Raoul"
+s = "Suzanne"
+t = "Thérèse"
+u = "Ursule"
+v = "Victor"
+w = "William"
+x = "Xavier"
+y = "Yvonne"
+z = "Zoé"
+
+# © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+# Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.

@@ -1,0 +1,47 @@
+# ── Over dit bestand ──────────────────────────────────────
+# Doel:           Het spellingsalfabet Duits: één codewoord per letter a t/m z.
+# Klant:          Petisys
+# Gemaakt vanuit: Petisys
+# Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
+# Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Alfabet Duits aangemaakt.
+#
+# Bron codewoorden: DIN 5009:2022-06, via https://de.wikipedia.org/wiki/Buchstabiertafel, nagekeken 2026-10-16.
+# ──────────────────────────────────────────────────────────
+
+[meta]
+code = "de"
+naam = "Duits"
+
+[letters]
+a = "Aachen"
+b = "Berlin"
+c = "Chemnitz"
+d = "Düsseldorf"
+e = "Essen"
+f = "Frankfurt"
+g = "Goslar"
+h = "Hamburg"
+i = "Ingelheim"
+j = "Jena"
+k = "Köln"
+l = "Leipzig"
+m = "München"
+n = "Nürnberg"
+o = "Offenbach"
+p = "Potsdam"
+q = "Quickborn"
+r = "Rostock"
+s = "Salzwedel"
+t = "Tübingen"
+u = "Unna"
+v = "Völklingen"
+w = "Wuppertal"
+x = "Xanten"
+y = "Ypsilon"
+z = "Zwickau"
+
+# © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+# Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.

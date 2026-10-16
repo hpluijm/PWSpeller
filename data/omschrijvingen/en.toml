@@ -1,0 +1,75 @@
+# ── Over dit bestand ──────────────────────────────────────
+# Doel:           De woorden rond de codewoorden in het Engels: sjablonen, cijfers, leestekens en lastige klanken.
+# Klant:          Petisys
+# Gemaakt vanuit: Petisys
+# Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
+# Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Omschrijvingen Engels aangemaakt.
+# ──────────────────────────────────────────────────────────
+
+[meta]
+code = "en"
+
+[sjablonen]
+hoofdletter = "capital {woord}"
+kleine_letter = "small {woord}"
+cijfer = "number {naam}"
+woord = "{woord}"
+woord_met_hoofdletter = "{woord}, with capital"
+onbekend = "character {teken} ({code})"
+
+[cijfers]
+"0" = "zero"
+"1" = "one"
+"2" = "two"
+"3" = "three"
+"4" = "four"
+"5" = "five"
+"6" = "six"
+"7" = "seven"
+"8" = "eight"
+"9" = "nine"
+
+[tekens]
+" " = "space"
+"!" = "exclamation mark"
+"\"" = "double quote"
+"#" = "hash"
+"$" = "dollar sign"
+"%" = "percent sign"
+"&" = "ampersand"
+"'" = "single quote"
+"(" = "open parenthesis"
+")" = "close parenthesis"
+"*" = "asterisk"
+"+" = "plus sign"
+"," = "comma"
+"-" = "hyphen"
+"." = "period"
+"/" = "forward slash"
+":" = "colon"
+";" = "semicolon"
+"<" = "less than"
+"=" = "equals sign"
+">" = "greater than"
+"?" = "question mark"
+"@" = "at sign"
+"[" = "open square bracket"
+"\\" = "backslash"
+"]" = "close square bracket"
+"^" = "caret"
+"_" = "underscore"
+"`" = "backtick"
+"{" = "open curly brace"
+"|" = "vertical bar"
+"}" = "close curly brace"
+"~" = "tilde"
+
+[lastige_klanken]
+bevat = []
+eindigt_op = []
+
+# © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+# Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.

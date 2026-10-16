@@ -1,0 +1,47 @@
+# ── Over dit bestand ──────────────────────────────────────
+# Doel:           Het spellingsalfabet NAVO: één codewoord per letter a t/m z.
+# Klant:          Petisys
+# Gemaakt vanuit: Petisys
+# Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
+# Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Alfabet NAVO aangemaakt.
+#
+# Bron codewoorden: ICAO/NAVO-spelling, via https://en.wikipedia.org/wiki/NATO_phonetic_alphabet, nagekeken 2026-10-16.
+# ──────────────────────────────────────────────────────────
+
+[meta]
+code = "navo"
+naam = "NAVO"
+
+[letters]
+a = "Alfa"
+b = "Bravo"
+c = "Charlie"
+d = "Delta"
+e = "Echo"
+f = "Foxtrot"
+g = "Golf"
+h = "Hotel"
+i = "India"
+j = "Juliett"
+k = "Kilo"
+l = "Lima"
+m = "Mike"
+n = "November"
+o = "Oscar"
+p = "Papa"
+q = "Quebec"
+r = "Romeo"
+s = "Sierra"
+t = "Tango"
+u = "Uniform"
+v = "Victor"
+w = "Whiskey"
+x = "X-ray"
+y = "Yankee"
+z = "Zulu"
+
+# © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+# Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.
