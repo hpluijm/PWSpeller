@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 16 fixronde 2: onderpaneel neemt niet langer de hele hoogte (horizontal i.p.v. with_layout, panelen niet vergrootbaar).
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 16 fixronde 1: middenzone scrolt en schaalt mee, bovenste regel wrapt, zuiver zwart op goud.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -14,9 +17,7 @@
 
 use crate::resultaat::weergave_fragment;
 use crate::thema::GOUD;
-use eframe::egui::{
-    self, Align, FontFamily, FontId, Key, Layout, RichText, TextFormat, text::LayoutJob,
-};
+use eframe::egui::{self, FontFamily, FontId, Key, RichText, TextFormat, text::LayoutJob};
 use pwspeller_kern::spelling::Regel;
 use pwspeller_kern::talen::interfacetekst;
 use std::ops::Range;
@@ -179,49 +180,55 @@ impl Voorlezen {
             Actie::Geen
         };
         let standaard = ui.visuals().text_color();
-        egui::Panel::top("voorlezen_tekst").show(ui, |ui| {
-            ui.add_space(8.0);
-            ui.label(self.volledige_tekst(standaard, ui.available_width()));
-            ui.add_space(8.0);
-        });
-        egui::Panel::bottom("voorlezen_onder").show(ui, |ui| {
-            ui.add_space(8.0);
-            let (n, totaal) = self.voortgang();
-            let sleutel = if self.per_woord {
-                "voorlezen.voortgang_woord"
-            } else {
-                "voorlezen.voortgang"
-            };
-            let tekst = interfacetekst(taal, sleutel)
-                .replace("{n}", &n.to_string())
-                .replace("{totaal}", &totaal.to_string());
-            ui.vertical_centered(|ui| ui.label(RichText::new(tekst).size(20.0)));
-            ui.add_space(8.0);
-            ui.with_layout(Layout::left_to_right(Align::Center), |ui| {
-                let knop = |ui: &mut egui::Ui, sleutel: &str| {
-                    let r = ui.add(
-                        egui::Button::new(RichText::new(interfacetekst(taal, sleutel)).size(20.0))
-                            .min_size(egui::vec2(120.0, 44.0)),
-                    );
-                    // Na een muisklik hoort de focus niet op de knop te blijven staan,
-                    // anders werken spatie en pijlen niet meer.
-                    if r.clicked() {
-                        r.surrender_focus();
-                    }
-                    r.clicked()
-                };
-                if knop(ui, "voorlezen.vorige") {
-                    self.vorige();
-                }
-                if knop(ui, "voorlezen.volgende") {
-                    self.volgende();
-                }
-                if knop(ui, "voorlezen.stop") {
-                    actie = Actie::Stop;
-                }
+        egui::Panel::top("voorlezen_tekst")
+            .resizable(false)
+            .show(ui, |ui| {
+                ui.add_space(8.0);
+                ui.label(self.volledige_tekst(standaard, ui.available_width()));
+                ui.add_space(8.0);
             });
-            ui.add_space(8.0);
-        });
+        egui::Panel::bottom("voorlezen_onder")
+            .resizable(false)
+            .show(ui, |ui| {
+                ui.add_space(8.0);
+                let (n, totaal) = self.voortgang();
+                let sleutel = if self.per_woord {
+                    "voorlezen.voortgang_woord"
+                } else {
+                    "voorlezen.voortgang"
+                };
+                let tekst = interfacetekst(taal, sleutel)
+                    .replace("{n}", &n.to_string())
+                    .replace("{totaal}", &totaal.to_string());
+                ui.vertical_centered(|ui| ui.label(RichText::new(tekst).size(20.0)));
+                ui.add_space(8.0);
+                ui.horizontal(|ui| {
+                    let knop = |ui: &mut egui::Ui, sleutel: &str| {
+                        let r = ui.add(
+                            egui::Button::new(
+                                RichText::new(interfacetekst(taal, sleutel)).size(20.0),
+                            )
+                            .min_size(egui::vec2(120.0, 44.0)),
+                        );
+                        // Na een muisklik hoort de focus niet op de knop te blijven staan,
+                        // anders werken spatie en pijlen niet meer.
+                        if r.clicked() {
+                            r.surrender_focus();
+                        }
+                        r.clicked()
+                    };
+                    if knop(ui, "voorlezen.vorige") {
+                        self.vorige();
+                    }
+                    if knop(ui, "voorlezen.volgende") {
+                        self.volgende();
+                    }
+                    if knop(ui, "voorlezen.stop") {
+                        actie = Actie::Stop;
+                    }
+                });
+                ui.add_space(8.0);
+            });
         egui::CentralPanel::default().show(ui, |ui| {
             let regel = self.huidige();
             let fragment = weergave_fragment(&regel.fragment);

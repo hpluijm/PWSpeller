@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 16 fixronde 2: test dat teken, omschrijving en knoppen na meerdere beelden op hun plek staan (560x668 en 480x560).
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 16 fixronde 1: tests voor 480x560 en een wachtwoord van 128 tekens; dode code weg.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -310,6 +313,88 @@ fn lang_wachtwoord_wrapt_en_markering_blijft_in_beeld() {
     h.state_mut().0.voorlezen = Some(v);
     stap(&mut h);
     binnen(h.get_by_label(&tekst).rect(), "volledige tekst");
+}
+
+/// Genereert een wachtwoord en opent de voorleesmodus op een gegeven venstermaat.
+fn voorlezend_op(breedte: f32, hoogte: f32) -> Harnas {
+    let t0 = Instant::now();
+    let mut h = Harness::builder()
+        .with_size([breedte, hoogte])
+        .with_context_setup(thema::zet_thema)
+        .build_ui_state(
+            |ui, (app, nu): &mut (PwApp, Instant)| app.teken(ui, *nu),
+            (PwApp::voor_test(t0), t0),
+        );
+    h.step();
+    h.state_mut().1 = t0 + SPLASHDUUR;
+    h.step();
+    h.step();
+    h.key_press(Key::Enter);
+    stap(&mut h);
+    h.key_press(Key::F5);
+    stap(&mut h);
+    // De fout groeide per beeld (het onderpaneel nam steeds meer hoogte); laat er genoeg lopen.
+    for _ in 0..30 {
+        h.step();
+    }
+    h
+}
+
+#[test]
+fn teken_en_omschrijving_staan_zichtbaar_tussen_tekst_en_knoppen() {
+    use eframe::egui::{Pos2, Rect, vec2};
+    for (b, hgt) in [(560.0, 668.0), (480.0, 560.0)] {
+        let mut h = voorlezend_op(b, hgt);
+        for _ in 0..2 {
+            let (fragment, omschrijving) = {
+                let v = h.state().0.voorlezen.as_ref().expect("open");
+                (
+                    v.huidige().fragment.clone(),
+                    v.huidige().omschrijving.clone(),
+                )
+            };
+            let venster = Rect::from_min_size(Pos2::ZERO, vec2(b, hgt));
+            let teken = h.get_by_label(&fragment).rect();
+            let omsch = h.get_by_label_contains(&omschrijving).rect();
+            assert!(
+                teken.height() >= 40.0,
+                "{b}x{hgt}: teken te laag: {teken:?}"
+            );
+            assert!(
+                venster.contains_rect(teken),
+                "{b}x{hgt}: teken buiten beeld"
+            );
+            assert!(
+                omsch.height() > 0.0,
+                "{b}x{hgt}: omschrijving zonder hoogte"
+            );
+            assert!(
+                venster.contains_rect(omsch),
+                "{b}x{hgt}: omschrijving buiten beeld: {omsch:?}"
+            );
+            for knop in ["Vorige", "Volgende", "Stop"] {
+                let r = h.get_by_label(knop).rect();
+                assert!(venster.contains_rect(r), "{b}x{hgt}: {knop} buiten beeld");
+                assert!(
+                    r.min.y > hgt / 2.0,
+                    "{b}x{hgt}: {knop} niet in onderste helft: {r:?}"
+                );
+                assert!(
+                    r.max.y >= hgt - 30.0,
+                    "{b}x{hgt}: {knop} staat niet onderaan het venster: {r:?}"
+                );
+                assert!(
+                    teken.max.y <= r.min.y,
+                    "{b}x{hgt}: teken ({teken:?}) niet boven {knop} ({r:?})"
+                );
+            }
+            h.key_press(Key::ArrowRight);
+            stap(&mut h);
+            for _ in 0..30 {
+                h.step();
+            }
+        }
+    }
 }
 
 // © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
