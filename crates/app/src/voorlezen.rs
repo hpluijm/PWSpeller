@@ -6,11 +6,14 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 16 fixronde 1: middenzone scrolt en schaalt mee, bovenste regel wrapt, zuiver zwart op goud.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 16: aangemaakt; Voorlezen met begrensde stappen, markering, toetsen en knoppen, en wissen bij verlaten.
 // ──────────────────────────────────────────────────────────
 
 use crate::resultaat::weergave_fragment;
-use crate::thema::{GOUD, ZWART};
+use crate::thema::GOUD;
 use eframe::egui::{
     self, Align, FontFamily, FontId, Key, Layout, RichText, TextFormat, text::LayoutJob,
 };
@@ -133,7 +136,7 @@ impl Voorlezen {
     }
 
     /// De bovenste regel: de hele tekst met de huidige groep of het huidige fragment gemarkeerd.
-    fn volledige_tekst(&self, standaard: egui::Color32) -> LayoutJob {
+    fn volledige_tekst(&self, standaard: egui::Color32, breedte: f32) -> LayoutJob {
         let bereik = markering(self.huidige(), self.per_woord);
         let gewoon = TextFormat {
             font_id: FontId::new(GROOTTE_VOLLEDIG, FontFamily::Monospace),
@@ -141,12 +144,13 @@ impl Voorlezen {
             ..Default::default()
         };
         let gemarkeerd = TextFormat {
-            color: ZWART,
+            color: egui::Color32::BLACK,
             background: GOUD,
             ..gewoon.clone()
         };
         let mut job = LayoutJob::default();
-        job.wrap.max_width = f32::INFINITY;
+        job.wrap.max_width = breedte;
+        job.wrap.break_anywhere = true;
         let mut run = String::new();
         let mut in_markering = false;
         for (i, c) in self.tekst.chars().enumerate() {
@@ -177,9 +181,7 @@ impl Voorlezen {
         let standaard = ui.visuals().text_color();
         egui::Panel::top("voorlezen_tekst").show(ui, |ui| {
             ui.add_space(8.0);
-            egui::ScrollArea::horizontal().show(ui, |ui| {
-                ui.label(self.volledige_tekst(standaard));
-            });
+            ui.label(self.volledige_tekst(standaard, ui.available_width()));
             ui.add_space(8.0);
         });
         egui::Panel::bottom("voorlezen_onder").show(ui, |ui| {
@@ -230,26 +232,38 @@ impl Voorlezen {
                 regel.omschrijving.replace(&regel.fragment, &fragment)
             };
             let lastig = regel.lastig;
-            ui.vertical_centered(|ui| {
-                ui.add_space((ui.available_height() * 0.15).max(8.0));
-                ui.label(
-                    RichText::new(fragment)
-                        .font(FontId::new(GROOTTE_TEKEN, FontFamily::Monospace))
-                        .strong(),
-                );
-                ui.add_space(16.0);
-                ui.label(RichText::new(omschrijving).size(GROOTTE_OMSCHRIJVING));
-                if lastig {
-                    ui.add_space(12.0);
-                    // Tekst met achtergrond in plaats van een symbool: geen ontbrekende glyphs.
-                    ui.label(
-                        RichText::new(format!(" {} ", interfacetekst(taal, "label.lastig")))
-                            .size(GROOTTE_OMSCHRIJVING)
-                            .color(ZWART)
-                            .background_color(GOUD),
-                    );
-                }
-            });
+            let breedte = ui.available_width();
+            let tekens = fragment.chars().count().max(1) as f32;
+            // Een woord breekt nooit midden in: de letters worden kleiner tot het past.
+            let teken_grootte = GROOTTE_TEKEN.min(breedte / (tekens * 0.62)).max(20.0);
+            let marge = (ui.available_height() * 0.15).min(24.0);
+            egui::ScrollArea::vertical()
+                .auto_shrink(false)
+                .show(ui, |ui| {
+                    ui.vertical_centered(|ui| {
+                        ui.add_space(marge);
+                        ui.label(
+                            RichText::new(fragment)
+                                .font(FontId::new(teken_grootte, FontFamily::Monospace))
+                                .strong(),
+                        );
+                        ui.add_space(16.0);
+                        ui.label(RichText::new(omschrijving).size(GROOTTE_OMSCHRIJVING));
+                        if lastig {
+                            ui.add_space(12.0);
+                            // Tekst met achtergrond in plaats van een symbool: geen ontbrekende glyphs.
+                            ui.label(
+                                RichText::new(format!(
+                                    " {} ",
+                                    interfacetekst(taal, "label.lastig")
+                                ))
+                                .size(GROOTTE_OMSCHRIJVING)
+                                .color(egui::Color32::BLACK)
+                                .background_color(GOUD),
+                            );
+                        }
+                    });
+                });
         });
         actie
     }

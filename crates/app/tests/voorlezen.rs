@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 16 fixronde 1: tests voor 480x560 en een wachtwoord van 128 tekens; dode code weg.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 16: tests voor de voorleesmodus aangemaakt.
 // ──────────────────────────────────────────────────────────
 
@@ -183,7 +186,6 @@ fn zonder_tekst_gaat_de_voorleesmodus_niet_open() {
 fn verlaten_wist_de_regels() {
     let mut h = voorlezend();
     let v = h.state_mut().0.voorlezen.take().expect("open");
-    let adres = v.regels[0].fragment.as_ptr();
     assert!(!v.regels.is_empty());
     // Het wissen zelf zit in Drop; hier controleren we dat wissen() leegt.
     let mut v = v;
@@ -193,7 +195,6 @@ fn verlaten_wist_de_regels() {
             .iter()
             .all(|r| r.fragment.is_empty() && r.omschrijving.is_empty())
     );
-    let _ = adres;
 }
 
 #[test]
@@ -244,6 +245,71 @@ fn groot_genoeg_en_lastig_gemarkeerd() {
         stap(&mut h);
     }
     assert_eq!(gezien, aantal_lastig);
+}
+
+fn klein_harnas() -> Harnas {
+    let t0 = Instant::now();
+    let mut h = Harness::builder()
+        .with_size([480.0, 560.0])
+        .with_context_setup(thema::zet_thema)
+        .build_ui_state(
+            |ui, (app, nu): &mut (PwApp, Instant)| app.teken(ui, *nu),
+            (PwApp::voor_test(t0), t0),
+        );
+    h.step();
+    h.state_mut().1 = t0 + SPLASHDUUR;
+    h.step();
+    h.step();
+    h
+}
+
+fn binnen(r: eframe::egui::Rect, wat: &str) {
+    let venster = eframe::egui::Rect::from_min_size(
+        eframe::egui::Pos2::ZERO,
+        eframe::egui::vec2(480.0, 560.0),
+    );
+    assert!(
+        venster.contains_rect(r),
+        "{wat} ligt buiten het venster: {r:?}"
+    );
+}
+
+#[test]
+fn minimale_venstermaat_houdt_alles_in_beeld() {
+    let mut h = klein_harnas();
+    let regels = vec![Regel {
+        positie: 1,
+        fragment: "Ö".to_string(),
+        omschrijving: "Otto met twee puntjes erboven, lastig aan de telefoon".to_string(),
+        soort: Soort::Hoofdletter,
+        lastig: true,
+    }];
+    h.state_mut().0.voorlezen = Voorlezen::nieuw(regels, "Ö", false);
+    stap(&mut h);
+    binnen(h.get_by_label("Ö").rect(), "teken");
+    binnen(
+        h.get_by_label_contains("Otto met twee puntjes").rect(),
+        "omschrijving",
+    );
+    for knop in ["Vorige", "Volgende", "Stop"] {
+        binnen(h.get_by_label(knop).rect(), knop);
+    }
+}
+
+#[test]
+fn lang_wachtwoord_wrapt_en_markering_blijft_in_beeld() {
+    let mut h = klein_harnas();
+    let tekst: String = (0..128u8).map(|i| char::from(b'a' + i % 26)).collect();
+    let regels: Vec<Regel> = tekst
+        .chars()
+        .enumerate()
+        .map(|(i, c)| regel(i + 1, &c.to_string(), false))
+        .collect();
+    let mut v = Voorlezen::nieuw(regels, &tekst, false).expect("regels");
+    v.index = 127;
+    h.state_mut().0.voorlezen = Some(v);
+    stap(&mut h);
+    binnen(h.get_by_label(&tekst).rect(), "volledige tekst");
 }
 
 // © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
