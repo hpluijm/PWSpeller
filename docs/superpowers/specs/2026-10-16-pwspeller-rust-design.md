@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Franse en Duitse woordenlijst toegevoegd (alleen a–z). |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Ontwerp vastgelegd na de brainstorm. |
 
 ---
@@ -70,7 +71,7 @@ PWSpeller/
 │   ├── alfabetten/             nl, vl, fr, de, navo
 │   ├── omschrijvingen/         nl, en, fr, de
 │   ├── interface/              nl, en
-│   └── woordenlijsten/         en-eff.txt, nl.txt, nl-geblokkeerd.txt
+│   └── woordenlijsten/         en-eff, nl, fr, de (.txt) + <code>-geblokkeerd.txt
 ├── assets/                     petisys-logo, app-icoon, Atkinson Hyperlegible Mono
 └── docs/
 ```
@@ -92,8 +93,8 @@ Spellen is de combinatie van twee lagen:
 |---|---|---|---|
 | Nederlands | nl (Anna, Bernard, Cornelis …) | nl | nl |
 | Vlaams | vl (Arthur, Brussel, Carolina …) | nl | nl |
-| Frans | fr (Anatole, Berthe, Célestin …) | fr | en-eff |
-| Duits | de (DIN 5009:2022: Aachen, Berlin, Chemnitz …) | de | en-eff |
+| Frans | fr (Anatole, Berthe, Célestin …) | fr | fr |
+| Duits | de (DIN 5009:2022: Aachen, Berlin, Chemnitz …) | de | de |
 | Engels | navo | en | en-eff |
 | NAVO | navo (Alfa, Bravo, Charlie …) | taal van de interface | en-eff |
 
@@ -166,9 +167,17 @@ Een nieuwe taal = één of twee TOML-bestanden en één regel in `spellingstalen
 - `nl-geblokkeerd.txt` — woorden die niet aan een klant worden voorgelezen (onder meer "moord",
   "zelfmoord", "verkrachting", "porno", "schijt", "doodschieten", "drugs"). Een eerste versie
   wordt opgesteld en door Hans goedgekeurd vóór de release.
+- `fr.txt` — bron: `mots_francais_8000_min5.txt` (8.000 woorden, met Claude gegenereerd in
+  opdracht van Petisys). Alleen de woorden met a–z blijven over (5.743, 12,5 bits per woord);
+  woorden met é, è, ç enz. vallen weg. Min `fr-geblokkeerd.txt`.
+- `de.txt` — bron: `deutsche_woerter_8000_min5.txt` (8.000 woorden, idem). Eerst naar kleine
+  letters (zelfstandige naamwoorden staan met hoofdletter in de bron), daarna alleen a–z (6.632,
+  12,7 bits per woord); woorden met ä, ö, ü of ß vallen weg. Min `de-geblokkeerd.txt`.
 
 Regels, bewaakt door een test: elk woord minimaal 5 tekens, alleen a–z, uniek, en niet in de
-blokkeerlijst.
+blokkeerlijst. Voor `en-eff` gelden alleen a–z en uniek (de EFF-lijst heeft ook kortere woorden).
+Accenten en ß zijn uitgesloten omdat ze telefonisch foutgevoelig zijn en de klant ze op zijn
+toetsenbord moet vinden.
 
 ## 5. Generator
 
@@ -356,14 +365,14 @@ Nederlandse lijst.
 | Crate `bitwarden-generators` gebruiken | GPL-3.0 zou PWSpeller GPL maken |
 | Gebruikers eigen taalbestanden laten importeren | Verschillende versies per medewerker; sandbox |
 | Dubbelzinnige Nederlandse woorden schrappen | Kost ruim 2.000 woorden; per letter spellen lost het op |
+| Franse en Duitse woorden met accent of ß spellen of omzetten (é → e, ü → ue) | Foutgevoelig aan de telefoon; omzetten maakt niet-bestaande woorden |
 
 ## 14. Openstaande punten
 
 - Ondertekenen: Apple Developer-account (macOS, ook notarisatie) en een certificaat voor
   codeondertekening (Windows). Zonder: waarschuwing bij de eerste start.
 - Publiceren in de app stores.
-- Woordenlijsten voor Frans en Duits.
-- De blokkeerlijst `nl-geblokkeerd.txt` laten goedkeuren door Hans.
+- De blokkeerlijsten `nl-`, `fr-` en `de-geblokkeerd.txt` laten goedkeuren door Hans.
 
 ---
 
