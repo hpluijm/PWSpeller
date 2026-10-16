@@ -1,0 +1,20 @@
+# ── Over dit bestand ──────────────────────────────────────
+# Doel:           Cargo-bestand van de crate pwspeller-data.
+# Klant:          Petisys
+# Gemaakt vanuit: Petisys
+# Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
+# Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Crate aangemaakt.
+# ──────────────────────────────────────────────────────────
+
+[package]
+name = "pwspeller-data"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+# Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.

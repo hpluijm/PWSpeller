@@ -1,0 +1,23 @@
+# ── Over dit bestand ──────────────────────────────────────
+# Doel:           De werkruimte van PWSpeller 2: noemt de crates en de gedeelde instellingen.
+# Klant:          Petisys
+# Gemaakt vanuit: Petisys
+# Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
+# Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Werkruimte aangemaakt.
+# ──────────────────────────────────────────────────────────
+
+[workspace]
+members = ["crates/*"]
+resolver = "3"
+
+[workspace.package]
+edition = "2024"
+version = "2.0.0"
+license = "MIT"
+publish = false
+
+# © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+# Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.
