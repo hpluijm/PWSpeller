@@ -1,0 +1,55 @@
+# ── Over dit bestand ──────────────────────────────────────
+# Doel:           De zes spellingstalen: welk alfabet, welke omschrijvingen en welke woordenlijst bij elkaar horen.
+# Klant:          Petisys
+# Gemaakt vanuit: Petisys
+# Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
+# Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Spellingstalen nl, vl, fr, de, en en navo aangemaakt (Taak 5).
+# ──────────────────────────────────────────────────────────
+
+[[taal]]
+code = "nl"
+naam = "Nederlands"
+alfabet = "nl"
+omschrijvingen = "nl"
+woordenlijst = "nl"
+
+[[taal]]
+code = "vl"
+naam = "Vlaams"
+alfabet = "vl"
+omschrijvingen = "nl"
+woordenlijst = "nl"
+
+[[taal]]
+code = "fr"
+naam = "Français"
+alfabet = "fr"
+omschrijvingen = "fr"
+woordenlijst = "fr"
+
+[[taal]]
+code = "de"
+naam = "Deutsch"
+alfabet = "de"
+omschrijvingen = "de"
+woordenlijst = "de"
+
+[[taal]]
+code = "en"
+naam = "English"
+alfabet = "navo"
+omschrijvingen = "en"
+woordenlijst = "en-eff"
+
+# NAVO gebruikt de taal van de interface: geen omschrijvingen.
+[[taal]]
+code = "navo"
+naam = "NATO / NAVO"
+alfabet = "navo"
+woordenlijst = "en-eff"
+
+# © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+# Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.

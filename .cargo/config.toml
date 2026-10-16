@@ -1,0 +1,19 @@
+# ── Over dit bestand ──────────────────────────────────────
+# Doel:           Bouwinstellingen: Windows-programma's statisch linken, zodat er geen losse runtime nodig is.
+# Klant:          Petisys
+# Gemaakt vanuit: Petisys
+# Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
+# Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Statisch linken voor Windows.
+# ──────────────────────────────────────────────────────────
+
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
+
+[target.aarch64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
+
+# © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+# Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.

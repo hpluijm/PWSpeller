@@ -1,0 +1,78 @@
+# ── Over dit bestand ──────────────────────────────────────
+# Doel:           De woorden rond de codewoorden in het Frans: sjablonen, cijfers, leestekens en lastige klanken.
+# Klant:          Petisys
+# Gemaakt vanuit: Petisys
+# Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
+# Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Fixronde 1: antislash en sjabloon met een hoofdletter.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Omschrijvingen Frans aangemaakt.
+# ──────────────────────────────────────────────────────────
+
+[meta]
+code = "fr"
+
+[sjablonen]
+hoofdletter = "majuscule {woord}"
+kleine_letter = "minuscule {woord}"
+cijfer = "chiffre {naam}"
+woord = "{woord}"
+woord_met_hoofdletter = "{woord}, avec une majuscule"
+onbekend = "caractère {teken} ({code})"
+
+[cijfers]
+"0" = "zéro"
+"1" = "un"
+"2" = "deux"
+"3" = "trois"
+"4" = "quatre"
+"5" = "cinq"
+"6" = "six"
+"7" = "sept"
+"8" = "huit"
+"9" = "neuf"
+
+[tekens]
+" " = "espace"
+"!" = "point d'exclamation"
+"\"" = "guillemet double"
+"#" = "dièse"
+"$" = "dollar"
+"%" = "pour cent"
+"&" = "esperluette"
+"'" = "apostrophe"
+"(" = "parenthèse ouvrante"
+")" = "parenthèse fermante"
+"*" = "astérisque"
+"+" = "plus"
+"," = "virgule"
+"-" = "tiret"
+"." = "point"
+"/" = "barre oblique"
+":" = "deux-points"
+";" = "point-virgule"
+"<" = "inférieur à"
+"=" = "égal"
+">" = "supérieur à"
+"?" = "point d'interrogation"
+"@" = "arobase"
+"[" = "crochet ouvrant"
+"\\" = "antislash"
+"]" = "crochet fermant"
+"^" = "accent circonflexe"
+"_" = "tiret bas"
+"`" = "accent grave"
+"{" = "accolade ouvrante"
+"|" = "barre verticale"
+"}" = "accolade fermante"
+"~" = "tilde"
+
+[lastige_klanken]
+bevat = []
+eindigt_op = []
+
+# © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+# Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.
