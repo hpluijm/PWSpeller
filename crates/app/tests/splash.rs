@@ -1,0 +1,84 @@
+// ── Over dit bestand ──────────────────────────────────────
+// Doel:           Test het splashscreen: de vijf gegevens, de volgorde vóór het hoofdvenster en de duur van drie seconden.
+// Klant:          Petisys
+// Gemaakt vanuit: Petisys
+// Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
+// Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 13: tests voor het splashscreen aangemaakt.
+// ──────────────────────────────────────────────────────────
+
+use egui_kittest::Harness;
+use egui_kittest::kittest::Queryable;
+use pwspeller::app::PwApp;
+use pwspeller::instellingen::VERSIE;
+use pwspeller::splash::{Fase, SPLASHDUUR, volgende_fase};
+use pwspeller::thema;
+use std::time::{Duration, Instant};
+
+fn harnas(t0: Instant) -> Harness<'static, (PwApp, Instant)> {
+    Harness::builder()
+        .with_size([560.0, 640.0])
+        .with_context_setup(thema::zet_thema)
+        .build_ui_state(
+            |ui, (app, nu): &mut (PwApp, Instant)| app.teken(ui, *nu),
+            (PwApp::voor_test(t0), t0),
+        )
+}
+
+#[test]
+fn splash_toont_vijf_gegevens() {
+    let t0 = Instant::now();
+    let mut h = harnas(t0);
+    h.step();
+    h.step();
+    assert!(matches!(h.state().0.fase, Fase::Splash { .. }));
+    assert!(h.query_by_label("PWSpeller").is_some(), "naam ontbreekt");
+    assert!(
+        h.query_by_label("Klant: Petisys").is_some(),
+        "klant ontbreekt"
+    );
+    assert!(h.query_by_label(VERSIE).is_some(), "versie ontbreekt");
+    assert!(
+        h.query_by_label("© 2026 Petisys. Alle rechten voorbehouden.")
+            .is_some(),
+        "copyright ontbreekt"
+    );
+    assert!(h.query_by_label("Petisys").is_some(), "logo ontbreekt");
+}
+
+#[test]
+fn splash_komt_voor_hoofdvenster() {
+    let t0 = Instant::now();
+    let mut h = harnas(t0);
+    h.step();
+    assert!(matches!(h.state().0.fase, Fase::Splash { .. }));
+    // Het hoofdvenster heeft voorlopig geen eigen teksten; na de splash moeten de splashteksten weg zijn.
+    h.state_mut().1 = t0 + SPLASHDUUR;
+    h.step();
+    h.step();
+    assert!(matches!(h.state().0.fase, Fase::Hoofd));
+    assert!(h.query_by_label("Klant: Petisys").is_none());
+    assert!(h.query_by_label("PWSpeller").is_none());
+}
+
+#[test]
+fn na_drie_seconden_hoofdvenster() {
+    let t0 = Instant::now();
+    assert!(matches!(
+        volgende_fase(
+            &Fase::Splash { start: t0 },
+            t0 + Duration::from_millis(2999)
+        ),
+        Fase::Splash { .. }
+    ));
+    assert!(matches!(
+        volgende_fase(&Fase::Splash { start: t0 }, t0 + SPLASHDUUR),
+        Fase::Hoofd
+    ));
+    assert!(matches!(volgende_fase(&Fase::Hoofd, t0), Fase::Hoofd));
+}
+
+// © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+// Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.

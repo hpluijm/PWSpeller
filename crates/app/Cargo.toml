@@ -6,6 +6,9 @@
 # Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 #
 # 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Taak 13: image (alleen png) en egui_kittest (dev) toegevoegd.
+#
+# 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 #   Taak 12: eframe, serde, toml, directories, sys-locale en log toegevoegd.
 #
 # 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -28,6 +31,10 @@ toml = "1.1.8"
 directories = "6.0.0"
 sys-locale = "0.3.2"
 log = "0.4.34"
+image = { version = "0.25.10", default-features = false, features = ["png"] }
+
+[dev-dependencies]
+egui_kittest = "0.37.0"
 
 # © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
 # Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.

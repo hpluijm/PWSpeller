@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 13: de app start met het splashscreen via PwApp::nieuw(Some(cc), nu).
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 12 fixronde 1: fouten bij start van logboek en venster ook naar pwspeller-fout.log.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -16,17 +19,19 @@
 
 use eframe::egui;
 use pwspeller::app::PwApp;
-use pwspeller::instellingen::{instellingenpad, logboekpad};
-use pwspeller::{logboek, thema};
+use pwspeller::instellingen::{Instellingen, instellingenpad, interfacetaal, logboekpad};
+use pwspeller::logboek;
 use pwspeller_kern::talen::interfacetekst;
+use std::time::Instant;
 
 fn main() -> eframe::Result {
     if let Err(e) = logboek::start_logboek(&logboekpad()) {
         meld_fout(&format!("logboek niet gestart: {e}"));
     }
-    let app = PwApp::nieuw(instellingenpad());
+    let instellingen = Instellingen::laad(&instellingenpad());
+    let taal = interfacetaal(&instellingen);
     log::info!("PWSpeller {} gestart", pwspeller::instellingen::VERSIE);
-    let titel = interfacetekst(&app.interfacetaal, "app.titel").to_owned();
+    let titel = interfacetekst(&taal, "app.titel").to_owned();
     let opties = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_title(titel.clone())
@@ -37,10 +42,7 @@ fn main() -> eframe::Result {
     let resultaat = eframe::run_native(
         &titel,
         opties,
-        Box::new(move |cc| {
-            thema::zet_thema(&cc.egui_ctx);
-            Ok(Box::new(app))
-        }),
+        Box::new(move |cc| Ok(Box::new(PwApp::nieuw(Some(cc), Instant::now())))),
     );
     if let Err(e) = &resultaat {
         log::error!("venster gestopt met een fout: {e}");
