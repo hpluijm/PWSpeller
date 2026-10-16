@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Logboek bijgewerkt tot en met fase C (taak 12–17). |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Logboek bijgewerkt tot en met fase B (taak 5–11). |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Logboek tot en met Taak 5 vastgelegd voor de overdracht. |
 
@@ -94,6 +95,52 @@ FIX_BASE taak 11: 031de09
 Task 11: fix round 1/5 (2 addressed, 0 open; re-review door controller: functie gelezen) 
 Task 11: complete (commits e312405..c62ccf2, review clean)
 Fase B: klaar — stoppunt, wacht op akkoord Hans voor fase C.
+Hans: blokkeerlijsten goedgekeurd; akkoord fase C (2026-10-17).
+BASE taak 12: 303214a
+Task 12: review spec ✅ Approved; Important: versienummer veroudert (rerun-if-changed alleen .git/HEAD).
+Ruling: fixronde neemt ook mee: Windows-foutpad zichtbaar (fallback-logbestand in temp_dir; afspraak 3) en kapot instellingenbestand eerst hernoemen naar .kapot — goedkoop, voorkomt stil falen — kost een paar regels.
+Task 12: minor (deferred): log zonder rotatie; UTC-tijden in log; hover-contrast; set_boxed_logger tweede aanroep; geen test VERSIE; font mist ✓ ↑ ▲ □ (pictogrammen als vorm tekenen in taak 14/15).
+FIX_BASE taak 12: fd74d65
+Task 12: fix round 1/5 (3 addressed, 0 open; re-review door controller: diff gelezen)
+Task 12: complete (commits 303214a..2e4c5df, review clean)
+BASE taak 13: 2e4c5df
+Task 13: review spec ✅, 3 Important: logo-asset 2639px elke start verkleind; volgordetest bewijst niets; faalpad logo niet getest.
+Ruling: fixronde neemt minors mee: merkgrijs i.p.v. Color32::GRAY, logo-textuur vrijgeven na splash, instellingen niet twee keer laden — goedkoop.
+Task 13: minor (deferred): KLANT hardcoded; versie zonder label; splash niet gemeten op 480x560.
+FIX_BASE taak 13: 8e0e5cb
+Task 13: fix round 1/5 (6 addressed; re-review controller: test gelezen — titel 'PWSpeller' ook op splash, dus volgorde vooral via Fase bewezen)
+Ruling: taak 14 breidt splash_komt_voor_hoofdvenster uit: knop 'knop.genereer' ontbreekt in frame 1 en is er na SPLASHDUUR — dan bewijst de test de volgorde echt — kost niets.
+Task 13: complete (commits 2e4c5df..ab0f829, review clean)
+BASE taak 14: ab0f829
+Task 14: review spec ❌ (eigen tekst zonder groepjes), 4 Important: eigen_tekst-commentaar onjuist / geen zeroize; groepjes ontbreken bij eigen tekst; spelregels elke frame opnieuw (prestatie + kopieën); Enter overschrijft gefocuste knop.
+Ruling: fixronde neemt minors mee: unwrap_or("-") weg, woordenlijsten sorteren, verhoog_lengte één keer per frame.
+Task 14: minor (deferred): teken_midden/genereer te groot; testgaten (woordenlijstkeuze, taalwissel wachtzin, vet/kleur); 480 px niet gemeten (fase-einde visueel nameten).
+FIX_BASE taak 14: a2da753
+Task 14: fix round 1/5 (5 addressed, 0 open; re-review sonnet)
+Task 14: complete (commits ab0f829..f08baf4, review clean)
+BASE taak 15: f08baf4
+Task 15: review spec ✅ Approved; minor 1+2 direct verwerkt (a7c3332, controller: diff gelezen)
+Task 15: minor (deferred): geen test opnieuw kopiëren binnen termijn; geen test app zonder bord; klembord_mislukt blijft staan; Windows/Linux-takken niet gecompileerd (CI taak 18).
+Task 15: complete (commits f08baf4..a7c3332, review clean)
+BASE taak 16: a7c3332
+Task 16: review spec ✅, 2 Important: midden past niet op 480x560 (geen scroll); gemarkeerde groep buiten beeld bij lange wachtwoorden.
+Ruling: fixronde neemt mee: zuiver zwart (#000) op goud (5,2:1 i.p.v. 4,6:1), dode code in test.
+Task 16: deferred naar taak 17: time-out/wis van geschiedenis moet ook in voorleesmodus werken (voorlezen = None) + test.
+Task 16: minor (deferred): per-frame kopieën in egui-weergave; geen Drop-test.
+FIX_BASE taak 16: 01128be
+Task 16: fix round 1/5 (3 addressed; re-review controller: commits + 176 tests groen gecontroleerd)
+Task 16: complete (commits a7c3332..3f0d2eb, review clean)
+BASE taak 17: 3f0d2eb
+Task 17: review spec ✅, 4 Important: wis bij geminimaliseerd venster onzeker; on_exit niet bij kill/geforceerd afmelden (spec te sterk); huidig resultaat overleeft inactiviteitswis; test geen-wachtwoord-op-schijf zwak.
+Ruling: bij inactiviteitswis en bij_afsluiten ook het huidige resultaat (hoofd.wachtwoord/wachtzin/cache, eigen tekst) wissen — spec §9 bedoelt dat na inactiviteit niets leesbaar blijft — kost: medewerker ziet na 15 min een leeg scherm.
+Ruling: elke invoer (toets/muis) telt als gebruik (markeer_gebruik in kern) — "inactiviteit" = niemand bedient de app — kost: geschiedenis blijft langer als iemand bezig is.
+Ruling: spec §9 wordt verzacht: on_exit dekt venster sluiten en normaal afsluiten; bij kill/geforceerd afmelden verdwijnt het geheugen met het proces, het klembord niet — eerlijk i.p.v. te sterke belofte — melden aan Hans.
+Ruling: geminimaliseerd venster: grens vastleggen in implementatie.md + handmatige meting bij fase-einde — meten kan niet in CI.
+FIX_BASE taak 17: 02d62f5
+Task 17: fix round 1/5 (6 addressed, 0 open; re-review sonnet)
+Task 17: minor (deferred): resultaat in beeld na handmatige 'Wis geschiedenis' valt niet onder inactiviteitswis (lege geschiedenis → controle stopt).
+Task 17: complete (commits 3f0d2eb..7ab7da9, review clean)
+Fase C: klaar — stoppunt, wacht op akkoord Hans voor fase D. Visuele controle niet mogelijk (screencapture geweigerd) → bij Hans.
 
 ---
 

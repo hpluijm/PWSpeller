@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fase C afgerond: taak 12 t/m 17 (de app). |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fase B afgerond: taak 5 t/m 11. |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Taak 3–5 en de overdracht naar de andere Mac. |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Eerste entry voor PWSpeller 2. |
@@ -15,6 +16,17 @@
 ---
 
 # Voortgang
+
+## 2026-10-17, later (Claude Code) — fase C afgerond: taak 12 t/m 17
+
+De app staat: splashscreen, hoofdvenster met drie tabbladen, klembord, voorleesmodus, geschiedenis- en instellingenpaneel. Elke taak is gereviewd; de belangrijkste vondsten:
+
+- **Splash:** het logo was 2.639 px breed en liet egui vastlopen op de maximale textuurmaat (2.048); het asset is nu 640 px. Het versienummer bleef staan na een nieuwe commit omdat `build.rs` alleen `.git/HEAD` volgde.
+- **Hoofdvenster:** de spelling werd elk beeld (60 per seconde) opnieuw opgebouwd, met ongewiste kopieën van het wachtwoord; nu in een cache die zichzelf wist. Enter maakte een nieuw wachtwoord terwijl een knop focus had.
+- **Klembord:** op macOS standaard niet gewist (wens van Hans); wel gemarkeerd als vertrouwelijk (`ConcealedType`, nagekeken in de broncode van arboard). Op Linux onder X11 bestaat zo'n markering niet.
+- **Voorleesmodus:** paste eerst niet in het kleinste venster (480 × 560); nu scrollt het midden en schaalt het teken mee.
+- **Geschiedenis:** na inactiviteit wordt nu ook het wachtwoord op het scherm gewist, en elke toets of klik telt als gebruik. De spec beloofde wissen "bij afmelden"; dat is aangepast: bij normaal afsluiten wordt gewist, bij een geforceerd einde verdwijnt het geheugen met het proces maar blijft het klembord staan.
+- **Niet gemeten:** het echte venster is niet visueel bekeken (schermopname is hier geweigerd), en wissen bij een geminimaliseerd venster is niet nagemeten.
 
 ## 2026-10-17 (Claude Code) — fase B afgerond: taak 5 t/m 11
 

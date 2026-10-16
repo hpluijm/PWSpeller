@@ -10,6 +10,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Stand na fase C bijgewerkt. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Stand na fase B bijgewerkt. |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Regel over wachtzinnen in het Nederlands, Frans en Duits toegevoegd. |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Releasenotes aangemaakt. |
@@ -27,11 +28,12 @@
 
 ### Nog te doen
 
-- De nieuwe versie is nog niet bruikbaar; de rekenkern (generator, spellen, geschiedenis) staat, het programmavenster volgt.
+- Het programma werkt, maar er is nog geen downloadbare versie; die volgt met de eerste release voor Windows, macOS en Linux.
 
 ### Bekende problemen
 
-- Geen.
+- Wordt het programma geforceerd beëindigd (taakbeheer, stroom eraf), dan blijft een gekopieerd wachtwoord op het klembord staan.
+- Op Linux met X11 kunnen klembordbeheerders een gekopieerd wachtwoord bewaren.
 
 ---
 
