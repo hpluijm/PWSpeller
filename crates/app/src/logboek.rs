@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 17: start_logboek mag vaker draaien en wisselt dan het bestand (tests met een eigen pad).
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 12: logboek aangemaakt.
 // ──────────────────────────────────────────────────────────
 
@@ -17,8 +20,13 @@ use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 struct Logboek {
-    bestand: Mutex<File>,
+    bestand: Mutex<Option<File>>,
 }
+
+/// De ene globale logger; het bestand erin kan gewisseld worden.
+static LOGBOEK: Logboek = Logboek {
+    bestand: Mutex::new(None),
+};
 
 impl Log for Logboek {
     fn enabled(&self, metadata: &Metadata) -> bool {
@@ -33,7 +41,9 @@ impl Log for Logboek {
             .duration_since(UNIX_EPOCH)
             .map(|d| d.as_secs())
             .unwrap_or(0);
-        if let Ok(mut f) = self.bestand.lock() {
+        if let Ok(mut g) = self.bestand.lock()
+            && let Some(f) = g.as_mut()
+        {
             let _ = writeln!(
                 f,
                 "{} {:<5} {}",
@@ -45,7 +55,9 @@ impl Log for Logboek {
     }
 
     fn flush(&self) {
-        if let Ok(mut f) = self.bestand.lock() {
+        if let Ok(mut g) = self.bestand.lock()
+            && let Some(f) = g.as_mut()
+        {
             let _ = f.flush();
         }
     }
@@ -72,17 +84,18 @@ fn tijdstip(secs: u64) -> String {
     )
 }
 
-/// Start het logboek en schrijft naar `pad` (de map wordt aangemaakt). Hierin komen nooit
-/// wachtwoorden of geschiedenis.
+/// Start het logboek en schrijft naar `pad` (de map wordt aangemaakt). Een tweede aanroep
+/// wisselt alleen het bestand. Hierin komen nooit wachtwoorden of geschiedenis.
 pub fn start_logboek(pad: &Path) -> io::Result<()> {
     if let Some(map) = pad.parent() {
         fs::create_dir_all(map)?;
     }
     let bestand = OpenOptions::new().create(true).append(true).open(pad)?;
-    log::set_boxed_logger(Box::new(Logboek {
-        bestand: Mutex::new(bestand),
-    }))
-    .map_err(io::Error::other)?;
+    if let Ok(mut g) = LOGBOEK.bestand.lock() {
+        *g = Some(bestand);
+    }
+    // Een logger die al staat (tweede start) is geen fout.
+    let _ = log::set_logger(&LOGBOEK);
     log::set_max_level(LevelFilter::Info);
     Ok(())
 }

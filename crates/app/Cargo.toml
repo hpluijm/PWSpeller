@@ -6,6 +6,9 @@
 # Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 #
 # 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Taak 17: chrono (alleen clock) toegevoegd voor de lokale tijd in de geschiedenis.
+#
+# 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 #   Taak 15: arboard (zonder image-data) en sha2 toegevoegd.
 #
 # 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -41,6 +44,7 @@ image = { version = "0.25.10", default-features = false, features = ["png"] }
 zeroize = "1.9.1"
 arboard = { version = "3.7.0", default-features = false, features = ["wayland-data-control"] }
 sha2 = "0.11.1"
+chrono = { version = "0.4.45", default-features = false, features = ["clock"] }
 
 [dev-dependencies]
 egui_kittest = "0.37.0"

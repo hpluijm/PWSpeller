@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 17: knoppen Geschiedenis en Instellingen, panelen, melding na wissen.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 15: klembordstap per beeld en melding bij mislukken.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -210,6 +213,7 @@ impl PwApp {
         match resultaat {
             Ok(g) => {
                 self.geschiedenis.voeg_toe(&g, &code, nu);
+                self.gewist_melding = false;
                 self.hoofd.fout = None;
                 match g.modus {
                     pwspeller_kern::generator::Modus::Wachtwoord => self.hoofd.wachtwoord = Some(g),
@@ -254,6 +258,8 @@ impl PwApp {
                 genereer |= self.teken_midden(ui, &taal);
             });
         });
+        self.teken_geschiedenis(ui.ctx(), nu);
+        self.teken_instellingen(ui.ctx());
         if self.verhoog_lengte() {
             ui.ctx().request_repaint();
         } else if self.instellingen.wachtwoord != voor {
@@ -314,6 +320,14 @@ impl PwApp {
                         );
                     }
                 });
+            ui.toggle_value(
+                &mut self.geschiedenis_open,
+                interfacetekst(taal, "geschiedenis.titel"),
+            );
+            ui.toggle_value(
+                &mut self.instellingen_open,
+                interfacetekst(taal, "instellingen.titel"),
+            );
         });
     }
 
@@ -336,6 +350,9 @@ impl PwApp {
         }
         if self.hoofd.klembord_mislukt {
             ui.label(interfacetekst(taal, "melding.klembord_mislukt"));
+        }
+        if self.gewist_melding {
+            ui.label(interfacetekst(taal, "geschiedenis.gewist_inactief"));
         }
         if let Some(fout) = &self.hoofd.fout {
             ui.colored_label(crate::thema::SPECIAAL_LICHT, fout);

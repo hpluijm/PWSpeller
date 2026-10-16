@@ -6,6 +6,9 @@
 # Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 #
 # 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Taak 17: sleutel geschiedenis.spel toegevoegd.
+#
+# 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 #   Drie sleutels voor de voorleesmodus toegevoegd (Taak 16).
 #
 # 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -21,6 +24,7 @@
 "app.titel" = "PWSpeller"
 "geschiedenis.gewist_inactief" = "De geschiedenis is gewist na inactiviteit."
 "geschiedenis.leeg" = "De geschiedenis is leeg."
+"geschiedenis.spel" = "Opnieuw spellen"
 "geschiedenis.titel" = "Geschiedenis"
 "geschiedenis.toon" = "Toon geschiedenis"
 "geschiedenis.verberg" = "Verberg geschiedenis"

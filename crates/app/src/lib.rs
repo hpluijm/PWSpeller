@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 17: modules geschiedenis_paneel en instellingen_paneel toegevoegd.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 16: module voorlezen toegevoegd.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -22,8 +25,10 @@
 // ──────────────────────────────────────────────────────────
 
 pub mod app;
+pub mod geschiedenis_paneel;
 pub mod hoofd;
 pub mod instellingen;
+pub mod instellingen_paneel;
 pub mod klembord;
 pub mod logboek;
 pub mod opties;

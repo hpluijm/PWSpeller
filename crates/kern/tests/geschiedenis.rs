@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 17: test voor zet_time_out.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Fixronde 1: tests voor wandklok en ontsleutelen na time-out.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -195,6 +198,17 @@ fn ontsleutelen_na_time_out_geeft_none_en_wist() {
         h.ontsleutel(id, nu + Duration::from_secs(16 * 60))
             .is_none()
     );
+    assert!(h.items().is_empty());
+}
+
+#[test]
+fn zet_time_out_geldt_voor_een_lopende_geschiedenis() {
+    let t0 = Instant::now();
+    let mut h = Geschiedenis::nieuw(None);
+    h.voeg_toe(&wachtwoord("abc"), "nl", t0);
+    assert!(!h.controleer_inactiviteit_op(t0 + Duration::from_secs(7200), SystemTime::now()));
+    h.zet_time_out(Some(Duration::from_secs(60)));
+    assert!(h.controleer_inactiviteit_op(t0 + Duration::from_secs(61), SystemTime::now()));
     assert!(h.items().is_empty());
 }
 

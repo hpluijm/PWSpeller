@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 17: zet_time_out toegevoegd (instellingen wijzigen de time-out van een lopende geschiedenis).
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Fixronde 1: inactiviteit ook op de wandklok (slaapstand), ontsleutel controleert eerst.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -152,6 +155,12 @@ impl Geschiedenis {
         self.items.clear();
         self.sleutel.zeroize();
         rand::rng().fill_bytes(&mut self.sleutel[..]);
+    }
+
+    /// Wijzigt de time-out van een lopende geschiedenis; de teller van de inactiviteit loopt
+    /// door vanaf het laatste gebruik.
+    pub fn zet_time_out(&mut self, time_out: Option<Duration>) {
+        self.time_out = time_out;
     }
 
     /// Wist als de inactiviteit de time-out heeft bereikt (`>=`), gemeten met `nu` én met de

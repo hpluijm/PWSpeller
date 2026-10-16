@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 17: sectie Geschiedenis- en instellingenpaneel, wissen bij sluiten en na inactiviteit. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 15 fixronde 1: hash wordt vóór het lezen weggenomen (bewust, geen lus). |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 15: sectie Klembord, met de markering per platform. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 14 fixronde 1: sectie Hoofdvenster, met de beperkte garantie voor het wissen van eigen tekst. |
@@ -76,7 +77,7 @@ Het ontwerp staat in [het ontwerpdocument](superpowers/specs/2026-10-16-pwspelle
 - `PwApp` bezit `Option<Klembordbeheer<Box<dyn Bord>>>` (`None` zonder systeemklembord, zoals
   Linux in CI) en vraagt `request_repaint_after` tot het wis-moment. Fouten: `log::warn!` zonder
   inhoud en de melding `melding.klembord_mislukt`; nooit paniek. `bij_sluiten_klembord` wordt in
-  Taak 17 aan `on_exit` gekoppeld.
+  Taak 17 aan `on_exit` gekoppeld (via `bij_afsluiten`).
 - **Markering als vertrouwelijk (arboard 3.7.0, `exclude_from_history`):** macOS zet
   `org.nspasteboard.ConcealedType` (arboard doet dat zelf, geen eigen objc-code nodig). Windows
   zet `ExcludeClipboardContentFromMonitorProcessing`-formaten via `exclude_from_history` en
@@ -84,6 +85,31 @@ Het ontwerp staat in [het ontwerpdocument](superpowers/specs/2026-10-16-pwspelle
   gebruikt `exclude_from_history`, dat alleen onder Wayland (data-control) iets doet; onder X11
   is er geen markering. De Windows- en Linux-takken zijn op macOS niet gecompileerd, dat doet CI.
 - `image-data` van arboard staat uit: er wordt alleen tekst gebruikt.
+
+## Geschiedenis- en instellingenpaneel (app, `geschiedenis_paneel.rs`, `instellingen_paneel.rs`)
+
+- Twee knoppen in de bovenbalk openen een venster (`egui::Window`): *Geschiedenis* en
+  *Instellingen* (tekst, geen tandwielglyph, want dat staat niet zeker in het lettertype).
+- Items staan nieuwste eerst met lokale tijd (`chrono`, alleen feature `clock`, geen netwerk),
+  modus en spellingstaal. De tekst is `••••••••` tot *Toon*; dan ontsleutelt `ontsleutel` het item
+  en staat het in `PwApp.getoond` (`Gegenereerd` met `Zeroizing`-velden). Verbergen, het paneel
+  sluiten, wissen of een time-out leegt die lijst. *Kopieer* zet de ontsleutelde tekst eenmalig
+  in `extra_kopie` en gaat zo door de bestaande klembordroute; *Opnieuw spellen* laadt het item
+  als huidig resultaat (tab en spellingstaal volgen het item).
+- **Inactiviteit:** `tik_geschiedenis` draait elk beeld, ook tijdens de voorleesmodus (die het
+  hoofdvenster niet tekent). Wist `controleer_inactiviteit`, dan gaan de voorleesmodus en de
+  getoonde items dicht en komt `geschiedenis.gewist_inactief` (tot de volgende handeling). De
+  voorleesmodus sluit bij elke wisbeurt, ook als hij het huidige resultaat toont: eenvoudiger en
+  veiliger dan onderscheid maken. `request_repaint_after(1 s)` alleen zolang er items zijn en
+  een time-out staat.
+- De time-out volgt de instelling elk beeld (`Geschiedenis::zet_time_out`), dus een wijziging in het
+  instellingenpaneel geldt direct; de teller loopt door vanaf het laatste gebruik.
+- **Sluiten:** `eframe::App::on_exit` roept `bij_afsluiten` aan: geschiedenis wissen, getoonde
+  items en voorleesmodus loslaten, klembord wissen volgens de instelling.
+- **Niets op schijf:** instellingen bevatten alleen opties; het logboek alleen meldingen zonder
+  inhoud (`Gegenereerd` toont de tekst als `***`). `nieuw_met_paden` plus `start_logboek`
+  (mag vaker draaien; de ene globale logger wisselt van bestand) maken de test mogelijk die 20
+  generaties (wachtwoord en wachtzin, woorden apart) tegen beide bestanden controleert.
 
 ## Afgewezen alternatieven
 
@@ -93,6 +119,8 @@ Het ontwerp staat in [het ontwerpdocument](superpowers/specs/2026-10-16-pwspelle
 | C# met Avalonia | VB niet ondersteund, grote bestanden, native bibliotheken naast de exe |
 | Go met Fyne | cgo en OpenGL, lastiger kruiselings bouwen |
 | Eén HTML-bestand | Geen exe, geen app store-pakket |
+| `time` met lokale offset in plaats van `chrono` | `time::UtcOffset::current_local_offset` faalt in multithreaded programma's; `chrono` met alleen `clock` is bruikbaar en klein |
+| Geschiedenis als vast zijpaneel | Een venster houdt het hoofdvenster op de minimale breedte intact |
 | Slint | Extra licentievoorwaarde, eigen opmaaktaal |
 | Iced | Nog vóór 1.0, API verandert per release |
 | Crate `bitwarden-generators` gebruiken | GPL-3.0 zou PWSpeller GPL maken |

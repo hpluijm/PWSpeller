@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 17: panelen, wissen na inactiviteit, on_exit/bij_afsluiten en nieuw_met_paden.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 16: voorleesmodus als eigen weergave (veld voorlezen, opent op het verzoek uit het hoofdvenster).
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -31,9 +34,12 @@ use crate::splash::{self, Fase, volgende_fase};
 use crate::thema;
 use crate::voorlezen::{Actie, Voorlezen};
 use eframe::egui;
+use pwspeller_kern::generator::Gegenereerd;
 use pwspeller_kern::geschiedenis::Geschiedenis;
+use std::path::Path;
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
+use zeroize::Zeroizing;
 
 pub struct PwApp {
     pub instellingen: Instellingen,
@@ -47,6 +53,15 @@ pub struct PwApp {
     pub geschiedenis: Geschiedenis,
     /// De voorleesmodus; als die open is, wordt het hoofdvenster niet getekend.
     pub voorlezen: Option<Voorlezen>,
+    /// Het geschiedenispaneel en het instellingenpaneel staan open.
+    pub geschiedenis_open: bool,
+    pub instellingen_open: bool,
+    /// De geschiedenis is na inactiviteit gewist; een korte melding tot de volgende handeling.
+    pub gewist_melding: bool,
+    /// Items uit de geschiedenis waarvan de tekst nu ontsleuteld in beeld staat.
+    pub(crate) getoond: Vec<(u64, Gegenereerd)>,
+    /// Een kopieerverzoek uit het geschiedenispaneel, voor één keer.
+    pub(crate) extra_kopie: Option<Zeroizing<String>>,
     /// `None` als er geen systeemklembord is (of in tests).
     klembord: Option<Klembordbeheer<Box<dyn Bord>>>,
     logo: Option<egui::TextureHandle>,
@@ -79,6 +94,19 @@ impl PwApp {
         Self::van(instellingen, None, nu)
     }
 
+    /// App voor tests van wat er op schijf komt: eigen instellingenpad en eigen logboek,
+    /// zonder systeemklembord.
+    pub fn nieuw_met_paden(instellingenpad: PathBuf, logpad: &Path, nu: Instant) -> Self {
+        if let Err(e) = crate::logboek::start_logboek(logpad) {
+            eprintln!("logboek niet gestart: {e}");
+        }
+        let instellingen = Instellingen {
+            interfacetaal: Some("nl".to_string()),
+            ..Instellingen::default()
+        };
+        Self::van(instellingen, Some(instellingenpad), nu)
+    }
+
     fn van(instellingen: Instellingen, instellingenpad: Option<PathBuf>, nu: Instant) -> Self {
         let interfacetaal = interfacetaal(&instellingen);
         let time_out = instellingen
@@ -93,6 +121,11 @@ impl PwApp {
             hoofd: HoofdState::default(),
             geschiedenis: Geschiedenis::nieuw(time_out),
             voorlezen: None,
+            geschiedenis_open: false,
+            instellingen_open: false,
+            gewist_melding: false,
+            getoond: Vec::new(),
+            extra_kopie: None,
             klembord: None,
             logo: None,
             logo_geprobeerd: false,
@@ -107,10 +140,12 @@ impl PwApp {
     /// Eén klembordstap per beeld: kopieerverzoek afhandelen, wissen als het moment er is.
     /// Geeft het moment terug waarop opnieuw getekend moet worden om te wissen.
     pub fn klembord_stap(&mut self, nu: Instant) -> Option<Instant> {
-        let gevraagd = self.neem_kopieer_verzoek();
-        let tekst = if gevraagd {
-            self.huidige_tekst()
-                .map(|t| zeroize::Zeroizing::new(t.to_owned()))
+        let extra = self.neem_extra_kopie();
+        let gevraagd = self.neem_kopieer_verzoek() || extra.is_some();
+        let tekst = if extra.is_some() {
+            extra
+        } else if gevraagd {
+            self.huidige_tekst().map(|t| Zeroizing::new(t.to_owned()))
         } else {
             None
         };
@@ -128,7 +163,18 @@ impl PwApp {
         beheer.wis_moment(&self.instellingen)
     }
 
-    /// Wist het klembord bij het sluiten (Taak 17 koppelt dit aan `on_exit`).
+    /// Wist alles wat bij het sluiten weg moet: geschiedenis, ontsleutelde items, voorleesmodus
+    /// en (volgens de instelling) het klembord. `on_exit` roept dit aan.
+    pub fn bij_afsluiten(&mut self) {
+        self.geschiedenis.wis();
+        self.getoond.clear();
+        self.extra_kopie = None;
+        self.voorlezen = None;
+        self.bij_sluiten_klembord();
+        log::info!("afgesloten");
+    }
+
+    /// Wist het klembord bij het sluiten, volgens de instelling.
     pub fn bij_sluiten_klembord(&mut self) {
         if let Some(beheer) = self.klembord.as_mut() {
             beheer.bij_sluiten(&self.instellingen);
@@ -164,6 +210,8 @@ impl PwApp {
 impl PwApp {
     /// De voorleesmodus als die open is, anders het hoofdvenster; een verzoek om voor te lezen opent hem.
     fn teken_hoofd_of_voorlezen(&mut self, ui: &mut egui::Ui, nu: Instant) {
+        // Ook tijdens de voorleesmodus: daar wordt het hoofdvenster niet getekend.
+        self.tik_geschiedenis(ui.ctx(), nu);
         if let Some(v) = self.voorlezen.as_mut() {
             if v.teken(ui, &self.interfacetaal) == Actie::Stop {
                 // Drop wist de regels.
@@ -204,6 +252,10 @@ impl PwApp {
 impl eframe::App for PwApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         self.teken(ui, Instant::now());
+    }
+
+    fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
+        self.bij_afsluiten();
     }
 }
 
