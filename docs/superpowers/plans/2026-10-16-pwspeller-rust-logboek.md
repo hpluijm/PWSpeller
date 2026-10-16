@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Logboek bijgewerkt tot en met fase B (taak 5–11). |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Logboek tot en met Taak 5 vastgelegd voor de overdracht. |
 
 ---
@@ -51,6 +52,48 @@ BASE taak 5: 74f33f7
 Task 5: geïmplementeerd (commit 6bee37f) — REVIEW NOG NIET GEDAAN. Zorg implementer: drempeltests (nl ≥ 7500, fr/de ≥ 5500) beperkten blokkeren; milde woorden teruggezet; fr 5511.
 Overdracht naar de andere Mac op 2026-10-16 op verzoek van Hans. Hervatten: Taak 5 reviewen, dan Taak 10 (vóór 7), 6, 7, 8, 9, 11.
 Briefs opnieuw maken: awk -v n=N '$0 ~ "^### Taak "n":" {p=1; print; next} p && /^(### Taak |## Fase |---$|\*\*Stoppunt)/ {exit} p' PLAN > taak-N-brief.md (scripts van de skill zoeken naar "Task N" en werken niet).
+
+Hervat op Mac mini M4 (2026-10-17); branch gelijk aan master 38e7dcf.
+Task 5: review — spec ✅; Important: idioot, zwijn (nl), stupide (fr), satan (de) niet geblokkeerd.
+Task 5: minor (deferred → voorleggen aan Hans bij goedkeuring blokkeerlijsten): lijst van beladen woorden (doodmoe, varken, enfer, cochon, schrecklich, luftwaffe, …), zie reviewrapport.
+Task 5: fix round 1/5 (4 addressed, 0 open; commits 89d229b..0f9c9c1) — re-review door controller (git show, 8 regels)
+Task 5: complete (commits 74f33f7..0f9c9c1, review clean)
+BASE taak 6: 0f9c9c1
+Task 6: review — spec ✅, Important: Box::leak in interfacetekst.
+Ruling: interfacetekst krijgt signatuur `fn interfacetekst<'a>(taal: &str, sleutel: &'a str) -> &'a str` i.p.v. `-> &'static str` uit het plan — spec legt de signatuur niet vast, geen lek — kost: latere taken die &'static verwachten moeten een levensduur volgen.
+Task 6: minor (deferred): `pub use pwspeller_data::*` breed; dedup() zonder sort/commentaar in build.rs; onbekende extensies in data/ stil genegeerd.
+Task 6: fix round 1/5 (1 addressed, 0 open; commits 217c50e..3b6265b) — re-review door controller (git show)
+Task 6: complete (commits 0f9c9c1..3b6265b, review clean)
+BASE taak 10: 3b6265b
+Ruling: review taak 10 door controller (35 regels pure functies + 11 tests gelezen) i.p.v. subagent — Hans vroeg zuinig met tokens, diff klein en volledig gelezen — kost: gemiste subtiliteit in formules.
+Task 10: complete (commits 3b6265b..7d12df3, review clean). Concern implementer: log2(10·n) voor cijfer is correct (10 cijfers × n posities).
+Task 10: minor (deferred): cargo fmt --check geeft 23 afwijkingen (o.a. build.rs) — Ruling: implementer taak 7 draait cargo fmt in een aparte commit — CI (taak 18) eist fmt.
+BASE taak 7: 7d12df3
+Task 7: geïmplementeerd (b848d5f fmt, 751bd88); review loopt
+Task 7: review — spec ✅, 3 Important: minima onbegrensd (>128 mogelijk), Vec<char> onbeschermd, geen OS-RNG-helper.
+Ruling: fixronde neemt ook minor 4 (rand feature unbiased), 5 (doc-comment entropiebenadering) en 6 (positietest shuffle) mee — goedkoop, zelfde bestand — kost een paar regels.
+Ruling: publieke API wordt genereer_wachtwoord_os(o) met rand::rng(); generieke variant blijft pub maar #[doc(hidden)] voor tests van andere crates — afwijking van planinterface — kost: app (taak 14) moet _os-variant gebruiken.
+Task 7: minor (deferred → taak 8): woorden: Option<Vec<String>> onbeschermd — Zeroizing per woord.
+FIX_BASE taak 7: 751bd88
+Task 7: fix round 1/5 (6 addressed, 0 open; re-review sonnet) ; fix round 2/5 (slotblok + re-export, gecontroleerd door controller met tail/grep; commit cba71e7)
+Task 7: minor (deferred): .expect("alleen ASCII") zou bij panic Vec ongewist droppen — theoretisch.
+Task 7: complete (commits b848d5f..cba71e7, review clean)
+BASE taak 8: cba71e7
+Ruling: Gegenereerd.woorden wordt Option<Zeroizing<Vec<String>>> (Zeroize wist elke String) — deref naar &[String] blijft werken voor taak 9 — kost: wijziging aan type uit taak 7.
+Task 8: review spec ✅ Approved; minors (deferred): capaciteit bron.len()+1 bij niet-ASCII; '-'-filter alleen in data; test cijfer+hoofdletter samen; app moet _os-varianten gebruiken (taak 14).
+Task 8: complete (commits cba71e7..a5ad918, review clean)
+BASE taak 9: a5ad918
+Task 9: review spec ✅ Approved; minors (deferred): geen tests fr/de/navo-combinaties; geen tests leeg woord / alleen cijfer / tafel77; leeg woord geeft dubbel scheidingsteken; tab wordt "teken <tab> (U+0009)" met ruwe tab (UI/taak 14).
+Task 9: complete (commits a5ad918..e312405, review clean)
+BASE taak 11: e312405
+Task 11: review (opus) spec ✅ Approved; Important: Instant loopt niet door in slaapstand (macOS/Linux) → geschiedenis overleeft dichtklappen.
+Ruling: oplossen in de kern i.p.v. GUI: naast Instant ook SystemTime (wandklok) bijhouden; wissen als een van beide >= time_out (klok achteruit → negeren) — platformonafhankelijk, geen slaap-events nodig — kost: een verzette systeemklok kan vroeg wissen (veilige kant).
+Ruling: minor 2 meenemen: ontsleutel() controleert eerst inactiviteit — robuust tegen vergeten aanroep in GUI — kost niets.
+Task 11: minor (deferred): scheidingsteken geen Zeroizing; Some("") bij geschonden invariant; munlock zonder telling; sleutelkopie op stack (binnen §9-grens).
+FIX_BASE taak 11: 031de09
+Task 11: fix round 1/5 (2 addressed, 0 open; re-review door controller: functie gelezen) 
+Task 11: complete (commits e312405..c62ccf2, review clean)
+Fase B: klaar — stoppunt, wacht op akkoord Hans voor fase C.
 
 ---
 

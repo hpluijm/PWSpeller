@@ -8,12 +8,25 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fase B afgerond: taak 5 t/m 11. |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Taak 3–5 en de overdracht naar de andere Mac. |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Eerste entry voor PWSpeller 2. |
 
 ---
 
 # Voortgang
+
+## 2026-10-17 (Claude Code) — fase B afgerond: taak 5 t/m 11
+
+Op de Mac mini verder gewerkt, met een subagent en een aparte review per taak.
+
+- **Taak 5:** de review vond vier woorden die niet aan een klant voorgelezen horen te worden (`idioot`, `zwijn`, `stupide`, `satan`); die staan nu op de blokkeerlijsten. Een langere lijst met beladen woorden ligt bij Hans ter beoordeling.
+- **Taak 6:** de taaldata wordt bij het bouwen ingebakken; een onvolledig taalbestand laat de build falen met bestand en teken. `interfacetekst` gaf bij een onbekende sleutel eerst geheugen weg met `Box::leak`; de signatuur heeft nu een levensduur.
+- **Taak 10 en 7:** sterkte en wachtwoordgenerator. De review vond dat te grote minima een wachtwoord langer dan 128 tekens gaven, dat een tussenkopie niet gewist werd, en dat er geen vaste functie met de OS-bron was. Opgelost: `genereer_wachtwoord_os`, `Zeroizing<Vec<u8>>`, grenzen 1–9 en ≤ 128, rand-feature `unbiased`.
+- **Taak 8:** wachtzingenerator; woorden staan in `Zeroizing`. Een scheidingsteken dat een cijfer of letter is, breekt het spellen niet omdat de woorden apart worden bewaard.
+- **Taak 9:** spelling per teken en per woord, met lastige klanken per letter.
+- **Taak 11:** versleutelde geschiedenis (XChaCha20-Poly1305, sleutel gelockt in het geheugen). De review wees erop dat `Instant` op macOS en Linux niet doorloopt in slaapstand: een dichtgeklapte laptop hield de geschiedenis dan langer vast. Nu telt ook de wandklok; de eerste die de time-out haalt, wist.
+- `cargo fmt` over de hele werkruimte gedraaid, zodat de latere CI-controle niet struikelt.
 
 ## 2026-10-16, later (Claude Code) — taak 3 t/m 5, overdracht
 

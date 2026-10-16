@@ -10,6 +10,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Stand na fase B bijgewerkt. |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Regel over wachtzinnen in het Nederlands, Frans en Duits toegevoegd. |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Releasenotes aangemaakt. |
 
@@ -26,7 +27,7 @@
 
 ### Nog te doen
 
-- De nieuwe versie is nog niet bruikbaar; er is nog geen programma om te starten.
+- De nieuwe versie is nog niet bruikbaar; de rekenkern (generator, spellen, geschiedenis) staat, het programmavenster volgt.
 
 ### Bekende problemen
 
