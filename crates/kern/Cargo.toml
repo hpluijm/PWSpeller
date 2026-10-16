@@ -5,6 +5,9 @@
 # Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
 # Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 #
+# 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Fixronde 1: rand-feature unbiased aangezet.
+#
 # 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
 #   Afhankelijkheden rand en zeroize toegevoegd, en serde als optionele feature.
 #
@@ -24,7 +27,7 @@ publish.workspace = true
 
 [dependencies]
 pwspeller-data = { version = "2.0.0", path = "../data" }
-rand = "0.10.3"
+rand = { version = "0.10.3", features = ["unbiased"] }
 serde = { version = "1.0.229", features = ["derive"], optional = true }
 zeroize = "1.9.1"
 

@@ -5,6 +5,9 @@
 // Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Fixronde 1: genereer_wachtwoord_os geëxporteerd, doc bij entropie_bits.
+//
 // 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Module aangemaakt.
 // ──────────────────────────────────────────────────────────
@@ -57,6 +60,8 @@ pub struct Gegenereerd {
     pub woorden: Option<Vec<String>>,
     /// Alleen bij een wachtzin.
     pub scheidingsteken: Option<String>,
+    /// Bovengrens: lengte × log2(pool). De minima per set (die een deel van de tekens
+    /// vastleggen) zijn niet afgetrokken, dus de werkelijke entropie ligt iets lager.
     pub entropie_bits: f64,
 }
 

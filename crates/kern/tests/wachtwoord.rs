@@ -5,12 +5,16 @@
 // Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Fixronde 1: tests voor minimumgrens, lengte, OS-bron en schudden.
+//
 // 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Tests aangemaakt voor genereer_wachtwoord.
 // ──────────────────────────────────────────────────────────
 
 use pwspeller_kern::generator::wachtwoord::{
     DUBBELZINNIG, SPECIALE_TEKENS, WachtwoordOpties, effectieve_lengte, genereer_wachtwoord,
+    genereer_wachtwoord_os,
 };
 use pwspeller_kern::generator::{GeneratorFout, Modus};
 use rand::SeedableRng;
@@ -241,6 +245,75 @@ fn verdeling_is_gelijkmatig() {
         .map(|&n| (n as f64 - verwacht).powi(2) / verwacht)
         .sum();
     assert!(chi < 52.6, "chi-kwadraat {chi}");
+}
+
+#[test]
+fn minimum_boven_9_is_fout() {
+    let o = WachtwoordOpties {
+        min_cijfers: 10,
+        ..Default::default()
+    };
+    assert_eq!(
+        genereer_wachtwoord(&o, &mut rng()).unwrap_err(),
+        GeneratorFout::OngeldigeLengte
+    );
+    let o = WachtwoordOpties {
+        speciaal: true,
+        min_speciaal: 200,
+        ..Default::default()
+    };
+    assert_eq!(
+        genereer_wachtwoord(&o, &mut rng()).unwrap_err(),
+        GeneratorFout::OngeldigeLengte
+    );
+}
+
+#[test]
+fn minimum_van_uitgeschakelde_set_telt_niet() {
+    let o = WachtwoordOpties {
+        min_speciaal: 200,
+        ..Default::default()
+    };
+    assert!(genereer_wachtwoord(&o, &mut rng()).is_ok());
+}
+
+#[test]
+fn tekst_heeft_precies_effectieve_lengte() {
+    let mut r = rng();
+    for lengte in [0u8, 5, 14, 20, 128] {
+        for speciaal in [false, true] {
+            let o = WachtwoordOpties {
+                lengte,
+                speciaal,
+                min_cijfers: 9,
+                min_speciaal: 9,
+                ..Default::default()
+            };
+            let g = genereer_wachtwoord(&o, &mut r).unwrap();
+            assert_eq!(g.tekst.chars().count(), effectieve_lengte(&o) as usize);
+        }
+    }
+}
+
+#[test]
+fn os_bron_levert_een_wachtwoord() {
+    let g = genereer_wachtwoord_os(&WachtwoordOpties::default()).unwrap();
+    assert_eq!(g.tekst.chars().count(), 14);
+}
+
+#[test]
+fn cijfers_komen_op_elke_positie_voor() {
+    let mut r = rng();
+    let mut gezien = [false; 14];
+    for _ in 0..2000 {
+        let g = genereer_wachtwoord(&WachtwoordOpties::default(), &mut r).unwrap();
+        for (i, c) in g.tekst.chars().enumerate() {
+            if c.is_ascii_digit() {
+                gezien[i] = true;
+            }
+        }
+    }
+    assert!(gezien.iter().all(|&b| b), "{gezien:?}");
 }
 
 // © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
