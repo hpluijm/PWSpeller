@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Module geschiedenis toegevoegd.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Module spelling toegevoegd.
 //
 // 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -22,6 +25,7 @@
 // ──────────────────────────────────────────────────────────
 
 pub mod generator;
+pub mod geschiedenis;
 pub mod spelling;
 pub mod sterkte;
 pub mod talen;
