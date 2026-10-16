@@ -1,0 +1,60 @@
+# ── Over dit bestand ──────────────────────────────────────
+# Doel:           Controleert bij elke push en pull request opmaak, clippy, tests en licenties op Linux, macOS en Windows.
+# Klant:          Petisys
+# Gemaakt vanuit: Petisys
+# Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
+# Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+#
+# 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Taak 18: workflow aangemaakt.
+# ──────────────────────────────────────────────────────────
+
+# Actions staan vastgepind op de commit-SHA van een major-versie (de tag in de opmerking), zodat een
+# verschoven of overgenomen tag de build niet kan veranderen. Gecontroleerd op 17 oktober 2026.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  controle:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Rust installeren
+        shell: bash
+        run: rustup toolchain install stable --profile minimal --component rustfmt --component clippy
+      - name: Pakketten voor eframe (Linux)
+        if: runner.os == 'Linux'
+        # Lijst uit de README van eframe, zonder libssl-dev (geen netwerkcode) en zonder GTK (geen rfd).
+        run: sudo apt-get update && sudo apt-get install -y libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev
+      - name: Opmaak
+        run: cargo fmt --all --check
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: Tests
+        run: cargo test --workspace
+
+  licenties:
+    name: cargo deny
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: EmbarkStudios/cargo-deny-action@b66acf5e9fe20f8aba065be86778a8a4c846f902 # v2
+        with:
+          command: check
+
+# © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+# Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.

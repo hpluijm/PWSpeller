@@ -1,0 +1,156 @@
+# ── Over dit bestand ──────────────────────────────────────
+# Doel:           Bouwt bij een tag v* PWSpeller voor Windows, macOS en Linux en zet de bestanden en releasenotes bij een GitHub-release.
+# Klant:          Petisys
+# Gemaakt vanuit: Petisys
+# Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
+# Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+#
+# 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Taak 18: workflow aangemaakt.
+# ──────────────────────────────────────────────────────────
+
+# Actions staan vastgepind op de commit-SHA van een major-versie (de tag in de opmerking). De
+# release gebeurt met `gh`, dat op de runner staat; daar is geen actie van een derde partij voor nodig.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+# Schrijfrechten alleen in de job die de release maakt.
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  PWSPELLER_VERSIE: ${{ github.ref_name }}
+
+jobs:
+  windows:
+    name: Windows ${{ matrix.naam }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - { naam: x64, doel: x86_64-pc-windows-msvc, test: true }
+          - { naam: arm64, doel: aarch64-pc-windows-msvc, test: false }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Rust installeren
+        shell: bash
+        run: rustup toolchain install stable --profile minimal --target ${{ matrix.doel }}
+      - name: Tests (alleen x64, want ARM64 draait niet op deze runner)
+        if: matrix.test
+        run: cargo test --workspace
+      - name: Bouwen
+        run: cargo build --release -p pwspeller --target ${{ matrix.doel }}
+      - name: Controle - geen losse C-runtime nodig
+        shell: pwsh
+        run: |
+          $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+          $dumpbin = & $vswhere -latest -find 'VC\Tools\MSVC\**\bin\Hostx64\x64\dumpbin.exe' | Select-Object -First 1
+          if (-not $dumpbin) { throw 'dumpbin.exe niet gevonden' }
+          $exe = 'target\${{ matrix.doel }}\release\pwspeller.exe'
+          $uitvoer = & $dumpbin /dependents $exe | Out-String
+          Write-Host $uitvoer
+          if ($uitvoer -match 'VCRUNTIME') { throw 'Het programma heeft VCRUNTIME nodig; crt-static werkt niet.' }
+      - name: Naam geven
+        shell: bash
+        run: |
+          mkdir uit
+          cp "target/${{ matrix.doel }}/release/pwspeller.exe" "uit/PWSpeller-${{ github.ref_name }}-windows-${{ matrix.naam }}.exe"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: windows-${{ matrix.naam }}
+          path: uit/*
+          if-no-files-found: error
+
+  macos:
+    name: macOS universeel
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Rust installeren
+        run: rustup toolchain install stable --profile minimal --target aarch64-apple-darwin --target x86_64-apple-darwin
+      - name: Tests
+        run: cargo test --workspace
+      - name: Bouwen (arm64 en x86_64)
+        run: |
+          cargo build --release -p pwspeller --target aarch64-apple-darwin
+          cargo build --release -p pwspeller --target x86_64-apple-darwin
+      - name: Samenvoegen en bundel maken
+        run: |
+          mkdir -p uit bouw
+          lipo -create -output bouw/pwspeller \
+            target/aarch64-apple-darwin/release/pwspeller \
+            target/x86_64-apple-darwin/release/pwspeller
+          lipo -info bouw/pwspeller
+          packaging/macos/maak-app.sh bouw/pwspeller "${{ github.ref_name }}" bouw
+          codesign -d --entitlements - bouw/PWSpeller.app
+          ditto -c -k --keepParent bouw/PWSpeller.app "uit/PWSpeller-${{ github.ref_name }}-macos.zip"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: macos
+          path: uit/*
+          if-no-files-found: error
+
+  linux:
+    name: Linux x64
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Rust installeren
+        run: rustup toolchain install stable --profile minimal --target x86_64-unknown-linux-gnu
+      - name: Pakketten voor eframe
+        run: sudo apt-get update && sudo apt-get install -y libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev
+      - name: Tests
+        run: cargo test --workspace
+      - name: Bouwen
+        run: |
+          cargo build --release -p pwspeller --target x86_64-unknown-linux-gnu
+          mkdir uit
+          cp target/x86_64-unknown-linux-gnu/release/pwspeller "uit/pwspeller-${{ github.ref_name }}-linux-x64"
+          chmod 755 uit/*
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: linux
+          path: uit/*
+          if-no-files-found: error
+
+  release:
+    name: GitHub-release
+    needs: [windows, macos, linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          path: uit
+          merge-multiple: true
+      - name: Releasenotes van deze versie ophalen
+        run: |
+          # De sectie in RELEASENOTES.md waarvan de kop de tag noemt ("## v2.0.0 (datum)" of "## 2.0.0").
+          tag="${{ github.ref_name }}"
+          awk -v tag="$tag" -v kaal="${tag#v}" '
+            /^## / { if (inside) exit; inside = (index($0, tag) > 0 || index($0, kaal) > 0); next }
+            inside { print }
+          ' RELEASENOTES.md > notities.md
+          if [ ! -s notities.md ]; then
+            echo "Releasenotes: zie [RELEASENOTES.md](https://github.com/${{ github.repository }}/blob/${tag}/RELEASENOTES.md)." > notities.md
+          fi
+          cat notities.md
+      - name: Release maken
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -l uit
+          gh release create "${{ github.ref_name }}" uit/* \
+            --title "PWSpeller ${{ github.ref_name }}" \
+            --notes-file notities.md \
+            --verify-tag
+
+# © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+# Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.

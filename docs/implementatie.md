@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 18: sectie Bouwen en uitleveren. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fix 2: groepjes van vier alleen bij het wachtwoord, eigen tekst doorlopend, spellinglijst doorlopend genummerd, splashscreen 1,5 seconde. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 17 fixronde 1: wissen wist ook het resultaat, invoer telt als gebruik, instellingen begrensd, grenzen vastgelegd. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 17: sectie Geschiedenis- en instellingenpaneel, wissen bij sluiten en na inactiviteit. |
@@ -134,6 +135,15 @@ Het ontwerp staat in [het ontwerpdocument](superpowers/specs/2026-10-16-pwspelle
   (mag vaker draaien; de ene globale logger wisselt van bestand) maken de test mogelijk die 20
   generaties (wachtwoord en wachtzin, woorden apart) tegen beide bestanden controleert.
 
+## Bouwen en uitleveren (Taak 18)
+
+- **Licenties** (`deny.toml`): lijst uit de randvoorwaarden plus `BSL-1.0`; `MPL-2.0` alleen voor `option-ext` (per-crate-uitzondering). `[graph] targets` beperkt de controle tot de vijf uitleverdoelen. HTTP-crates en `openssl` staan onder `[bans]`.
+- **CI** (`.github/workflows/ci.yml`): fmt, clippy (`--all-targets -D warnings`) en test op ubuntu, macos en windows; `cargo deny` op ubuntu. Linux-pakketten: de lijst uit de eframe-README (`libxcb-render0-dev`, `libxcb-shape0-dev`, `libxcb-xfixes0-dev`, `libxkbcommon-dev`) zonder `libssl-dev` en GTK (geen netwerk, geen bestandsdialoog).
+- **Release** (`release.yml`): per platform een job die tests draait, bouwt en een artifact uploadt; een laatste job (enige met `contents: write`) maakt de release met `gh release create`. De versie komt uit de tag via `PWSPELLER_VERSIE` (zie `build.rs`).
+- **Windows**: `crt-static` staat in `.cargo/config.toml`; de job controleert met `dumpbin /dependents` dat `VCRUNTIME` ontbreekt. Het icoon gaat via `winresource` in `build.rs`.
+- **macOS**: `lipo` voegt arm64 en x86_64 samen; `packaging/macos/maak-app.sh` maakt de bundel (Info.plist met de versie uit de tag, `AppIcon.icns`, ad-hoc `codesign` met hardened runtime en entitlements: alleen `app-sandbox`).
+- **Vastgepind**: actions op commit-SHA van major-versies (checkout v7, upload-artifact v7, download-artifact v8, cargo-deny-action v2); toolchain via `rustup` van de runner.
+
 ## Afgewezen alternatieven
 
 | Alternatief | Waarom niet |
@@ -144,6 +154,8 @@ Het ontwerp staat in [het ontwerpdocument](superpowers/specs/2026-10-16-pwspelle
 | Eén HTML-bestand | Geen exe, geen app store-pakket |
 | `time` met lokale offset in plaats van `chrono` | `time::UtcOffset::current_local_offset` faalt in multithreaded programma's; `chrono` met alleen `clock` is bruikbaar en klein |
 | Geschiedenis als vast zijpaneel | Een venster houdt het hoofdvenster op de minimale breedte intact |
+| `softprops/action-gh-release` voor de release | Extra actie van een derde partij; `gh release create` staat op de runner |
+| `dtolnay/rust-toolchain` voor de toolchain | Rustup staat op de runners; één actie minder om te vertrouwen |
 | Slint | Extra licentievoorwaarde, eigen opmaaktaal |
 | Iced | Nog vóór 1.0, API verandert per release |
 | Crate `bitwarden-generators` gebruiken | GPL-3.0 zou PWSpeller GPL maken |

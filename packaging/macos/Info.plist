@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ══ Over dit bestand ══════════════════════════════════════
+Doel:           Programma-info van PWSpeller.app voor macOS (naam, identiteit, versie, icoon).
+Klant:          Petisys
+Gemaakt vanuit: Petisys
+Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
+Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+
+2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+  Taak 18: Info.plist aangemaakt; de versie wordt door maak-app.sh ingevuld.
+══════════════════════════════════════════════════════════ -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleName</key>
+	<string>PWSpeller</string>
+	<key>CFBundleDisplayName</key>
+	<string>PWSpeller</string>
+	<key>CFBundleIdentifier</key>
+	<string>nl.petisys.pwspeller</string>
+	<key>CFBundleExecutable</key>
+	<string>PWSpeller</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>@VERSIE@</string>
+	<key>CFBundleVersion</key>
+	<string>@VERSIE@</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>11.0</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.utilities</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>© 2026 Petisys. Alle rechten voorbehouden.</string>
+</dict>
+</plist>
+<!-- © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md. -->

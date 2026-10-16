@@ -6,6 +6,9 @@
 # Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 #
 # 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Taak 18: winresource (build-dependency) toegevoegd voor het Windows-icoon.
+#
+# 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 #   Taak 17: chrono (alleen clock) toegevoegd voor de lokale tijd in de geschiedenis.
 #
 # 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -48,6 +51,9 @@ chrono = { version = "0.4.45", default-features = false, features = ["clock"] }
 
 [dev-dependencies]
 egui_kittest = "0.37.0"
+
+[build-dependencies]
+winresource = "0.1.34"
 
 # © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
 # Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.

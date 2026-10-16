@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 18: Windows-icoon (assets/app.ico) en programma-info in het .exe via winresource.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 12 fixronde 1: ook nieuwe commits op dezelfde branch herberekenen de versie.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -35,6 +38,28 @@ fn main() {
             std::env::var("CARGO_PKG_VERSION").expect("CARGO_PKG_VERSION ontbreekt")
         });
     println!("cargo:rustc-env=PWSPELLER_VERSIE={versie}");
+    windows_resources();
+}
+
+/// Zet het icoon en de programma-info in het .exe. Het build-script draait op de host, dus de
+/// doelcontrole gaat via `CARGO_CFG_TARGET_OS` (werkt ook bij het bouwen voor ARM64 op x64).
+fn windows_resources() {
+    println!("cargo:rerun-if-changed=assets/app.ico");
+    if std::env::var("CARGO_CFG_TARGET_OS").as_deref() != Ok("windows") {
+        return;
+    }
+    let mut res = winresource::WindowsResource::new();
+    res.set_icon("assets/app.ico");
+    res.set("ProductName", "PWSpeller");
+    res.set("CompanyName", "Petisys");
+    res.set(
+        "LegalCopyright",
+        "© 2026 Petisys. Alle rechten voorbehouden.",
+    );
+    if let Err(fout) = res.compile() {
+        // Zonder icoon werkt het programma nog; stop de build niet, maar laat het zien.
+        println!("cargo:warning=Windows-resources niet gezet: {fout}");
+    }
 }
 
 fn uit_git() -> Option<String> {

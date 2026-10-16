@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 18: licentiecontrole, CI en uitlevering per platform. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Visuele controle: voorleesmodus, groepjes, splash 1,5 s. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fix: tabblad Wachtzin toont hele woorden met scheidingsteken en woordnummer, niet groepjes van vier die woorden middenin afbraken; wachtwoord en eigen tekst blijven groepjes. De voorleesmodus breekt een wachtzin alleen na een scheidingsteken. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fase C afgerond: taak 12 t/m 17 (de app). |
@@ -18,6 +19,14 @@
 ---
 
 # Voortgang
+
+## 2026-10-17, nacht (Claude Code) — Taak 18: licenties, CI en uitlevering
+
+- **`deny.toml`**: licenties zoals de randvoorwaarden, plus `BSL-1.0` (Boost, permissief; `clipboard-win` en `error-code` via arboard, alleen Windows) en een per-crate-uitzondering voor `MPL-2.0` bij `option-ext` (via `directories`). MPL-2.0 is copyleft op bestandsniveau; de crate wordt onveranderd gebruikt. Gemeld in NOTICE.md. Verboden: reqwest, ureq, hyper, curl, openssl. `cargo deny check` is groen (licenses, bans, advisories, sources).
+- **Workflows**: `ci.yml` (fmt, clippy, test op drie OS, deny op Linux) en `release.yml` (tag `v*`: Windows x64 en ARM64, macOS universeel met `lipo` en `maak-app.sh`, Linux x64; `gh release create`). Actions staan vast op de commit-SHA van een major-versie; schrijfrechten alleen in de release-job. Toolchain via `rustup` op de runner; alleen `cargo-deny-action` (Embark) is van een derde partij.
+- **Alleen gecontroleerd op de Mac**: de workflows zelf draaien pas na de push. Windows-ARM64 wordt gekruist op de x64-runner gebouwd (test draait daar niet) en de `dumpbin`-controle is niet lokaal getest.
+- **Icoon**: 1024 px, logo gecentreerd op wit; `AppIcon.icns` via `iconutil`, `app.ico` met PNG-lagen van 16 tot 256 px, ingebed via `winresource` in `build.rs` (alleen bij doel Windows).
+- **macOS-bundel** lokaal gebouwd en gestart: ad-hoc ondertekend met sandbox, zonder `network.client`. Instellingen en logboek staan in de sandbox-container, `~/Library/Containers/nl.petisys.pwspeller/Data/Library/Application Support/nl.Petisys.PWSpeller/`.
 
 ## 2026-10-17, avond (Claude Code) — visuele controle van de app
 
@@ -79,6 +88,7 @@ Op de Mac mini verder gewerkt, met een subagent en een aparte review per taak.
 
 - Review van Taak 5, daarna Taak 10, 6, 7, 8, 9 en 11 (rest van fase B), dan fase C en D.
 - Hans keurt de blokkeerlijsten `nl-`, `fr-` en `de-geblokkeerd.txt` goed.
+- Na de push: kijken of `ci.yml` op alle drie de OS groen wordt, dan tag `v2.0.0`; het eerste echte `release.yml`-resultaat (met name `dumpbin` en ARM64) moet nog blijken.
 - Ondertekenen en app stores: zie het ontwerp, hoofdstuk 14.
 
 ---

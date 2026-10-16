@@ -1,0 +1,68 @@
+# ── Over dit bestand ──────────────────────────────────────
+# Doel:           Bewaakt met cargo-deny de toegestane licenties, verboden netwerkcrates en de herkomst van alle afhankelijkheden.
+# Klant:          Petisys
+# Gemaakt vanuit: Petisys
+# Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
+# Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
+#
+# 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Taak 18: licentiecontrole, verboden HTTP-crates en bronnen vastgelegd; BSL-1.0 en een MPL-2.0-uitzondering voor option-ext.
+# ──────────────────────────────────────────────────────────
+
+[graph]
+# Alleen de platforms waarvoor PWSpeller wordt uitgeleverd.
+targets = [
+    "x86_64-pc-windows-msvc",
+    "aarch64-pc-windows-msvc",
+    "x86_64-apple-darwin",
+    "aarch64-apple-darwin",
+    "x86_64-unknown-linux-gnu",
+]
+
+[licenses]
+confidence-threshold = 0.93
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "Unicode-3.0",
+    "OFL-1.1",
+    "CC-BY-3.0",
+    # Boost Software License: permissief (zoals MIT). Alleen via arboard op Windows:
+    # clipboard-win en error-code.
+    "BSL-1.0",
+]
+# OFL-1.1 en CC-BY-3.0 horen bij bestanden (lettertype, woordenlijst), niet bij crates.
+unused-allowed-license = "allow"
+
+# MPL-2.0 is copyleft op bestandsniveau. Alleen option-ext (via directories/dirs-sys), onveranderd
+# als afhankelijkheid gebruikt, dus er hoeft geen broncode gedeeld te worden. Gemeld in NOTICE.md.
+exceptions = [
+    { allow = ["MPL-2.0"], crate = "option-ext" },
+]
+
+[bans]
+multiple-versions = "allow"
+wildcards = "allow"
+# Geen netwerkcode in PWSpeller: geen enkele crate met een HTTP-client of TLS-bibliotheek.
+deny = [
+    { name = "reqwest" },
+    { name = "ureq" },
+    { name = "hyper" },
+    { name = "curl" },
+    { name = "openssl" },
+]
+
+[advisories]
+unmaintained = "workspace"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+
+# © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
+# Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.
