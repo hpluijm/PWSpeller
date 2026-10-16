@@ -10,6 +10,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Woordenlijsten toegevoegd: EFF-lijst (CC BY 3.0) en de gegenereerde Nederlandse, Franse en Duitse lijsten (Taak 5). |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | NOTICE.md aangemaakt. |
 
 ---
@@ -36,7 +37,15 @@ AI-tools zijn hulpmiddelen, geen auteurs.
 
 ## Overige rechthebbenden
 
-Nog geen meegeleverde bibliotheken of lettertypen. Deze lijst vult zich in latere taken.
+- **Woordenlijst Engels (`data/woordenlijsten/en-eff.txt`):** de EFF Large Wordlist for
+  Passphrases van de Electronic Frontier Foundation, licentie CC BY 3.0
+  (https://creativecommons.org/licenses/by/3.0/), bron
+  https://www.eff.org/files/2016/07/18/eff_large_wordlist.txt. De dobbelsteennummers en de
+  woorden met een koppelteken zijn eruit gehaald.
+- **Woordenlijsten Nederlands, Frans en Duits (`data/woordenlijsten/{nl,fr,de}.txt`) en de
+  bijbehorende blokkeerlijsten:** gegenereerd met Claude in opdracht van Petisys.
+
+Verder nog geen meegeleverde bibliotheken of lettertypen. Deze lijst vult zich in latere taken.
 
 ---
 
