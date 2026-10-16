@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 14: volgordetest controleert ook dat de knop Genereer pas na de splash komt.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 13 fixronde 1: volgordetest met titel in het hoofdvenster; test voor een kapot logo.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -62,6 +65,10 @@ fn splash_komt_voor_hoofdvenster() {
     // Het hoofdvenster toont (tijdelijk) de titel als kop; de splash toont de naam ook, maar
     // als eigen kop in vet. Het onderscheid: de splash heeft de regel "Klant: Petisys", het hoofdvenster niet.
     assert!(h.query_by_label("Klant: Petisys").is_some());
+    assert!(
+        h.query_by_label("Genereer").is_none(),
+        "knop Genereer hoort niet op de splash"
+    );
     h.state_mut().1 = t0 + SPLASHDUUR;
     h.step();
     h.step();
@@ -69,8 +76,8 @@ fn splash_komt_voor_hoofdvenster() {
     assert!(h.query_by_label("Klant: Petisys").is_none());
     assert!(h.query_by_label(VERSIE).is_none());
     assert!(
-        h.query_by_label("PWSpeller").is_some(),
-        "hoofdvenster toont de titel"
+        h.query_by_label("Genereer").is_some(),
+        "hoofdvenster toont de knop Genereer"
     );
 }
 

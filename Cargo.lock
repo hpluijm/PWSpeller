@@ -2383,6 +2383,7 @@ dependencies = [
  "serde",
  "sys-locale",
  "toml",
+ "zeroize",
 ]
 
 [[package]]

@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 14: hoofdvenster ingebouwd; PwApp kreeg hoofdstate en geschiedenis; instellingenpad is optioneel (tests schrijven niet).
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 13 fixronde 1: nieuw() krijgt de geladen instellingen; logo vrijgegeven na de splash; tijdelijk titel in het hoofdvenster.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -15,19 +18,25 @@
 //   Taak 12: PwApp aangemaakt met een leeg hoofdvlak.
 // ──────────────────────────────────────────────────────────
 
+use crate::hoofd::HoofdState;
 use crate::instellingen::{Instellingen, interfacetaal};
 use crate::splash::{self, Fase, volgende_fase};
 use crate::thema;
 use eframe::egui;
-use pwspeller_kern::talen::interfacetekst;
+use pwspeller_kern::geschiedenis::Geschiedenis;
 use std::path::PathBuf;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 pub struct PwApp {
     pub instellingen: Instellingen,
-    pub instellingenpad: PathBuf,
+    /// `None` betekent: instellingen worden niet bewaard (tests).
+    pub instellingenpad: Option<PathBuf>,
     pub interfacetaal: String,
     pub fase: Fase,
+    /// De instellingen zoals ze het laatst bewaard zijn; een verschil betekent: opnieuw bewaren.
+    pub(crate) bewaard: Instellingen,
+    pub hoofd: HoofdState,
+    pub geschiedenis: Geschiedenis,
     logo: Option<egui::TextureHandle>,
     logo_geprobeerd: bool,
 }
@@ -43,7 +52,7 @@ impl PwApp {
         if let Some(cc) = cc {
             thema::zet_thema(&cc.egui_ctx);
         }
-        Self::van(instellingen, instellingenpad, nu)
+        Self::van(instellingen, Some(instellingenpad), nu)
     }
 
     /// App voor tests: standaardinstellingen, Nederlandse interface en een pad dat nooit beschreven wordt.
@@ -52,20 +61,22 @@ impl PwApp {
             interfacetaal: Some("nl".to_string()),
             ..Instellingen::default()
         };
-        Self::van(
-            instellingen,
-            std::env::temp_dir().join("pwspeller-test-nooit-schrijven.toml"),
-            nu,
-        )
+        Self::van(instellingen, None, nu)
     }
 
-    fn van(instellingen: Instellingen, instellingenpad: PathBuf, nu: Instant) -> Self {
+    fn van(instellingen: Instellingen, instellingenpad: Option<PathBuf>, nu: Instant) -> Self {
         let interfacetaal = interfacetaal(&instellingen);
+        let time_out = instellingen
+            .geschiedenis_minuten
+            .map(|m| Duration::from_secs(u64::from(m) * 60));
         Self {
+            bewaard: instellingen.clone(),
             instellingen,
             instellingenpad,
             interfacetaal,
             fase: Fase::Splash { start: nu },
+            hoofd: HoofdState::default(),
+            geschiedenis: Geschiedenis::nieuw(time_out),
             logo: None,
             logo_geprobeerd: false,
         }
@@ -91,11 +102,7 @@ impl PwApp {
             Fase::Hoofd => {
                 // De textuur is niet meer nodig.
                 self.logo = None;
-                // Tijdelijk: Taak 14 vervangt dit door de echte inhoud.
-                let titel = interfacetekst(&self.interfacetaal, "app.titel");
-                egui::CentralPanel::default().show(ui, |ui| {
-                    ui.heading(titel);
-                });
+                self.teken_hoofd(ui, nu);
             }
         }
     }

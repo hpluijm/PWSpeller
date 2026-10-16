@@ -5,6 +5,9 @@
 # Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
 # Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 #
+# 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Zes sleutels voor het hoofdvenster toegevoegd (Taak 14).
+#
 # 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
 #   Interfaceteksten Nederlands aangemaakt.
 # ──────────────────────────────────────────────────────────
@@ -30,7 +33,13 @@
 "knop.per_woord" = "Per woord"
 "knop.sluiten" = "Sluiten"
 "knop.voorlezen" = "Lees voor"
+"label.bits" = "{bits} bits"
+"label.eigen_hint" = "Typ of plak hier een wachtwoord om het te spellen"
+"label.lastig" = "lastig"
+"label.spelling" = "Spelling"
 "label.spellingstaal" = "Spellingstaal"
+"label.sterkte" = "Sterkte"
+"label.woordenlijst_volg" = "Volg de spellingstaal"
 "melding.lengte_opgehoogd" = "De lengte is verhoogd zodat alle gekozen opties passen."
 "melding.moeilijk_teken" = "Let op: dit teken is lastig aan de telefoon."
 "optie.cijfers" = "Cijfers"
