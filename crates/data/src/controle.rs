@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 4 fixronde 1: controle op dubbele omschrijvingen binnen een omschrijvingenbestand.
+//
+// 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Fixronde 1: exacte sleutels, lege waarden, verweesde blokkeerlijst, en.toml verplicht, lege lijst.
 //
 // 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -102,6 +105,26 @@ pub fn controleer(c: &Catalogus) -> Vec<DataFout> {
                 &format!("omschrijving van teken '{teken}'"),
                 tekst,
             );
+        }
+        // Twee tekens met dezelfde omschrijving zijn aan de telefoon niet te onderscheiden.
+        let mut gezien: std::collections::BTreeMap<String, String> = std::collections::BTreeMap::new();
+        let alle = o
+            .cijfers
+            .iter()
+            .chain(o.tekens.iter())
+            .map(|(t, tekst)| (*t, tekst));
+        for (teken, tekst) in alle {
+            if tekst.trim().is_empty() {
+                continue;
+            }
+            if let Some(eerder) = gezien.insert(tekst.trim().to_lowercase(), teken.to_string()) {
+                f.push(fout(
+                    &bestand,
+                    format!(
+                        "omschrijving '{tekst}' wordt gebruikt voor zowel '{eerder}' als '{teken}'"
+                    ),
+                ));
+            }
         }
         let s = &o.sjablonen;
         for (naam, tekst) in [

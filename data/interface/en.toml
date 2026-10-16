@@ -6,7 +6,7 @@
 # Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 #
 # 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
-#   Interfaceteksten en aangemaakt.
+#   Interfaceteksten Engels aangemaakt; Custom password en Lowercase letters aangepast.
 # ──────────────────────────────────────────────────────────
 
 "app.titel" = "PWSpeller"
@@ -36,7 +36,7 @@
 "optie.cijfers" = "Digits"
 "optie.dubbelzinnig" = "Avoid ambiguous characters"
 "optie.hoofdletters" = "Capital letters"
-"optie.kleine_letters" = "Small letters"
+"optie.kleine_letters" = "Lowercase letters"
 "optie.lengte" = "Length"
 "optie.min_cijfers" = "Minimum digits"
 "optie.min_speciaal" = "Minimum special characters"
@@ -52,7 +52,7 @@
 "sterkte.schatting" = "Estimated strength"
 "sterkte.sterk" = "Strong"
 "sterkte.zwak" = "Weak"
-"tab.eigen" = "Own password"
+"tab.eigen" = "Custom password"
 "tab.wachtwoord" = "Password"
 "tab.wachtzin" = "Passphrase"
 "voorlezen.stop" = "Stop"

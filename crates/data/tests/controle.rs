@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 4 fixronde 1: tests voor dubbele omschrijvingen binnen een omschrijvingenbestand.
+//
+// 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Fixronde 1: tests voor exacte sleutels, lege waarden, dubbelen, verweesde blokkeerlijst en en.toml.
 //
 // 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -302,6 +305,21 @@ fn ontbrekend_cijfer_is_fout() {
     let c = catalogus(pas(O, "\"3\" = \"cijfer3\"\n", ""));
     let f = controleer(&c);
     assert!(heeft(&f, O, "'3'"), "{f:?}");
+}
+
+#[test]
+fn dubbele_omschrijving_van_twee_cijfers_is_fout() {
+    let c = catalogus(pas(O, "\"3\" = \"cijfer3\"", "\"3\" = \"cijfer4\""));
+    let f = controleer(&c);
+    assert!(heeft(&f, O, "cijfer4"), "{f:?}");
+}
+
+#[test]
+fn dubbele_omschrijving_is_hoofdletterongevoelig_en_geldt_over_cijfers_en_tekens() {
+    let c = catalogus(pas(O, "\"3\" = \"cijfer3\"", "\"3\" = \"CIJFER4\""));
+    assert!(heeft(&controleer(&c), O, "cijfer4"));
+    let c = catalogus(pas(O, "\"3\" = \"cijfer3\"", "\"3\" = \"TEKEN33\""));
+    assert!(heeft(&controleer(&c), O, "teken33"));
 }
 
 #[test]

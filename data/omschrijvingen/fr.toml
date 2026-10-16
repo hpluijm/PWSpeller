@@ -6,6 +6,9 @@
 # Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 #
 # 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Fixronde 1: antislash en sjabloon met een hoofdletter.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
 #   Omschrijvingen Frans aangemaakt.
 # ──────────────────────────────────────────────────────────
 
@@ -17,7 +20,7 @@ hoofdletter = "majuscule {woord}"
 kleine_letter = "minuscule {woord}"
 cijfer = "chiffre {naam}"
 woord = "{woord}"
-woord_met_hoofdletter = "{woord}, avec majuscule"
+woord_met_hoofdletter = "{woord}, avec une majuscule"
 onbekend = "caractère {teken} ({code})"
 
 [cijfers]
@@ -57,7 +60,7 @@ onbekend = "caractère {teken} ({code})"
 "?" = "point d'interrogation"
 "@" = "arobase"
 "[" = "crochet ouvrant"
-"\\" = "barre oblique inverse"
+"\\" = "antislash"
 "]" = "crochet fermant"
 "^" = "accent circonflexe"
 "_" = "tiret bas"

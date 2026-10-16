@@ -6,6 +6,9 @@
 # Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 #
 # 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Fixronde 1: Quotiënt en Izaak.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
 #   Alfabet Nederlands aangemaakt.
 #
 # Bron codewoorden: Overgenomen uit talen.csv van release v1.0-vb (kolom Nederlands); 'Urecht' daar is hersteld naar 'Utrecht'.
@@ -24,7 +27,7 @@ e = "Eduard"
 f = "Ferdinand"
 g = "Gerard"
 h = "Hendrik"
-i = "Isaak"
+i = "Izaak"
 j = "Jan"
 k = "Karel"
 l = "Lodewijk"
@@ -32,7 +35,7 @@ m = "Maria"
 n = "Nico"
 o = "Otto"
 p = "Pieter"
-q = "Quotient"
+q = "Quotiënt"
 r = "Rudolf"
 s = "Simon"
 t = "Theodoor"

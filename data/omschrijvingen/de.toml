@@ -6,6 +6,9 @@
 # Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 #
 # 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Fixronde 1: großgeschrieben, Backslash, Dach, Accent grave, zwo.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
 #   Omschrijvingen Duits aangemaakt.
 # ──────────────────────────────────────────────────────────
 
@@ -17,13 +20,13 @@ hoofdletter = "Großbuchstabe {woord}"
 kleine_letter = "Kleinbuchstabe {woord}"
 cijfer = "Ziffer {naam}"
 woord = "{woord}"
-woord_met_hoofdletter = "{woord}, mit Großbuchstabe"
+woord_met_hoofdletter = "{woord}, großgeschrieben"
 onbekend = "Zeichen {teken} ({code})"
 
 [cijfers]
 "0" = "null"
 "1" = "eins"
-"2" = "zwei"
+"2" = "zwo"
 "3" = "drei"
 "4" = "vier"
 "5" = "fünf"
@@ -57,11 +60,11 @@ onbekend = "Zeichen {teken} ({code})"
 "?" = "Fragezeichen"
 "@" = "At-Zeichen"
 "[" = "eckige Klammer auf"
-"\\" = "umgekehrter Schrägstrich"
+"\\" = "Backslash"
 "]" = "eckige Klammer zu"
-"^" = "Zirkumflex"
+"^" = "Dach"
 "_" = "Unterstrich"
-"`" = "Gravis"
+"`" = "Accent grave"
 "{" = "geschweifte Klammer auf"
 "|" = "senkrechter Strich"
 "}" = "geschweifte Klammer zu"

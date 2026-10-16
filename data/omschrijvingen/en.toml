@@ -6,6 +6,9 @@
 # Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 #
 # 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Fixronde 1: sjabloon with a capital letter.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
 #   Omschrijvingen Engels aangemaakt.
 # ──────────────────────────────────────────────────────────
 
@@ -17,7 +20,7 @@ hoofdletter = "capital {woord}"
 kleine_letter = "small {woord}"
 cijfer = "number {naam}"
 woord = "{woord}"
-woord_met_hoofdletter = "{woord}, with capital"
+woord_met_hoofdletter = "{woord}, with a capital letter"
 onbekend = "character {teken} ({code})"
 
 [cijfers]
