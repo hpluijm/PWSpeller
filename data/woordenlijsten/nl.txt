@@ -2700,7 +2700,6 @@ huwelijk
 huwelijken
 identiek
 identiteit
-idioot
 ieder
 iedere
 iedereen
@@ -7522,6 +7521,5 @@ zweven
 zwijg
 zwijgen
 zwijgt
-zwijn
 zwijnen
 zwoer

@@ -4874,7 +4874,6 @@ strictement
 structure
 studio
 studios
-stupide
 stupides
 subir
 sublime
