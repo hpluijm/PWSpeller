@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Module generator toegevoegd.
+//
+// 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Module sterkte toegevoegd.
 //
 // 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -15,6 +18,7 @@
 //   Lege bibliotheek aangemaakt.
 // ──────────────────────────────────────────────────────────
 
+pub mod generator;
 pub mod sterkte;
 pub mod talen;
 

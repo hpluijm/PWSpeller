@@ -6,6 +6,9 @@
 # Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 #
 # 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Afhankelijkheden rand en zeroize toegevoegd, en serde als optionele feature.
+#
+# 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
 #   Afhankelijkheid pwspeller-data toegevoegd (ook als build-afhankelijkheid).
 #
 # 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -21,9 +24,15 @@ publish.workspace = true
 
 [dependencies]
 pwspeller-data = { version = "2.0.0", path = "../data" }
+rand = "0.10.3"
+serde = { version = "1.0.229", features = ["derive"], optional = true }
+zeroize = "1.9.1"
 
 [build-dependencies]
 pwspeller-data = { version = "2.0.0", path = "../data" }
+
+[features]
+serde = ["dep:serde"]
 
 # © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
 # Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.
