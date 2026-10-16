@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Fixronde 1: tests voor exacte sleutels, lege waarden, dubbelen, verweesde blokkeerlijst en en.toml.
+//
+// 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Tests voor lees_catalogus en controleer toegevoegd.
 // ──────────────────────────────────────────────────────────
 
@@ -54,7 +57,7 @@ const INTERFACE_NL: &str = "\"knop.genereer\" = \"Genereer\"\n\"label.titel\" = 
 const SPELLINGSTALEN: &str = "[[taal]]\ncode = \"nl\"\nnaam = \"Nederlands\"\nalfabet = \"nl\"\n\
                               omschrijvingen = \"nl\"\nwoordenlijst = \"nl\"\n";
 
-fn catalogus(wijzig: impl Fn(&str, String) -> String) -> Catalogus {
+fn lees_met(wijzig: impl Fn(&str, String) -> String) -> Result<Catalogus, Vec<DataFout>> {
     let bestanden: Vec<(&str, String)> = vec![
         ("alfabetten/nl.toml", alfabet("")),
         ("omschrijvingen/nl.toml", omschrijvingen("")),
@@ -72,7 +75,27 @@ fn catalogus(wijzig: impl Fn(&str, String) -> String) -> Catalogus {
         .iter()
         .map(|(p, i)| (p.as_str(), i.as_str()))
         .collect();
-    lees_catalogus(&refs).unwrap_or_else(|f| panic!("inlezen mislukt: {f:?}"))
+    lees_catalogus(&refs)
+}
+
+fn catalogus(wijzig: impl Fn(&str, String) -> String) -> Catalogus {
+    lees_met(wijzig).unwrap_or_else(|f| panic!("inlezen mislukt: {f:?}"))
+}
+
+/// Vervangt `van` door `naar` in het bestand `pad`.
+fn pas(
+    pad: &'static str,
+    van: &'static str,
+    naar: &'static str,
+) -> impl Fn(&str, String) -> String {
+    move |p, i| {
+        if p == pad {
+            assert!(i.contains(van), "{van:?} komt niet voor in {pad}");
+            i.replacen(van, naar, 1)
+        } else {
+            i
+        }
+    }
 }
 
 fn heeft(f: &[DataFout], bestand: &str, deel: &str) -> bool {
@@ -149,14 +172,15 @@ fn woord_korter_dan_5_is_fout() {
 fn woord_met_hoofdletter_of_accent_is_fout() {
     let c = catalogus(|p, i| {
         if p == "woordenlijsten/nl.txt" {
-            format!("{i}Appeltje\ncafeetje\ncafé\n")
+            format!("{i}Appeltje\ncafeetje\ncrème\n")
         } else {
             i
         }
     });
     let f = controleer(&c);
     assert!(heeft(&f, "woordenlijsten/nl.txt", "Appeltje"), "{f:?}");
-    assert!(heeft(&f, "woordenlijsten/nl.txt", "café"), "{f:?}");
+    assert!(heeft(&f, "woordenlijsten/nl.txt", "crème"), "{f:?}");
+    assert!(heeft(&f, "woordenlijsten/nl.txt", "a-z"), "{f:?}");
 }
 
 #[test]
@@ -227,6 +251,185 @@ fn dataklacht_toont_bestand_en_melding() {
         melding: "kapot".into(),
     };
     assert_eq!(f.to_string(), "a.toml: kapot");
+}
+
+const A: &str = "alfabetten/nl.toml";
+const O: &str = "omschrijvingen/nl.toml";
+
+#[test]
+fn extra_sleutel_in_letters_is_fout() {
+    for sleutel in ["Q", "é"] {
+        let c = catalogus(move |p, i| {
+            if p == A {
+                format!("{i}\"{sleutel}\" = \"x\"\n")
+            } else {
+                i
+            }
+        });
+        let f = controleer(&c);
+        assert!(heeft(&f, A, &format!("'{sleutel}'")), "{sleutel}: {f:?}");
+    }
+}
+
+#[test]
+fn letter_als_cijfersleutel_is_fout() {
+    let c = catalogus(pas(O, "[cijfers]\n", "[cijfers]\n\"a\" = \"x\"\n"));
+    let f = controleer(&c);
+    assert!(heeft(&f, O, "'a'"), "{f:?}");
+}
+
+#[test]
+fn letter_of_cijfer_in_tekens_is_fout() {
+    for sleutel in ["a", "5"] {
+        let c = catalogus(move |p, i| {
+            if p == O {
+                i.replacen(
+                    "[tekens]\n",
+                    &format!("[tekens]\n\"{sleutel}\" = \"x\"\n"),
+                    1,
+                )
+            } else {
+                i
+            }
+        });
+        let f = controleer(&c);
+        assert!(heeft(&f, O, &format!("'{sleutel}'")), "{sleutel}: {f:?}");
+    }
+}
+
+#[test]
+fn ontbrekend_cijfer_is_fout() {
+    let c = catalogus(pas(O, "\"3\" = \"cijfer3\"\n", ""));
+    let f = controleer(&c);
+    assert!(heeft(&f, O, "'3'"), "{f:?}");
+}
+
+#[test]
+fn dubbel_pad_is_fout() {
+    let f = lees_catalogus(&[
+        ("interface/en.toml", INTERFACE_EN),
+        ("interface/en.toml", INTERFACE_EN),
+    ])
+    .unwrap_err();
+    assert!(heeft(&f, "interface/en.toml", "dubbel"), "{f:?}");
+}
+
+#[test]
+fn dubbele_code_in_spellingstalen_is_fout() {
+    let c = catalogus(|p, i| {
+        if p == "spellingstalen.toml" {
+            format!("{i}\n{i}")
+        } else {
+            i
+        }
+    });
+    let f = controleer(&c);
+    assert!(heeft(&f, "spellingstalen.toml", "dubbel"), "{f:?}");
+}
+
+#[test]
+fn blokkeerlijst_zonder_woordenlijst_is_fout() {
+    let f = lees_catalogus(&[("woordenlijsten/xx-geblokkeerd.txt", "moord\n")]).unwrap();
+    let f = controleer(&f);
+    assert!(
+        heeft(&f, "woordenlijsten/xx-geblokkeerd.txt", "woordenlijst"),
+        "{f:?}"
+    );
+}
+
+#[test]
+fn lege_waarden_zijn_fout() {
+    let gevallen = [
+        (A, "a = \"Woorda\"", "a = \"  \""),
+        (O, "cijfer = \"cijfer {naam}\"", "cijfer = \"\""),
+        (O, "\"7\" = \"cijfer7\"", "\"7\" = \"\""),
+        (O, "\"!\" = \"teken33\"", "\"!\" = \" \""),
+        (O, "bevat = [\"ij\"]", "bevat = [\"\"]"),
+        (O, "eindigt_op = [\"d\", \"t\"]", "eindigt_op = [\" \"]"),
+    ];
+    for (pad, van, naar) in gevallen {
+        let c = catalogus(pas(pad, van, naar));
+        let f = controleer(&c);
+        assert!(heeft(&f, pad, "leeg"), "{van} -> {naar}: {f:?}");
+    }
+}
+
+#[test]
+fn lege_naam_is_fout_en_ontbrekende_naam_wordt_niet_stil_leeg() {
+    let c = catalogus(pas(A, "naam = \"Nederlands\"", "naam = \"\""));
+    assert!(heeft(&controleer(&c), A, "leeg"));
+    let f = lees_met(pas(A, "naam = \"Nederlands\"\n", "")).unwrap_err();
+    assert!(heeft(&f, A, "naam"), "{f:?}");
+}
+
+#[test]
+fn interface_zonder_en_is_fout() {
+    let c = catalogus(|p, i| {
+        if p == "interface/en.toml" {
+            String::new()
+        } else {
+            i
+        }
+    });
+    let mut c = c;
+    c.interface.remove("en");
+    let f = controleer(&c);
+    assert!(heeft(&f, "interface/en.toml", "ontbreekt"), "{f:?}");
+}
+
+#[test]
+fn lege_woordenlijst_is_fout() {
+    let c = catalogus(|p, i| {
+        if p == "woordenlijsten/nl.txt" {
+            "\n\n".to_string()
+        } else {
+            i
+        }
+    });
+    let f = controleer(&c);
+    assert!(heeft(&f, "woordenlijsten/nl.txt", "leeg"), "{f:?}");
+}
+
+#[test]
+fn blokkeerlijst_is_hoofdletterongevoelig_en_negeert_lege_regels() {
+    let c = catalogus(|p, i| match p {
+        "woordenlijsten/nl-geblokkeerd.txt" => "\n  \nMoord\n".to_string(),
+        "woordenlijsten/nl.txt" => format!("{i}moord\n"),
+        _ => i,
+    });
+    assert!(!c.geblokkeerd["nl"].contains(""));
+    let f = controleer(&c);
+    assert!(heeft(&f, "woordenlijsten/nl.txt", "moord"), "{f:?}");
+}
+
+#[test]
+fn verwijzing_naar_onbekende_omschrijving_of_woordenlijst_is_fout() {
+    let c = catalogus(pas(
+        "spellingstalen.toml",
+        "omschrijvingen = \"nl\"",
+        "omschrijvingen = \"yy\"",
+    ));
+    assert!(heeft(&controleer(&c), "spellingstalen.toml", "yy"));
+    let c = catalogus(pas(
+        "spellingstalen.toml",
+        "woordenlijst = \"nl\"",
+        "woordenlijst = \"zz\"",
+    ));
+    assert!(heeft(&controleer(&c), "spellingstalen.toml", "zz"));
+}
+
+#[test]
+fn meta_code_die_afwijkt_van_bestandsnaam_is_fout() {
+    let f = lees_met(pas(A, "code = \"nl\"", "code = \"xx\"")).unwrap_err();
+    assert!(heeft(&f, A, "xx"), "{f:?}");
+}
+
+#[test]
+fn hoofdletter_in_letters_telt_niet_als_kleine_letter() {
+    let c = catalogus(pas(A, "q = \"Woordq\"", "Q = \"Woordq\""));
+    let f = controleer(&c);
+    assert!(heeft(&f, A, "'q'"), "{f:?}");
+    assert!(heeft(&f, A, "'Q'"), "{f:?}");
 }
 
 // © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).

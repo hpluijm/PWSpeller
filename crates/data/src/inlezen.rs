@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Fixronde 1: dubbel pad is fout, naam verplicht, blokkeerlijst in kleine letters.
+//
+// 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Inlezen van alfabetten, omschrijvingen, woordenlijsten, spellingstalen en interface.
 // ──────────────────────────────────────────────────────────
 
@@ -19,9 +22,13 @@ use crate::model::{
 };
 
 #[derive(Deserialize)]
+struct MetaCode {
+    code: String,
+}
+
+#[derive(Deserialize)]
 struct Meta {
     code: String,
-    #[serde(default)]
     naam: String,
 }
 
@@ -33,7 +40,7 @@ struct AlfabetBestand {
 
 #[derive(Deserialize)]
 struct OmschrijvingenBestand {
-    meta: Meta,
+    meta: MetaCode,
     sjablonen: Sjablonen,
     cijfers: BTreeMap<String, String>,
     tekens: BTreeMap<String, String>,
@@ -98,7 +105,15 @@ pub fn lees_catalogus(bestanden: &[(&str, &str)]) -> Result<Catalogus, Vec<DataF
     let mut c = Catalogus::default();
     let mut fouten = Vec::new();
 
+    let mut gezien = BTreeSet::new();
     for &(pad, inhoud) in bestanden {
+        if !gezien.insert(pad) {
+            fouten.push(fout(
+                pad,
+                "bestand staat dubbel in de invoer; de tweede is genegeerd",
+            ));
+            continue;
+        }
         if let Some(code) = code_uit_pad(pad, "alfabetten", "toml") {
             match toml::from_str::<AlfabetBestand>(inhoud) {
                 Ok(b) => {
@@ -144,7 +159,7 @@ pub fn lees_catalogus(bestanden: &[(&str, &str)]) -> Result<Catalogus, Vec<DataF
         } else if let Some(code) = code_uit_pad(pad, "woordenlijsten", "txt") {
             let regels = inhoud.lines().map(str::trim).filter(|r| !r.is_empty());
             if let Some(basis) = code.strip_suffix("-geblokkeerd") {
-                let set: BTreeSet<String> = regels.map(str::to_string).collect();
+                let set: BTreeSet<String> = regels.map(str::to_lowercase).collect();
                 c.geblokkeerd.insert(basis.to_string(), set);
             } else {
                 let woorden = regels.map(str::to_string).collect();
