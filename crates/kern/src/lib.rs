@@ -5,6 +5,9 @@
 // Bron:           https://github.com/hpluijm/PWSpeller, release v2.0.0
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Module spelling toegevoegd.
+//
 // 2026-10-16  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Module generator toegevoegd.
 //
@@ -19,6 +22,7 @@
 // ──────────────────────────────────────────────────────────
 
 pub mod generator;
+pub mod spelling;
 pub mod sterkte;
 pub mod talen;
 
