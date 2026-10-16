@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 16: module voorlezen toegevoegd.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 15: module klembord toegevoegd.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -27,6 +30,7 @@ pub mod opties;
 pub mod resultaat;
 pub mod splash;
 pub mod thema;
+pub mod voorlezen;
 
 // © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
 // Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.

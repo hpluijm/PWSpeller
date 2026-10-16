@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 16: voorleesmodus als eigen weergave (veld voorlezen, opent op het verzoek uit het hoofdvenster).
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 15: klembord aangesloten (kopieer-verzoek, wissen per beeld, bij_sluiten_klembord).
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -26,6 +29,7 @@ use crate::instellingen::{Instellingen, interfacetaal};
 use crate::klembord::{Bord, Klembordbeheer, Systeembord};
 use crate::splash::{self, Fase, volgende_fase};
 use crate::thema;
+use crate::voorlezen::{Actie, Voorlezen};
 use eframe::egui;
 use pwspeller_kern::geschiedenis::Geschiedenis;
 use std::path::PathBuf;
@@ -41,6 +45,8 @@ pub struct PwApp {
     pub(crate) bewaard: Instellingen,
     pub hoofd: HoofdState,
     pub geschiedenis: Geschiedenis,
+    /// De voorleesmodus; als die open is, wordt het hoofdvenster niet getekend.
+    pub voorlezen: Option<Voorlezen>,
     /// `None` als er geen systeemklembord is (of in tests).
     klembord: Option<Klembordbeheer<Box<dyn Bord>>>,
     logo: Option<egui::TextureHandle>,
@@ -86,6 +92,7 @@ impl PwApp {
             fase: Fase::Splash { start: nu },
             hoofd: HoofdState::default(),
             geschiedenis: Geschiedenis::nieuw(time_out),
+            voorlezen: None,
             klembord: None,
             logo: None,
             logo_geprobeerd: false,
@@ -148,8 +155,48 @@ impl PwApp {
             Fase::Hoofd => {
                 // De textuur is niet meer nodig.
                 self.logo = None;
-                self.teken_hoofd(ui, nu);
+                self.teken_hoofd_of_voorlezen(ui, nu);
             }
+        }
+    }
+}
+
+impl PwApp {
+    /// De voorleesmodus als die open is, anders het hoofdvenster; een verzoek om voor te lezen opent hem.
+    fn teken_hoofd_of_voorlezen(&mut self, ui: &mut egui::Ui, nu: Instant) {
+        if let Some(v) = self.voorlezen.as_mut() {
+            if v.teken(ui, &self.interfacetaal) == Actie::Stop {
+                // Drop wist de regels.
+                self.voorlezen = None;
+                ui.ctx().request_repaint();
+            }
+            return;
+        }
+        self.teken_hoofd(ui, nu);
+        if std::mem::take(&mut self.hoofd.voorlezen_gevraagd) {
+            self.open_voorlezen(ui.ctx());
+        }
+    }
+
+    /// Opent de voorleesmodus met de regels uit de cache; zonder regels gebeurt er niets.
+    fn open_voorlezen(&mut self, ctx: &egui::Context) {
+        let per_woord = self.hoofd.tab == crate::hoofd::Tab::Wachtzin && !self.hoofd.per_teken;
+        let Some(cache) = self.hoofd.cache.as_ref() else {
+            return;
+        };
+        let regels = cache.regels.clone();
+        let Some(tekst) = self.huidige_tekst() else {
+            return;
+        };
+        self.voorlezen = Voorlezen::nieuw(regels, tekst, per_woord);
+        if self.voorlezen.is_some() {
+            // Een knop die focus had (Tab-toets) bestaat in dit beeld niet meer.
+            ctx.memory_mut(|m| {
+                if let Some(id) = m.focused() {
+                    m.surrender_focus(id);
+                }
+            });
+            ctx.request_repaint();
         }
     }
 }

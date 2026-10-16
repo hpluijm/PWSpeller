@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 16: de F5-test controleert dat de voorleesmodus opent en sluit met Esc.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 15: de kopieertest gebruikt een nepbord, want de app handelt het verzoek nu zelf af.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -258,7 +261,10 @@ fn sneltoetsen_enter_f5_en_kopieer() {
     assert!(!h.state().0.hoofd.voorlezen_gevraagd);
     h.key_press(Key::F5);
     stap(&mut h);
-    assert!(h.state().0.hoofd.voorlezen_gevraagd);
+    assert!(h.state().0.voorlezen.is_some(), "F5 opent de voorleesmodus");
+    h.key_press(Key::Escape);
+    stap(&mut h);
+    assert!(h.state().0.voorlezen.is_none());
     h.key_press_modifiers(Modifiers::COMMAND, Key::C);
     stap(&mut h);
     // De app handelt het verzoek zelf af (Taak 15): het nepbord heeft de tekst, het verzoek is weg.

@@ -6,6 +6,9 @@
 # Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 #
 # 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Drie sleutels voor de voorleesmodus toegevoegd (Taak 16).
+#
+# 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 #   Sleutel melding.klembord_mislukt toegevoegd (Taak 15).
 #
 # 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -69,7 +72,10 @@
 "tab.wachtwoord" = "Wachtwoord"
 "tab.wachtzin" = "Wachtzin"
 "voorlezen.stop" = "Stop"
+"voorlezen.volgende" = "Volgende"
 "voorlezen.voortgang" = "teken {n} van {totaal}"
+"voorlezen.voortgang_woord" = "stap {n} van {totaal}"
+"voorlezen.vorige" = "Vorige"
 
 # © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
 # Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.
