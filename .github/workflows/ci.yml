@@ -6,6 +6,9 @@
 # Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 #
 # 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Taak 18 fixronde: checkout zonder bewaarde inloggegevens, advisories als aparte, niet-blokkerende job.
+#
+# 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 #   Taak 18: workflow aangemaakt.
 # ──────────────────────────────────────────────────────────
 
@@ -33,6 +36,8 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - name: Rust installeren
         shell: bash
         run: rustup toolchain install stable --profile minimal --component rustfmt --component clippy
@@ -46,15 +51,39 @@ jobs:
         run: cargo clippy --workspace --all-targets -- -D warnings
       - name: Tests
         run: cargo test --workspace
+      - name: TIJDELIJK diagnose logboek
+        if: runner.os == 'Linux'
+        env:
+          PWSPELLER_DIAG: "1"
+        run: cargo test -p pwspeller --test geschiedenis -- --nocapture --test-threads=8 2>&1 | sed -n '/LOGBOEK-DIAG-BEGIN/,/LOGBOEK-DIAG-EIND/p' || true
 
   licenties:
     name: cargo deny
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - uses: EmbarkStudios/cargo-deny-action@b66acf5e9fe20f8aba065be86778a8a4c846f902 # v2
         with:
           command: check
+          command-arguments: licenses bans sources
+
+  # Een nieuw beveiligingsbericht over een crate kan elke dag verschijnen, zonder dat de code
+  # verandert. Deze job faalt dan zichtbaar, maar houdt de andere jobs niet tegen. In de
+  # release-workflow is dezelfde controle wél blokkerend.
+  advisories:
+    name: cargo deny advisories
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: EmbarkStudios/cargo-deny-action@b66acf5e9fe20f8aba065be86778a8a4c846f902 # v2
+        with:
+          command: check
+          command-arguments: advisories
 
 # © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
 # Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.

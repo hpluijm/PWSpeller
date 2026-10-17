@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 18 fixronde: in CI of bij een releaseversie laat een mislukte winresource-stap de build falen.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 18: Windows-icoon (assets/app.ico) en programma-info in het .exe via winresource.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -45,6 +48,7 @@ fn main() {
 /// doelcontrole gaat via `CARGO_CFG_TARGET_OS` (werkt ook bij het bouwen voor ARM64 op x64).
 fn windows_resources() {
     println!("cargo:rerun-if-changed=assets/app.ico");
+    println!("cargo:rerun-if-env-changed=CI");
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() != Ok("windows") {
         return;
     }
@@ -57,7 +61,14 @@ fn windows_resources() {
         "© 2026 Petisys. Alle rechten voorbehouden.",
     );
     if let Err(fout) = res.compile() {
-        // Zonder icoon werkt het programma nog; stop de build niet, maar laat het zien.
+        // In CI of bij een releasebuild (versie van buiten gezet) mag het icoon niet stilletjes
+        // ontbreken. Lokaal werkt het programma ook zonder; dan alleen een waarschuwing.
+        let streng = ["CI", "PWSPELLER_VERSIE"]
+            .iter()
+            .any(|n| std::env::var(n).is_ok_and(|v| !v.trim().is_empty()));
+        if streng {
+            panic!("Windows-resources niet gezet: {fout}");
+        }
         println!("cargo:warning=Windows-resources niet gezet: {fout}");
     }
 }

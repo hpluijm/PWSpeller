@@ -345,6 +345,9 @@ fn geen_wachtwoord_in_instellingen_of_logboek() {
     assert!(instellingen.contains("klembord_seconden = 61"));
     let logboek = std::fs::read_to_string(&logpad).expect("logboek bestaat");
     assert!(!logboek.trim().is_empty(), "het logboek is niet leeg");
+    if std::env::var_os("PWSPELLER_DIAG").is_some() {
+        eprintln!("LOGBOEK-DIAG-BEGIN\n{logboek}LOGBOEK-DIAG-EIND");
+    }
     // Alleen de waarden van de instellingen tellen; sleutels als `cijfer` zijn geen lek.
     let waarden: String = instellingen
         .lines()

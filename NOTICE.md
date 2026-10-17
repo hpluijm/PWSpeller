@@ -10,6 +10,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | BSL-1.0-crates genoemd; goedkeuring van BSL-1.0 en MPL-2.0 door de opdrachtgever vastgelegd (Taak 18 fixronde). |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Rust-bibliotheken en de MPL-2.0-uitzondering (option-ext) vermeld (Taak 18). |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Lettertype Atkinson Hyperlegible Mono (OFL 1.1) toegevoegd (Taak 12). |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Woordenlijsten toegevoegd: EFF-lijst (CC BY 3.0) en de gegenereerde Nederlandse, Franse en Duitse lijsten (Taak 5). |
@@ -57,10 +58,13 @@ AI-tools zijn hulpmiddelen, geen auteurs.
 - **Rust-bibliotheken (crates):** de bibliotheken in `Cargo.lock` zijn met een toegestane,
   permissieve licentie (MIT, Apache-2.0, BSD, ISC, Zlib, Unicode-3.0, BSL-1.0); `cargo deny`
   bewaakt dat in `deny.toml` en in de CI.
+- **BSL-1.0 (Boost Software License 1.0), `clipboard-win` en `error-code`** (via `arboard`, alleen
+  in de Windows-versie): permissief, vergelijkbaar met MIT. Goedgekeurd door de opdrachtgever
+  (Petisys) op 17 oktober 2026.
 - **MPL-2.0, `option-ext` 0.2.0** (via `directories`): Mozilla Public License 2.0, een licentie
   met copyleft op bestandsniveau. De crate wordt onveranderd gebruikt; wie hem aanpast, moet die
   aangepaste bestanden onder MPL-2.0 delen (https://www.mozilla.org/MPL/2.0/). Per crate
-  toegestaan in `deny.toml`.
+  toegestaan in `deny.toml`. Goedgekeurd door de opdrachtgever (Petisys) op 17 oktober 2026.
 
 ---
 

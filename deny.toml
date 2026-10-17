@@ -6,6 +6,9 @@
 # Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 #
 # 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Taak 18 fixronde: ook native-tls, rustls, tokio, h2 en hyper-util verboden.
+#
+# 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 #   Taak 18: licentiecontrole, verboden HTTP-crates en bronnen vastgelegd; BSL-1.0 en een MPL-2.0-uitzondering voor option-ext.
 # ──────────────────────────────────────────────────────────
 
@@ -40,6 +43,8 @@ unused-allowed-license = "allow"
 
 # MPL-2.0 is copyleft op bestandsniveau. Alleen option-ext (via directories/dirs-sys), onveranderd
 # als afhankelijkheid gebruikt, dus er hoeft geen broncode gedeeld te worden. Gemeld in NOTICE.md.
+# BSL-1.0 (clipboard-win, error-code) en deze MPL-2.0-uitzondering zijn op 17 oktober 2026 door de
+# opdrachtgever (Petisys) goedgekeurd.
 exceptions = [
     { allow = ["MPL-2.0"], crate = "option-ext" },
 ]
@@ -54,6 +59,11 @@ deny = [
     { name = "hyper" },
     { name = "curl" },
     { name = "openssl" },
+    { name = "native-tls" },
+    { name = "rustls" },
+    { name = "tokio" },
+    { name = "h2" },
+    { name = "hyper-util" },
 ]
 
 [advisories]

@@ -6,6 +6,9 @@
 # Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 #
 # 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Taak 18 fixronde: tag valideren, eerst controle (fmt, clippy, tests, cargo deny), geen expressies in run, exacte releasenotes.
+#
+# 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 #   Taak 18: workflow aangemaakt.
 # ──────────────────────────────────────────────────────────
 
@@ -21,37 +24,114 @@ on:
 permissions:
   contents: read
 
+# Expressies als `github.ref_name` en `matrix.*` komen nooit rechtstreeks in een `run:`-script,
+# maar via `env:` als gewone omgevingsvariabele; zo kan een tagnaam geen shellcode worden.
 env:
   CARGO_TERM_COLOR: always
   PWSPELLER_VERSIE: ${{ github.ref_name }}
+  TAG: ${{ github.ref_name }}
 
 jobs:
+  tag:
+    name: Tag en releasenotes controleren
+    runs-on: ubuntu-latest
+    outputs:
+      prerelease: ${{ steps.tag.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Tag valideren
+        id: tag
+        shell: bash
+        run: |
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
+            echo "::error::Ongeldige tag '$TAG'; verwacht vX.Y.Z of vX.Y.Z-achtervoegsel."
+            exit 1
+          fi
+          # Een tag met een achtervoegsel (bv. v2.0.0-rc1) wordt een prerelease.
+          if [[ "$TAG" == *-* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Releasenotes van deze versie ophalen
+        shell: bash
+        run: packaging/releasenotes.sh "$TAG" RELEASENOTES.md > notities.md
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: notities
+          path: notities.md
+          if-no-files-found: error
+
+  controle:
+    name: Controle ${{ matrix.os }}
+    needs: tag
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Rust installeren
+        shell: bash
+        run: rustup toolchain install stable --profile minimal --component rustfmt --component clippy
+      - name: Pakketten voor eframe (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev
+      - name: Opmaak
+        run: cargo fmt --all --check
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: Tests
+        run: cargo test --workspace
+
+  # In de release is cargo deny volledig blokkerend, ook de beveiligingsberichten (advisories).
+  deny:
+    name: cargo deny
+    needs: tag
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: EmbarkStudios/cargo-deny-action@b66acf5e9fe20f8aba065be86778a8a4c846f902 # v2
+        with:
+          command: check
+
   windows:
     name: Windows ${{ matrix.naam }}
+    needs: [controle, deny]
     runs-on: windows-latest
     strategy:
       fail-fast: true
       matrix:
         include:
-          - { naam: x64, doel: x86_64-pc-windows-msvc, test: true }
-          - { naam: arm64, doel: aarch64-pc-windows-msvc, test: false }
+          - { naam: x64, doel: x86_64-pc-windows-msvc }
+          - { naam: arm64, doel: aarch64-pc-windows-msvc }
+    env:
+      DOEL: ${{ matrix.doel }}
+      NAAM: ${{ matrix.naam }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - name: Rust installeren
         shell: bash
-        run: rustup toolchain install stable --profile minimal --target ${{ matrix.doel }}
-      - name: Tests (alleen x64, want ARM64 draait niet op deze runner)
-        if: matrix.test
-        run: cargo test --workspace
+        run: rustup toolchain install stable --profile minimal --target "$DOEL"
       - name: Bouwen
-        run: cargo build --release -p pwspeller --target ${{ matrix.doel }}
+        shell: bash
+        run: cargo build --release -p pwspeller --target "$DOEL"
       - name: Controle - geen losse C-runtime nodig
         shell: pwsh
         run: |
           $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
           $dumpbin = & $vswhere -latest -find 'VC\Tools\MSVC\**\bin\Hostx64\x64\dumpbin.exe' | Select-Object -First 1
           if (-not $dumpbin) { throw 'dumpbin.exe niet gevonden' }
-          $exe = 'target\${{ matrix.doel }}\release\pwspeller.exe'
+          $exe = Join-Path 'target' (Join-Path $env:DOEL 'release\pwspeller.exe')
           $uitvoer = & $dumpbin /dependents $exe | Out-String
           Write-Host $uitvoer
           if ($uitvoer -match 'VCRUNTIME') { throw 'Het programma heeft VCRUNTIME nodig; crt-static werkt niet.' }
@@ -59,7 +139,7 @@ jobs:
         shell: bash
         run: |
           mkdir uit
-          cp "target/${{ matrix.doel }}/release/pwspeller.exe" "uit/PWSpeller-${{ github.ref_name }}-windows-${{ matrix.naam }}.exe"
+          cp "target/$DOEL/release/pwspeller.exe" "uit/PWSpeller-$TAG-windows-$NAAM.exe"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: windows-${{ matrix.naam }}
@@ -68,13 +148,14 @@ jobs:
 
   macos:
     name: macOS universeel
+    needs: [controle, deny]
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - name: Rust installeren
         run: rustup toolchain install stable --profile minimal --target aarch64-apple-darwin --target x86_64-apple-darwin
-      - name: Tests
-        run: cargo test --workspace
       - name: Bouwen (arm64 en x86_64)
         run: |
           cargo build --release -p pwspeller --target aarch64-apple-darwin
@@ -86,9 +167,9 @@ jobs:
             target/aarch64-apple-darwin/release/pwspeller \
             target/x86_64-apple-darwin/release/pwspeller
           lipo -info bouw/pwspeller
-          packaging/macos/maak-app.sh bouw/pwspeller "${{ github.ref_name }}" bouw
+          packaging/macos/maak-app.sh bouw/pwspeller "$TAG" bouw
           codesign -d --entitlements - bouw/PWSpeller.app
-          ditto -c -k --keepParent bouw/PWSpeller.app "uit/PWSpeller-${{ github.ref_name }}-macos.zip"
+          ditto -c -k --keepParent bouw/PWSpeller.app "uit/PWSpeller-$TAG-macos.zip"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: macos
@@ -97,20 +178,21 @@ jobs:
 
   linux:
     name: Linux x64
+    needs: [controle, deny]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - name: Rust installeren
         run: rustup toolchain install stable --profile minimal --target x86_64-unknown-linux-gnu
       - name: Pakketten voor eframe
         run: sudo apt-get update && sudo apt-get install -y libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev
-      - name: Tests
-        run: cargo test --workspace
       - name: Bouwen
         run: |
           cargo build --release -p pwspeller --target x86_64-unknown-linux-gnu
           mkdir uit
-          cp target/x86_64-unknown-linux-gnu/release/pwspeller "uit/pwspeller-${{ github.ref_name }}-linux-x64"
+          cp target/x86_64-unknown-linux-gnu/release/pwspeller "uit/pwspeller-$TAG-linux-x64"
           chmod 755 uit/*
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
@@ -120,37 +202,31 @@ jobs:
 
   release:
     name: GitHub-release
-    needs: [windows, macos, linux]
+    needs: [tag, windows, macos, linux]
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      PRERELEASE: ${{ needs.tag.outputs.prerelease }}
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           path: uit
           merge-multiple: true
-      - name: Releasenotes van deze versie ophalen
-        run: |
-          # De sectie in RELEASENOTES.md waarvan de kop de tag noemt ("## v2.0.0 (datum)" of "## 2.0.0").
-          tag="${{ github.ref_name }}"
-          awk -v tag="$tag" -v kaal="${tag#v}" '
-            /^## / { if (inside) exit; inside = (index($0, tag) > 0 || index($0, kaal) > 0); next }
-            inside { print }
-          ' RELEASENOTES.md > notities.md
-          if [ ! -s notities.md ]; then
-            echo "Releasenotes: zie [RELEASENOTES.md](https://github.com/${{ github.repository }}/blob/${tag}/RELEASENOTES.md)." > notities.md
-          fi
-          cat notities.md
       - name: Release maken
-        env:
-          GH_TOKEN: ${{ github.token }}
+        shell: bash
         run: |
+          mv uit/notities.md notities.md
           ls -l uit
-          gh release create "${{ github.ref_name }}" uit/* \
-            --title "PWSpeller ${{ github.ref_name }}" \
+          extra=()
+          if [[ "$PRERELEASE" == "true" ]]; then extra+=(--prerelease); fi
+          gh release create "$TAG" uit/* \
+            --title "PWSpeller $TAG" \
             --notes-file notities.md \
-            --verify-tag
+            --verify-tag \
+            "${extra[@]}"
 
 # © 2026 Petisys (opdrachtgever) en Hans van der Pluijm, Petisys (uitvoerder).
 # Gemaakt met Claude Code (Anthropic). Overige rechthebbenden: NOTICE.md.
