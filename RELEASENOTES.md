@@ -10,6 +10,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 19: sectie hernoemd naar v2.0.0 met datum, inhoud herschreven voor gebruiker en helpdesk. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 18: downloads per platform en de eerste-start-waarschuwing. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fix 2: eigen tekst doorlopend, optie "Cijfer toevoegen", korter splashscreen. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Stand na fase C bijgewerkt. |
@@ -23,23 +24,27 @@
 
 ## Nog niet uitgebracht
 
+## v2.0.0 — 2026-10-17
+
 ### Wat er verandert
 
-- PWSpeller wordt opnieuw gebouwd voor Windows (x64 en ARM64), macOS (Apple en Intel, als app met het Petisys-icoon) en Linux; de vorige versie blijft beschikbaar als release v1.0-vb.
-- Een wachtzin staat in beeld in hele woorden, met het scheidingsteken ertussen en een klein nummer boven elk woord; een woord wordt niet meer in tweeën gebroken.
-- Het startscherm blijft anderhalve seconde staan. Eigen tekst staat in beeld als één doorlopende regel in kleur; alleen een gegenereerd wachtwoord staat in groepjes van vier. De spelling is doorlopend genummerd.
-- Wachtzinnen maak je straks ook in het Nederlands, Frans en Duits, naast het Engels; woorden die aanstootgevend kunnen zijn komen er niet in voor.
+- PWSpeller is opnieuw gebouwd voor Windows (x64 en ARM64), macOS (Apple en Intel) en Linux. De vorige versie blijft beschikbaar als release v1.0-vb.
+- Je maakt een wachtwoord, een wachtzin of spelt je eigen tekst, en de spelling staat erbij in het Nederlands, Vlaams, Frans, Duits, Engels of het NAVO-alfabet. Wachtzinnen maak je in het Nederlands, Frans, Duits of Engels; woorden die aanstootgevend kunnen zijn komen er niet in voor.
+- Een gegenereerd wachtwoord staat in groepjes van vier met nummers. Een wachtzin staat in hele woorden met het scheidingsteken ertussen. Eigen tekst staat doorlopend in beeld.
+- Met *Lees voor* zie je één teken of woord tegelijk, groot; volgende en vorige met spatie en de pijltjes, stoppen met Esc.
+- De geschiedenis staat alleen in het geheugen, versleuteld, en wordt gewist bij het sluiten, na 15 minuten inactiviteit (instelbaar) of met *Wis geschiedenis*. Een gekopieerd wachtwoord wordt na 30 seconden van het klembord gehaald (instelbaar; op macOS standaard uit).
+- Het programma gebruikt geen internet.
 
 ### Nog te doen
 
-- De eerste release voor Windows, macOS en Linux moet nog gepubliceerd worden; die komt met de tag `v2.0.0`.
 - De programma's zijn nog niet ondertekend met een betaald certificaat; zie "Bekende problemen".
 
 ### Bekende problemen
 
-- Bij de eerste start waarschuwt Windows (SmartScreen) en macOS (Gatekeeper) dat het programma niet ondertekend is. Windows: kies *Meer informatie* en *Toch uitvoeren*. macOS: rechtsklik op PWSpeller, kies *Open* en bevestig.
+- Bij de eerste start waarschuwt Windows (SmartScreen) en macOS (Gatekeeper) dat het programma niet ondertekend is. Windows: kies *Meer informatie* en *Toch uitvoeren*. macOS: open *Systeeminstellingen > Privacy en beveiliging* en kies *Toch openen* (op oudere macOS-versies kan ook rechtsklik en *Open*).
 - Wordt het programma geforceerd beëindigd (taakbeheer, stroom eraf), dan blijft een gekopieerd wachtwoord op het klembord staan.
 - Op Linux met X11 kunnen klembordbeheerders een gekopieerd wachtwoord bewaren.
+- Een tekst die je zelf typt, kan het programma niet volledig uit het geheugen wissen; dat kan alleen door het programma te sluiten.
 
 ---
 

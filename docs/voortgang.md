@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fase D: taak 19 (documentatie, releasenotes v2.0.0) en samenvatting van taak 18. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 18 fixronde: sleutel op een eigen pagina (Windows-paniek), valse treffer in de schijftest, release-workflow aangescherpt. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 18: licentiecontrole, CI en uitlevering per platform. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Visuele controle: voorleesmodus, groepjes, splash 1,5 s. |
@@ -20,6 +21,16 @@
 ---
 
 # Voortgang
+
+## 2026-10-17, ochtend (Claude Code) — Fase D afgerond: taak 18 en 19, klaar voor v2.0.0
+
+- **Taak 19, documentatie.** README volledig voor engineers en helpdesk (downloaden, eerste start, gebruik, bouwen, taal toevoegen, uitrollen, alle documenten); `docs/implementatie.md` aangevuld met taaldata, generator, spelling, app-onderdelen en licenties; releasenotes onder de kop `## v2.0.0 — 2026-10-17`. Gemeten: `packaging/releasenotes.sh v2.0.0` vindt de sectie, en een lege sectie "Nog niet uitgebracht" erboven is geen probleem, want het script stopt bij de volgende `## `-kop.
+- **macOS-waarschuwing.** In README en releasenotes staat *Systeeminstellingen > Privacy en beveiliging > Toch openen* voorop; rechtsklik en *Open* geldt alleen nog op oudere macOS-versies. Dit is uit kennis van het gedrag sinds macOS 15 opgeschreven en niet op een macOS 26-scherm nagelezen; de tekst zegt dat ook.
+- **Waarom de sleutel een eigen pagina kreeg (taak 18).** Op Windows paniekte `region` bij het ontgrendelen: kleine allocaties delen een pagina en vergrendelen telt niet mee, dus de tweede `VirtualUnlock` gaf ERROR_NOT_LOCKED. Zie de entry hieronder en `docs/implementatie.md`.
+- **Waarom de schijftest losse woorden anders behandelt (taak 18).** De Linux-"lek"-melding was een woord (`verzoek`) dat toevallig ook in een vaste logtekst stond; gemeten en verworpen als lek. Het volledige wachtwoord blijft in het ruwe logboek gezocht.
+- **Waarom de release-workflow strenger is.** Minimale rechten, tag en releasenotes eerst gevalideerd, geen `${{ }}` in `run:`, `persist-credentials: false`, vastgepinde actions, `cargo deny` blokkerend. Een release zonder kloppende notes faalt liever dan dat er stil een lege tekst uitgaat.
+- **Licentie-uitzonderingen.** `BSL-1.0` en `MPL-2.0` (alleen `option-ext`) zijn op 17 oktober 2026 door Hans goedgekeurd en staan in `deny.toml` en `NOTICE.md`.
+- **Nog niet gedaan:** de tag `v2.0.0`. Die wacht op akkoord van Hans (afspraak 14); daarna `git tag -a v2.0.0 -m "PWSpeller 2.0.0"` en push, en controleren dat de release vijf bestanden bevat.
 
 ## 2026-10-17, nacht (Claude Code) — Taak 18 fixronde: CI groen op drie platforms
 
@@ -95,9 +106,9 @@ Op de Mac mini verder gewerkt, met een subagent en een aparte review per taak.
 
 ## Openstaande punten
 
-- Review van Taak 5, daarna Taak 10, 6, 7, 8, 9 en 11 (rest van fase B), dan fase C en D.
+- Hans geeft akkoord op de tag `v2.0.0`; daarna taggen, pushen en met `gh run watch` en `gh release view v2.0.0` controleren dat er vijf bestanden bij staan. Het eerste echte `release.yml`-resultaat (met name `dumpbin` en Windows ARM64) moet nog blijken.
 - Hans keurt de blokkeerlijsten `nl-`, `fr-` en `de-geblokkeerd.txt` goed.
-- Na de push: kijken of `ci.yml` op alle drie de OS groen wordt, dan tag `v2.0.0`; het eerste echte `release.yml`-resultaat (met name `dumpbin` en ARM64) moet nog blijken.
+- Handmatig meten: wissen van het klembord bij een geminimaliseerd venster.
 - Ondertekenen en app stores: zie het ontwerp, hoofdstuk 14.
 
 ---

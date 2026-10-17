@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 19: taaldata, generator, spelling, app-onderdelen en licenties toegevoegd; verouderde verwijzing naar Taak 17 weg. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 18 fixronde: sleutelpagina, release-workflow met controle vooraf. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 18: sectie Bouwen en uitleveren. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fix 2: groepjes van vier alleen bij het wachtwoord, eigen tekst doorlopend, spellinglijst doorlopend genummerd, splashscreen 1,5 seconde. |
@@ -37,6 +38,76 @@ Een Cargo-werkruimte (`edition = "2024"`, `resolver = "3"`) met drie crates:
 Windows-bouwsels linken statisch (`.cargo/config.toml`, `crt-static`). De test
 `crates/kern/tests/kopblok.rs` bewaakt dat elke historieregel in een kopblok een merkteken heeft.
 Het ontwerp staat in [het ontwerpdocument](superpowers/specs/2026-10-16-pwspeller-rust-design.md).
+
+## Taaldata en datamodel (`pwspeller-data`, `data/`)
+
+- `data/` bevat alles wat per taal verschilt, als TOML en tekst: `alfabetten/<code>.toml` (codewoord
+  per letter a-z), `omschrijvingen/<code>.toml` (sjablonen, cijfers, leestekens, lastige klanken),
+  `woordenlijsten/<code>.txt` met `<code>-geblokkeerd.txt`, `interface/<code>.toml` en
+  `spellingstalen.toml` (welk alfabet, welke omschrijvingen en welke woordenlijst bij een taal horen).
+  Zes spellingstalen: nl, vl, fr, de, en en navo. Vlaams gebruikt de omschrijvingen van het
+  Nederlands; Engels en NAVO volgen de taal van de interface (`omschrijvingen` ontbreekt).
+- De crate `pwspeller-data` heeft geen bestandstoegang: `lees_catalogus(&[(pad, tekst)])` zet de
+  bestanden om in een `Catalogus` (`Alfabet`, `Omschrijvingen`, `Woordenlijst`, geblokkeerde
+  woorden, `Spellingstaal`, interfaceteksten) en `controleer(&Catalogus)` geeft een lijst `DataFout`
+  (bestand plus melding). Dat houdt de logica testbaar met kleine voorbeelden.
+- `crates/kern/build.rs` leest alle `.toml`- en `.txt`-bestanden in `data/`, draait beide functies en
+  laat de build mislukken met alle fouten tegelijk. Daarna schrijft hij `bestanden.rs` met
+  `include_str!` per bestand; `talen::catalogus()` leest die één keer in (`OnceLock`). Zo kan een
+  onvolledige taal niet in een programma terechtkomen. De controle eist onder meer: alle letters
+  a-z, cijfers 0-9 en ASCII 32-126 omschreven, geen lege teksten, geen onbekende verwijzingen,
+  elke sleutel uit `en.toml` ook in elke andere interfacetaal, en woorden van minstens 5 tekens, alleen a-z,
+  zonder dubbelen en buiten de blokkeerlijst.
+- Teksten met een plaatshouder (`{woord}`, `{naam}`) worden in één doorgang ingevuld, zodat een
+  ingevulde waarde niet opnieuw als plaatshouder gelezen wordt.
+
+## Generator en sterkte (kern, `generator/`, `sterkte.rs`)
+
+- **Wachtwoord** (`WachtwoordOpties`: lengte 5-128, vier tekensets, minimum per set 1-9,
+  dubbelzinnige tekens `I O l 0 1` vermijden). Eerst trekt het per set het minimum aantal tekens,
+  vult daarna aan uit alle sets samen en schudt. `effectieve_lengte` is minstens 5 en minstens de som
+  van de minima; de app meldt een verhoogde lengte (`melding.lengte_opgehoogd`). Speciale tekens
+  zijn `! @ # $ % ^ & *`, bewust een kleine set die aan de telefoon te geven is.
+- **Wachtzin** (`WachtzinOpties`: 3-20 woorden, scheidingsteken, hoofdletter per woord, één cijfer).
+  Woorden komen uniform uit de gekozen woordenlijst; het cijfer wordt aan één willekeurig woord
+  geplakt. `Gegenereerd.woorden` bewaart de woorden apart, zodat de weergave ze heel kan tonen.
+- **Willekeur** komt alleen uit `rand::rng()` (ChaCha12, geseed uit het besturingssysteem). Tests
+  gebruiken een `StdRng` met vaste seed via de verborgen functies zonder `_os`.
+- Het resultaat is een `Gegenereerd` met `Zeroizing<String>`; `entropie_bits` is een bovengrens
+  (lengte × log2(pool), zonder aftrek voor de minima).
+- **Sterkte** (`sterkte.rs`): `niveau` geeft Zwak (< 60 bits), Redelijk (60 tot en met 80) of Sterk.
+  `schatting_bits` voor eigen tekst telt de aanwezige tekensoorten bij elkaar (26, 26, 10, 33, 100 voor
+  niet-ASCII); het is een grove schatting, geen wachtwoordsterkteanalyse.
+
+## Spelling (kern, `spelling.rs`)
+
+- `Speller::nieuw(alfabet, omschrijvingen)` levert `Regel`s: `positie` (1-based, in tekens),
+  `fragment`, `omschrijving`, `soort` (hoofdletter, kleine letter, cijfer, speciaal, spatie, woord,
+  onbekend) en `lastig`.
+- `per_teken` spelt elk teken. Een teken zonder omschrijving krijgt de sjabloon `onbekend` met de
+  code `U+xxxx`, zodat onzichtbare of vreemde tekens nooit stil wegvallen.
+- `wachtzin` spelt per woord ("woord correct") en het scheidingsteken per teken; een eindcijfer
+  wordt als apart cijfer gespeld. Een woord is `lastig` als het een klank bevat of eindigt op een
+  klank uit `lastige_klanken` van de taal (Nederlands: ij, ei, au, ou, of een woord op d of t); de app markeert die.
+- `omschrijvingen_voor(taal, interfacetaal)` kiest de omschrijvingen van de spellingstaal, of die van
+  de interface als de taal er geen heeft.
+
+## App-onderdelen (`pwspeller`, `crates/app/src`)
+
+| Bestand | Rol |
+|---|---|
+| `main.rs`, `lib.rs`, `app.rs` | Opstarten, logboek, `PwApp` (`eframe::App`), de splash-, hoofd- en panelen in één beeldlus |
+| `splash.rs` | Splashscreen (logo, naam, klant, versie, copyright); start nooit het programma tegen |
+| `hoofd.rs`, `opties.rs` | Hoofdvenster met drie tabs, de opties per tab, sneltoetsen |
+| `resultaat.rs` | Weergave van het resultaat en de spellinglijst |
+| `voorlezen.rs` | Voorleesmodus: één teken of woord, groot |
+| `klembord.rs` | Kopiëren en na een tijd wissen |
+| `geschiedenis_paneel.rs`, `instellingen_paneel.rs` | De twee vensters |
+| `instellingen.rs`, `logboek.rs` | Instellingen (TOML) en logboek in de mappen van het besturingssysteem |
+| `thema.rs` | Petisys-kleuren, lettertype Atkinson Hyperlegible Mono |
+
+`build.rs` van de app zet het versienummer (`PWSPELLER_VERSIE`, uit de omgeving of anders `git describe --tags --always`) en
+bedt het Windows-icoon in. Versie en klant op het splashscreen komen dus uit de release, niet uit de code.
 
 ## Geschiedenis (kern, `geschiedenis.rs`)
 
@@ -68,7 +139,7 @@ Het ontwerp staat in [het ontwerpdocument](superpowers/specs/2026-10-16-pwspelle
   geen ingevoegde spaties of nummers). De spellinglijst nummert doorlopend 1, 2, 3 (weergave), niet
   naar `Regel.positie`, want bij een wachtzin per woord springt die. De voorleesmodus markeert alleen
   bij een wachtwoord een groepje; anders het huidige teken of woord.
-- **Splashscreen:** 1,5 seconde (`SPLASHDUUR`), besluit opdrachtgever 17 oktober 2026 (eerst 3 seconden).
+- **Splashscreen:** 1,5 seconde (`SPLASHDUUR`), besluit opdrachtgever 17 oktober 2026.
 - Spelregels en groepjes staan in een cache (`SpelCache`) die alleen opnieuw wordt opgebouwd bij een
   andere tab, tekst, spellingstaal, interfacetaal of spelwijze. De cache overschrijft zijn teksten met
   nullen als hij vervangen of vrijgegeven wordt.
@@ -92,8 +163,8 @@ Het ontwerp staat in [het ontwerpdocument](superpowers/specs/2026-10-16-pwspelle
   aanstaat. Staat het uit, dan is er geen enkele aanroep op het bord (getest met een telnepbord).
 - `PwApp` bezit `Option<Klembordbeheer<Box<dyn Bord>>>` (`None` zonder systeemklembord, zoals
   Linux in CI) en vraagt `request_repaint_after` tot het wis-moment. Fouten: `log::warn!` zonder
-  inhoud en de melding `melding.klembord_mislukt`; nooit paniek. `bij_sluiten_klembord` wordt in
-  Taak 17 aan `on_exit` gekoppeld (via `bij_afsluiten`).
+  inhoud en de melding `melding.klembord_mislukt`; nooit paniek. `bij_afsluiten` (aangeroepen vanuit
+  `on_exit`) roept `bij_sluiten` van het klembord aan.
 - **Markering als vertrouwelijk (arboard 3.7.0, `exclude_from_history`):** macOS zet
   `org.nspasteboard.ConcealedType` (arboard doet dat zelf, geen eigen objc-code nodig). Windows
   zet `ExcludeClipboardContentFromMonitorProcessing`-formaten via `exclude_from_history` en
@@ -149,6 +220,19 @@ Het ontwerp staat in [het ontwerpdocument](superpowers/specs/2026-10-16-pwspelle
 - **Windows**: `crt-static` staat in `.cargo/config.toml`; de job controleert met `dumpbin /dependents` dat `VCRUNTIME` ontbreekt. Het icoon gaat via `winresource` in `build.rs`.
 - **macOS**: `lipo` voegt arm64 en x86_64 samen; `packaging/macos/maak-app.sh` maakt de bundel (Info.plist met de versie uit de tag, `AppIcon.icns`, ad-hoc `codesign` met hardened runtime en entitlements: alleen `app-sandbox`).
 - **Vastgepind**: actions op commit-SHA van major-versies (checkout v7, upload-artifact v7, download-artifact v8, cargo-deny-action v2); toolchain via `rustup` van de runner.
+
+## Licenties en afhankelijkheden
+
+- Toegestaan: MIT, Apache-2.0, BSD-2/3, ISC, Zlib, Unicode-3.0, OFL-1.1 en CC-BY-3.0 (EFF-lijst),
+  bewaakt door `cargo deny check licenses`. Op 17 oktober 2026 keurde de opdrachtgever twee
+  uitzonderingen goed: `BSL-1.0` (Boost, permissief; `clipboard-win` en `error-code` via arboard,
+  alleen Windows) en `MPL-2.0` alleen voor `option-ext` (via `directories`, onveranderd gebruikt).
+  Ze staan in `deny.toml` en in [NOTICE.md](../NOTICE.md).
+- Geen netwerk: HTTP-clients, TLS-crates en `openssl` staan onder `[bans]`; eframe draait zonder de
+  feature `persistence`; `image-data` van arboard staat uit.
+- Hoofdafhankelijkheden: `eframe`/`egui` (interface), `rand` 0.10, `zeroize`, `chacha20poly1305`
+  en `region` (geschiedenis), `arboard` en `sha2` (klembord), `serde` en `toml`, `directories`,
+  `sys-locale`, `chrono` (alleen feature `clock`), `log`.
 
 ## Afgewezen alternatieven
 
