@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 18 fixronde: sleutel op een eigen pagina (Windows-paniek), valse treffer in de schijftest, release-workflow aangescherpt. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 18: licentiecontrole, CI en uitlevering per platform. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Visuele controle: voorleesmodus, groepjes, splash 1,5 s. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fix: tabblad Wachtzin toont hele woorden met scheidingsteken en woordnummer, niet groepjes van vier die woorden middenin afbraken; wachtwoord en eigen tekst blijven groepjes. De voorleesmodus breekt een wachtzin alleen na een scheidingsteken. |
@@ -19,6 +20,14 @@
 ---
 
 # Voortgang
+
+## 2026-10-17, nacht (Claude Code) — Taak 18 fixronde: CI groen op drie platforms
+
+- **Windows-paniek in `region` (`unlocking region: Err(SystemCall(158))`)**. Oorzaak: de sleutel van 32 bytes stond in een `Box`, en kleine allocaties delen een geheugenpagina (gemeten: drie `Box<[u8; 32]>` op één pagina van 16 KiB). Het besturingssysteem vergrendelt per pagina en telt niet mee: de eerste `VirtualUnlock` hief ook de lock van de andere geschiedenis op, de tweede faalde met ERROR_NOT_LOCKED (158), en de `debug_assert` in `LockGuard::drop` gaf een paniek. Op macOS/Linux faalt `munlock` niet, maar ontgrendelde de eerste drop stilletjes de pagina van de ander. Oplossing: de sleutel krijgt een eigen allocatie van precies één pagina, pagina-uitgelijnd (`std::alloc` met `Layout`), gelockt; bij drop eerst gewist, dan ontgrendeld (fout alleen gelogd), dan vrijgegeven. `region::alloc` is bewust niet gebruikt: `Allocation::drop` heeft dezelfde `debug_assert`.
+- **Linux: "gegenereerde tekst in logboek"**. Gemeten met tijdelijke diagnose (lokaal na 40 runs gereproduceerd, ook op macOS): het woord `verzoek` uit de Nederlandse woordenlijst, in de logregel `geschiedenis gewist op verzoek`. Die regel kwam van een andere test: de logger is voor het hele testproces gedeeld. Geen lek, maar toeval (~2 % per run: `verzoek`, `afgesloten`, `geschiedenis` staan in de lijst én in vaste logteksten). Een woordgrens helpt hier niet, want het is een heel woord. Oplossing: het volledige wachtwoord en de volledige wachtzin worden nog steeds in het ruwe logboek gezocht; voor de losse woorden haalt de test eerst de vaste teksten van alle `log::…!`-aanroepen in de bron weg (automatisch uit de broncode gelezen), de ingevulde waarden blijven gecontroleerd.
+- **Release-workflow**: tag eerst gevalideerd (`vX.Y.Z` met optioneel achtervoegsel; met achtervoegsel een prerelease), releasenotes met exacte kopmatch via `packaging/releasenotes.sh` (faalt als de sectie ontbreekt, geen terugval meer), fmt/clippy/tests op drie OS en een volledig blokkerende `cargo deny` vóór het bouwen. Geen `${{ }}`-expressies meer in `run:`; alles via `env:`. Overal `persist-credentials: false`.
+- **CI**: advisories in een eigen job met `continue-on-error`, zodat een nieuw beveiligingsbericht zichtbaar faalt zonder de rest te blokkeren. `deny.toml` verbiedt nu ook native-tls, rustls, tokio, h2 en hyper-util. `build.rs`: in CI of met `PWSPELLER_VERSIE` laat een mislukte winresource-stap de build falen.
+- **Licenties**: BSL-1.0 en de MPL-2.0-uitzondering (option-ext) zijn op 17 oktober 2026 door de opdrachtgever goedgekeurd; vastgelegd in NOTICE.md en deny.toml.
 
 ## 2026-10-17, nacht (Claude Code) — Taak 18: licenties, CI en uitlevering
 

@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 18 fixronde: sleutelpagina, release-workflow met controle vooraf. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 18: sectie Bouwen en uitleveren. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fix 2: groepjes van vier alleen bij het wachtwoord, eigen tekst doorlopend, spellinglijst doorlopend genummerd, splashscreen 1,5 seconde. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 17 fixronde 1: wissen wist ook het resultaat, invoer telt als gebruik, instellingen begrensd, grenzen vastgelegd. |
@@ -39,8 +40,13 @@ Het ontwerp staat in [het ontwerpdocument](superpowers/specs/2026-10-16-pwspelle
 
 ## Geschiedenis (kern, `geschiedenis.rs`)
 
-- Sleutel van 32 willekeurige bytes in `Box<Zeroizing<[u8; 32]>>` (stabiel adres), vergrendeld met
-  `region::lock`; mislukt dat, dan volgt één `log::warn!` en werkt de app door.
+- Sleutel van 32 willekeurige bytes op een eigen geheugenpagina (`SleutelPagina`: `std::alloc` met
+  een `Layout` van één pagina, pagina-uitgelijnd), vergrendeld met `region::lock`; mislukt dat, dan
+  volgt één `log::warn!` en werkt de app door. Bij drop: wissen, ontgrendelen (fout alleen gelogd),
+  vrijgeven. Een `Box` is afgewezen: kleine allocaties delen een pagina, en vergrendelen gaat per
+  pagina zonder teller, dus het ontgrendelen van de ene sleutel hief de lock van de andere op
+  (Windows: ERROR_NOT_LOCKED en een paniek in `LockGuard`). `region::alloc` is afgewezen omdat
+  `Allocation::drop` dezelfde `debug_assert` heeft.
 - Elk item apart met XChaCha20-Poly1305 en een eigen nonce van 24 bytes. De platte tekst is een
   eigen codering (modus, tekst, wachtzin-onderdelen, entropie) in een `Zeroizing<Vec<u8>>`; de
   decodering controleert elke lengte en geeft bij corrupte data `None`.
@@ -138,8 +144,8 @@ Het ontwerp staat in [het ontwerpdocument](superpowers/specs/2026-10-16-pwspelle
 ## Bouwen en uitleveren (Taak 18)
 
 - **Licenties** (`deny.toml`): lijst uit de randvoorwaarden plus `BSL-1.0`; `MPL-2.0` alleen voor `option-ext` (per-crate-uitzondering). `[graph] targets` beperkt de controle tot de vijf uitleverdoelen. HTTP-crates en `openssl` staan onder `[bans]`.
-- **CI** (`.github/workflows/ci.yml`): fmt, clippy (`--all-targets -D warnings`) en test op ubuntu, macos en windows; `cargo deny` op ubuntu. Linux-pakketten: de lijst uit de eframe-README (`libxcb-render0-dev`, `libxcb-shape0-dev`, `libxcb-xfixes0-dev`, `libxkbcommon-dev`) zonder `libssl-dev` en GTK (geen netwerk, geen bestandsdialoog).
-- **Release** (`release.yml`): per platform een job die tests draait, bouwt en een artifact uploadt; een laatste job (enige met `contents: write`) maakt de release met `gh release create`. De versie komt uit de tag via `PWSPELLER_VERSIE` (zie `build.rs`).
+- **CI** (`.github/workflows/ci.yml`): fmt, clippy (`--all-targets -D warnings`) en test op ubuntu, macos en windows; `cargo deny` (licenses, bans, sources) op ubuntu, en advisories in een eigen job met `continue-on-error`. Linux-pakketten: de lijst uit de eframe-README (`libxcb-render0-dev`, `libxcb-shape0-dev`, `libxcb-xfixes0-dev`, `libxkbcommon-dev`) zonder `libssl-dev` en GTK (geen netwerk, geen bestandsdialoog).
+- **Release** (`release.yml`): eerst de tag valideren (achtervoegsel = prerelease) en de sectie uit `RELEASENOTES.md` halen (`packaging/releasenotes.sh`, exacte kop, faalt als hij ontbreekt); dan fmt, clippy en tests op drie OS en een blokkerende `cargo deny`; daarna per platform een job die bouwt en een artifact uploadt; een laatste job (enige met `contents: write`) maakt de release met `gh release create`. De versie komt uit de tag via `PWSPELLER_VERSIE` (zie `build.rs`).
 - **Windows**: `crt-static` staat in `.cargo/config.toml`; de job controleert met `dumpbin /dependents` dat `VCRUNTIME` ontbreekt. Het icoon gaat via `winresource` in `build.rs`.
 - **macOS**: `lipo` voegt arm64 en x86_64 samen; `packaging/macos/maak-app.sh` maakt de bundel (Info.plist met de versie uit de tag, `AppIcon.icns`, ad-hoc `codesign` met hardened runtime en entitlements: alleen `app-sandbox`).
 - **Vastgepind**: actions op commit-SHA van major-versies (checkout v7, upload-artifact v7, download-artifact v8, cargo-deny-action v2); toolchain via `rustup` van de runner.

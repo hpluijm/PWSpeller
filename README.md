@@ -15,6 +15,7 @@ geven zijn. Versie 2 wordt opnieuw gebouwd in Rust voor Windows, macOS en Linux.
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 18 fixronde: release controleert eerst, releasenotes-sectie verplicht. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 18: sectie Uitrollen/downloaden. |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Verwijzingen naar plan, logboek en bronnen van de woordenlijsten. |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | README opnieuw opgezet voor PWSpeller 2 (Rust). |
@@ -46,11 +47,13 @@ cargo test --workspace
 | Linux x64 | `pwspeller-<versie>-linux-x64` (`chmod +x`, daarna starten) |
 
 **Hoe de release tot stand komt.** Een tag `v*` (bijvoorbeeld `v2.0.0`) start
-[`.github/workflows/release.yml`](.github/workflows/release.yml). Die draait de tests en bouwt op een
+[`.github/workflows/release.yml`](.github/workflows/release.yml). Die controleert de tag, draait
+opmaak, clippy, tests en `cargo deny`, en bouwt pas daarna op een
 Windows-, macOS- en Linux-runner, zet de tag als versienummer in het programma
 (`PWSPELLER_VERSIE`) en maakt met `gh release create` de GitHub-release met de bestanden. De tekst
-van de release is de sectie van die versie uit [RELEASENOTES.md](RELEASENOTES.md), of een
-verwijzing ernaar als die sectie ontbreekt. Bij elke push en pull request draait
+van de release is de sectie van die versie uit [RELEASENOTES.md](RELEASENOTES.md) (kop `## v2.0.0`
+of `## 2.0.0`); ontbreekt die, dan faalt de release. Een tag met achtervoegsel (`v2.0.0-rc1`) wordt
+een prerelease. Bij elke push en pull request draait
 [`ci.yml`](.github/workflows/ci.yml): opmaak, clippy, tests en `cargo deny` (licenties, verboden
 netwerkcrates).
 

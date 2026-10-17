@@ -51,11 +51,6 @@ jobs:
         run: cargo clippy --workspace --all-targets -- -D warnings
       - name: Tests
         run: cargo test --workspace
-      - name: TIJDELIJK diagnose logboek
-        if: runner.os == 'Linux'
-        env:
-          PWSPELLER_DIAG: "1"
-        run: cargo test -p pwspeller --test geschiedenis -- --nocapture --test-threads=8 2>&1 | sed -n '/LOGBOEK-DIAG-BEGIN/,/LOGBOEK-DIAG-EIND/p' || true
 
   licenties:
     name: cargo deny

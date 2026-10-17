@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Taak 18 fixronde: schijftest negeert de vaste teksten van de eigen logregels bij de losse woorden.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 17 fixronde 1: tests voor wissen van het resultaat, invoer als gebruik en een sterkere schijftest.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -90,6 +93,82 @@ fn komt_voor(inhoud: &str, tekst: &str, heel_woord: bool) -> bool {
     } else {
         inhoud.contains(tekst)
     }
+}
+
+/// De vaste stukken tekst van alle `log::…!`-aanroepen in de broncode van de app en de kern
+/// (de tekst tussen de `{…}`-plaatsaanduidingen), langste eerst.
+fn vaste_logteksten() -> Vec<String> {
+    fn rs_bestanden(map: &std::path::Path, uit: &mut Vec<std::path::PathBuf>) {
+        for e in std::fs::read_dir(map).expect("bronmap leesbaar").flatten() {
+            let pad = e.path();
+            if pad.is_dir() {
+                rs_bestanden(&pad, uit);
+            } else if pad.extension().is_some_and(|x| x == "rs") {
+                uit.push(pad);
+            }
+        }
+    }
+    let wortel = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+    let mut bestanden = Vec::new();
+    rs_bestanden(&wortel.join("src"), &mut bestanden);
+    rs_bestanden(&wortel.join("../kern/src"), &mut bestanden);
+    let mut stukken = Vec::new();
+    for pad in bestanden {
+        let bron = std::fs::read_to_string(&pad).expect("bron leesbaar");
+        for aanroep in ["log::info!(", "log::warn!(", "log::error!("] {
+            for (i, _) in bron.match_indices(aanroep) {
+                let rest = &bron[i + aanroep.len()..];
+                let begin = rest.find('"').expect("logtekst") + 1;
+                let eind = begin + rest[begin..].find('"').expect("einde logtekst");
+                let mut stuk = String::new();
+                let mut in_haak = false;
+                for c in rest[begin..eind].chars() {
+                    match c {
+                        '{' => {
+                            stukken.push(std::mem::take(&mut stuk));
+                            in_haak = true;
+                        }
+                        '}' => in_haak = false,
+                        c if !in_haak => stuk.push(c),
+                        _ => {}
+                    }
+                }
+                stukken.push(stuk);
+            }
+        }
+    }
+    stukken.retain(|s| s.chars().any(char::is_alphabetic));
+    stukken.sort_by_key(|s| std::cmp::Reverse(s.len()));
+    stukken.dedup();
+    assert!(
+        stukken
+            .iter()
+            .any(|s| s == "geschiedenis gewist op verzoek"),
+        "vaste logteksten niet gevonden"
+    );
+    stukken
+}
+
+/// Het logboek zonder de vaste logteksten; wat overblijft (tijdstip, niveau, ingevulde waarden
+/// zoals paden en foutmeldingen) wordt wel op losse woorden gecontroleerd.
+fn zonder_vaste_logteksten(logboek: &str) -> String {
+    let mut uit = logboek.to_owned();
+    for stuk in vaste_logteksten() {
+        uit = uit.replace(&stuk, " ");
+    }
+    uit
+}
+
+#[test]
+fn vaste_logteksten_wegfilteren_laat_een_lek_staan() {
+    let log = "2026-10-17 00:03:10Z INFO  geschiedenis gewist op verzoek\n\
+               2026-10-17 00:03:10Z INFO  afgesloten\n\
+               2026-10-17 00:03:11Z WARN  instellingen /tmp/x/verzoek.toml onleesbaar: geschiedenis; standaard gebruikt\n";
+    let rest = zonder_vaste_logteksten(log);
+    // De vaste regels zijn weg, de ingevulde waarden (pad, fout) blijven staan.
+    assert!(!komt_voor(&rest, "afgesloten", false));
+    assert_eq!(rest.matches("verzoek").count(), 1);
+    assert_eq!(rest.matches("geschiedenis").count(), 1);
 }
 
 #[test]
@@ -313,6 +392,8 @@ fn geen_wachtwoord_in_instellingen_of_logboek() {
     let mut h = harnas_met(app, t0);
     // (tekst, alleen als heel woord vergelijken)
     let mut teksten: Vec<(String, bool)> = Vec::new();
+    // Het volledige wachtwoord of de volledige wachtzin.
+    let mut volledig: Vec<String> = Vec::new();
     for i in 0..20 {
         kies_tab(
             &mut h,
@@ -330,6 +411,7 @@ fn geen_wachtwoord_in_instellingen_of_logboek() {
             app.hoofd.wachtzin.as_ref()
         }
         .expect("gegenereerd");
+        volledig.push(g.tekst.to_string());
         teksten.push((g.tekst.to_string(), false));
         if let Some(w) = &g.woorden {
             // Korte woorden alleen als heel woord, anders geven "true" en dergelijke valse treffers.
@@ -345,15 +427,24 @@ fn geen_wachtwoord_in_instellingen_of_logboek() {
     assert!(instellingen.contains("klembord_seconden = 61"));
     let logboek = std::fs::read_to_string(&logpad).expect("logboek bestaat");
     assert!(!logboek.trim().is_empty(), "het logboek is niet leeg");
-    if std::env::var_os("PWSPELLER_DIAG").is_some() {
-        eprintln!("LOGBOEK-DIAG-BEGIN\n{logboek}LOGBOEK-DIAG-EIND");
-    }
     // Alleen de waarden van de instellingen tellen; sleutels als `cijfer` zijn geen lek.
     let waarden: String = instellingen
         .lines()
         .filter_map(|r| r.split_once('=').map(|(_, w)| w))
         .collect::<Vec<_>>()
         .join("\n");
+    // Het volledige wachtwoord en de volledige wachtzin mogen nergens in het logboek staan.
+    assert_eq!(volledig.len(), 20);
+    for t in &volledig {
+        assert!(
+            !logboek.contains(t.as_str()),
+            "gegenereerde tekst in het ruwe logboek"
+        );
+    }
+    // Voor de losse woorden tellen de vaste teksten van de eigen logregels niet mee: de logger
+    // is voor het hele testproces gedeeld, dus ook "geschiedenis gewist op verzoek" van een
+    // andere test staat erin, en "verzoek" staat in de Nederlandse woordenlijst.
+    let logboek = zonder_vaste_logteksten(&logboek);
     let mut bestanden = vec![("instellingen", waarden), ("logboek", logboek)];
     for extra in ["instellingen.toml.tmp", "instellingen.toml.kapot"] {
         if let Ok(t) = std::fs::read_to_string(map.join(extra)) {
@@ -363,12 +454,7 @@ fn geen_wachtwoord_in_instellingen_of_logboek() {
     assert!(!teksten.is_empty());
     for (naam, inhoud) in &bestanden {
         for (t, heel) in &teksten {
-            if komt_voor(inhoud, t, *heel) {
-                let regels: Vec<&str> = inhoud.lines().filter(|r| r.contains(t.as_str())).collect();
-                panic!(
-                    "DIAGNOSE gegenereerde tekst in {naam}: {t:?} (heel={heel}) regels: {regels:?}"
-                );
-            }
+            assert!(!komt_voor(inhoud, t, *heel), "gegenereerde tekst in {naam}");
         }
     }
     let _ = std::fs::remove_dir_all(&map);
