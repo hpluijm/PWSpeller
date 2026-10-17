@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Eindreview: eigen inactiviteitsteller; klembordstap elk beeld, ook in de voorleesmodus.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 17 fixronde 1: bij_afsluiten wist ook het huidige resultaat.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -41,7 +44,7 @@ use pwspeller_kern::generator::Gegenereerd;
 use pwspeller_kern::geschiedenis::Geschiedenis;
 use std::path::Path;
 use std::path::PathBuf;
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant, SystemTime};
 use zeroize::Zeroizing;
 
 pub struct PwApp {
@@ -69,6 +72,9 @@ pub struct PwApp {
     klembord: Option<Klembordbeheer<Box<dyn Bord>>>,
     logo: Option<egui::TextureHandle>,
     logo_geprobeerd: bool,
+    /// Laatste invoer van de gebruiker, los van de geschiedenis; de wandklok loopt door tijdens slaapstand.
+    pub(crate) laatste_invoer: Instant,
+    pub(crate) laatste_invoer_wand: SystemTime,
 }
 
 impl PwApp {
@@ -132,6 +138,8 @@ impl PwApp {
             klembord: None,
             logo: None,
             logo_geprobeerd: false,
+            laatste_invoer: nu,
+            laatste_invoer_wand: SystemTime::now(),
         }
     }
 
@@ -221,11 +229,16 @@ impl PwApp {
                 self.voorlezen = None;
                 ui.ctx().request_repaint();
             }
-            return;
+        } else {
+            self.teken_hoofd(ui, nu);
+            if std::mem::take(&mut self.hoofd.voorlezen_gevraagd) {
+                self.open_voorlezen(ui.ctx());
+            }
         }
-        self.teken_hoofd(ui, nu);
-        if std::mem::take(&mut self.hoofd.voorlezen_gevraagd) {
-            self.open_voorlezen(ui.ctx());
+        // Elk beeld, ook in de voorleesmodus: anders blijft het klembord staan zolang die open is.
+        if let Some(moment) = self.klembord_stap(nu) {
+            ui.ctx()
+                .request_repaint_after(moment.saturating_duration_since(nu));
         }
     }
 

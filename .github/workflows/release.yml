@@ -6,6 +6,9 @@
 # Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 #
 # 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Eindreview: Linux bouwt op ubuntu-22.04 (oudere glibc); de tag moet gelijk zijn aan de versie in Cargo.toml.
+#
+# 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 #   Taak 18 fixronde: tag valideren, eerst controle (fmt, clippy, tests, cargo deny), geen expressies in run, exacte releasenotes.
 #
 # 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -54,6 +57,21 @@ jobs:
             echo "prerelease=true" >> "$GITHUB_OUTPUT"
           else
             echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Tag vergelijken met de versie in Cargo.toml
+        shell: bash
+        run: |
+          # De versie van de werkruimte; de tag zonder v en zonder achtervoegsel moet gelijk zijn.
+          cargo_versie="$(awk '/^\[workspace\.package\]/ { s = 1; next } /^\[/ { s = 0 } s && /^version[[:space:]]*=/ { gsub(/[" ]/, ""); sub(/^version=/, ""); print; exit }' Cargo.toml)"
+          tag_versie="${TAG#v}"
+          tag_versie="${tag_versie%%-*}"
+          if [ -z "$cargo_versie" ]; then
+            echo "::error::Geen version gevonden onder [workspace.package] in Cargo.toml."
+            exit 1
+          fi
+          if [ "$tag_versie" != "$cargo_versie" ]; then
+            echo "::error::Tag $TAG hoort bij versie $tag_versie, maar Cargo.toml heeft version $cargo_versie. Pas de version aan of kies een andere tag."
+            exit 1
           fi
       - name: Releasenotes van deze versie ophalen
         shell: bash
@@ -179,7 +197,7 @@ jobs:
   linux:
     name: Linux x64
     needs: [controle, deny]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:

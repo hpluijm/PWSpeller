@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Eindreview: zeven bevindingen opgelost (klembord, voorleesmodus, inactiviteit, release). |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fase D: taak 19 (documentatie, releasenotes v2.0.0) en samenvatting van taak 18. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 18 fixronde: sleutel op een eigen pagina (Windows-paniek), valse treffer in de schijftest, release-workflow aangescherpt. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 18: licentiecontrole, CI en uitlevering per platform. |
@@ -21,6 +22,14 @@
 ---
 
 # Voortgang
+
+## 2026-10-17, middag (Claude Code) — Eindreview: zeven bevindingen opgelost
+
+- **Plakken werkte niet.** `eframe` stond met `default-features = false` zonder `clipboard`, dus egui-winit gebruikte een klembord binnen de app. Feature aangezet (`cargo deny` groen). Gevolg: egui kopieert nu ook zelf naar het systeemklembord. Daarom `selectable_labels = false` (test in `thema.rs`), zodat het resultaat niet via egui buiten het wissen en de vertrouwelijk-markering om op het klembord komt; Cmd/Ctrl+C in het eigen tekstveld mag via egui (eigen invoer van de gebruiker). Zie `docs/implementatie.md`.
+- **Klembord bleef staan in de voorleesmodus.** `klembord_stap` zat alleen in `teken_hoofd`; nu in `teken_hoofd_of_voorlezen`, elk beeld. Test: kopieer, voorleesmodus, 31 s, bord gewist.
+- **Inactiviteit zonder geschiedenis.** De wis hing aan de geschiedenis: leeg (na *Wis geschiedenis*, of alleen eigen tekst) betekende nooit wissen. De app heeft nu een eigen teller (`Instant` en wandklok). Tests: eigen tekst 16 min, resultaat na *Wis geschiedenis*, en "alleen bij sluiten" wist niet.
+- **README:** F5 opent de voorleesmodus; het stond als genereren.
+- **Release:** Linux bouwt op ubuntu-22.04 (glibc 2.35); `releasenotes.sh` valt bij `vX.Y.Z-achtervoegsel` terug op `## vX.Y.Z` (gemeten met v2.0.0, v2.0.0-rc1 en een eigen rc-sectie); de release-workflow faalt als de tag (zonder v en achtervoegsel) niet gelijk is aan `version` in `Cargo.toml`.
 
 ## 2026-10-17, ochtend (Claude Code) — Fase D afgerond: taak 18 en 19, klaar voor v2.0.0
 

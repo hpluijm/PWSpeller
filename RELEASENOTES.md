@@ -10,6 +10,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Eindreview: plakken werkt; Linux vanaf Ubuntu 22.04; wissen na inactiviteit ook zonder geschiedenis. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 19: sectie hernoemd naar v2.0.0 met datum, inhoud herschreven voor gebruiker en helpdesk. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 18: downloads per platform en de eerste-start-waarschuwing. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Fix 2: eigen tekst doorlopend, optie "Cijfer toevoegen", korter splashscreen. |
@@ -33,6 +34,9 @@
 - Een gegenereerd wachtwoord staat in groepjes van vier met nummers. Een wachtzin staat in hele woorden met het scheidingsteken ertussen. Eigen tekst staat doorlopend in beeld.
 - Met *Lees voor* zie je één teken of woord tegelijk, groot; volgende en vorige met spatie en de pijltjes, stoppen met Esc.
 - De geschiedenis staat alleen in het geheugen, versleuteld, en wordt gewist bij het sluiten, na 15 minuten inactiviteit (instelbaar) of met *Wis geschiedenis*. Een gekopieerd wachtwoord wordt na 30 seconden van het klembord gehaald (instelbaar; op macOS standaard uit).
+- Plakken in *Eigen wachtwoord* werkt met het klembord van het systeem. Het resultaat zelf is niet te selecteren; kopiëren gaat met *Kopieer* of Cmd/Ctrl+C.
+- Het resultaat en de eigen tekst worden na de ingestelde inactiviteit ook gewist als de geschiedenis leeg is, en het klembord wordt ook gewist als *Lees voor* open staat.
+- Linux werkt vanaf Ubuntu 22.04 (glibc 2.35), Debian 12 of nieuwer.
 - Het programma gebruikt geen internet.
 
 ### Nog te doen

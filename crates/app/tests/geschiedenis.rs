@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Eindreview: tests voor klembord in de voorleesmodus en inactiviteit zonder geschiedenis.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 18 fixronde: schijftest negeert de vaste teksten van de eigen logregels bij de losse woorden.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -289,6 +292,70 @@ fn bij_afsluiten_wist_ook_het_huidige_resultaat() {
     let app = &h.state().0;
     assert!(app.huidige_tekst().is_none());
     assert!(app.hoofd.cache.is_none());
+}
+
+#[test]
+fn klembord_wordt_ook_tijdens_voorlezen_gewist() {
+    let t0 = Instant::now();
+    let bord = NepBord::default();
+    let mut app = PwApp::voor_test(t0);
+    app.instellingen.klembord_wissen = true;
+    app.instellingen.klembord_seconden = 30;
+    app.zet_bord(Box::new(bord.clone()));
+    let mut h = harnas_met(app, t0);
+    genereer(&mut h);
+    h.get_by_label("Kopieer").click();
+    stap(&mut h);
+    assert!(bord.0.borrow().is_some());
+    h.key_press(Key::F5);
+    stap(&mut h);
+    assert!(h.state().0.voorlezen.is_some());
+    let nu = h.state().1;
+    h.state_mut().1 = nu + Duration::from_secs(31);
+    stap(&mut h);
+    assert!(h.state().0.voorlezen.is_some(), "voorleesmodus is nog open");
+    assert!(bord.0.borrow().is_none(), "klembord is gewist");
+}
+
+#[test]
+fn inactiviteit_wist_ook_zonder_geschiedenis() {
+    // Alleen eigen tekst: er is geen geschiedenis om de teller aan te hangen.
+    let mut h = hoofd();
+    kies_tab(&mut h, Tab::EigenTekst);
+    h.state_mut().0.hoofd.eigen_tekst = "Abc12!".to_string();
+    h.key_press(Key::A);
+    stap(&mut h);
+    assert!(h.state().0.geschiedenis.items().is_empty());
+    assert!(!h.state().0.hoofd.eigen_tekst.is_empty());
+    let nu = h.state().1;
+    h.state_mut().1 = nu + Duration::from_secs(16 * 60);
+    stap(&mut h);
+    assert!(h.state().0.hoofd.eigen_tekst.is_empty());
+    assert!(h.state().0.huidige_tekst().is_none());
+}
+
+#[test]
+fn inactiviteit_wist_resultaat_na_wis_geschiedenis() {
+    let mut h = hoofd();
+    genereer(&mut h);
+    h.state_mut().0.geschiedenis.wis();
+    assert!(h.state().0.huidige_tekst().is_some());
+    let nu = h.state().1;
+    h.state_mut().1 = nu + Duration::from_secs(16 * 60);
+    stap(&mut h);
+    assert!(h.state().0.huidige_tekst().is_none());
+    assert!(h.state().0.hoofd.cache.is_none());
+}
+
+#[test]
+fn alleen_bij_sluiten_wist_niet_na_inactiviteit() {
+    let mut h = hoofd();
+    h.state_mut().0.instellingen.geschiedenis_minuten = None;
+    genereer(&mut h);
+    let nu = h.state().1;
+    h.state_mut().1 = nu + Duration::from_secs(120 * 60);
+    stap(&mut h);
+    assert!(h.state().0.huidige_tekst().is_some());
 }
 
 #[test]

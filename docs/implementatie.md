@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Eindreview: eframe-feature clipboard, niet-selecteerbare labels, klembordstap elk beeld, eigen inactiviteitsteller. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 19: taaldata, generator, spelling, app-onderdelen en licenties toegevoegd; verouderde verwijzing naar Taak 17 weg. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 18 fixronde: sleutelpagina, release-workflow met controle vooraf. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 18: sectie Bouwen en uitleveren. |
@@ -165,6 +166,19 @@ bedt het Windows-icoon in. Versie en klant op het splashscreen komen dus uit de 
   Linux in CI) en vraagt `request_repaint_after` tot het wis-moment. Fouten: `log::warn!` zonder
   inhoud en de melding `melding.klembord_mislukt`; nooit paniek. `bij_afsluiten` (aangeroepen vanuit
   `on_exit`) roept `bij_sluiten` van het klembord aan.
+- **Plakken en het systeemklembord (eframe-feature `clipboard`):** eframe staat met
+  `default-features = false`; zonder de feature `clipboard` (die `egui-winit/clipboard` aanzet)
+  gebruikt egui-winit een klembord binnen de app en werkt plakken uit andere programma's niet.
+  De feature staat nu aan; `cargo deny` blijft groen (alleen `arboard`, dat er al was, en op
+  Wayland `smithay-clipboard`; geen netwerk). Daardoor kopieert egui ook zelf naar het
+  systeemklembord (`OutputCommand::CopyText`), langs ons klembordbeheer. Twee keuzes:
+  `selectable_labels = false` in `thema.rs` (alle thema's), zodat het resultaat en de spelling
+  niet te selecteren zijn en egui er nooit een wachtwoord mee kopieert zonder de
+  vertrouwelijk-markering en het wissen na 30 seconden; en Cmd/Ctrl+C in het tekstveld van
+  *Eigen wachtwoord* mag wel via egui, want dat is de eigen invoer van de gebruiker. Afgewezen:
+  `Event::Copy` en `CopyText` filteren; dat is fragieler dan de labels niet selecteerbaar maken.
+- **Klembordstap elk beeld:** `klembord_stap` staat in `teken_hoofd_of_voorlezen` (app.rs), niet
+  in `teken_hoofd`, zodat het klembord ook gewist wordt als de voorleesmodus open is.
 - **Markering als vertrouwelijk (arboard 3.7.0, `exclude_from_history`):** macOS zet
   `org.nspasteboard.ConcealedType` (arboard doet dat zelf, geen eigen objc-code nodig). Windows
   zet `ExcludeClipboardContentFromMonitorProcessing`-formaten via `exclude_from_history` en
@@ -187,8 +201,13 @@ bedt het Windows-icoon in. Versie en klant op het splashscreen komen dus uit de 
   hoofdvenster niet tekent). Wist `controleer_inactiviteit`, dan gaan de voorleesmodus en de
   getoonde items dicht en komt `geschiedenis.gewist_inactief` (tot de volgende handeling). De
   voorleesmodus sluit bij elke wisbeurt, ook als hij het huidige resultaat toont: eenvoudiger en
-  veiliger dan onderscheid maken. `request_repaint_after(1 s)` alleen zolang er items zijn en
-  een time-out staat.
+  veiliger dan onderscheid maken. `request_repaint_after(1 s)` alleen zolang er iets te wissen is
+  (items, resultaat, eigen tekst) en een time-out staat.
+- **Eigen inactiviteitsteller van de app** (`laatste_invoer` als `Instant` plus `laatste_invoer_wand`
+  als `SystemTime`, de langste van de twee telt): los van de geschiedenis, zodat het huidige
+  resultaat na de ingestelde minuten ook wordt gewist als de geschiedenis leeg is (na *Wis
+  geschiedenis*, of alleen eigen tekst). Dan blijft de melding over de geschiedenis weg. Met "alleen
+  bij sluiten" (geen time-out) wordt niets gewist. De kern-teller blijft bestaan en wist dezelfde dingen.
 - Bij een inactiviteitswis gaat ook het huidige resultaat weg (`wis_resultaat`: gegenereerde
   resultaten, spelling-cache, eigen tekst, voorleesmodus, getoonde items); `bij_afsluiten` doet hetzelfde.
 - **Invoer telt als gebruik:** toets, tekst, klik, scroll, aanraking en klembordacties roepen

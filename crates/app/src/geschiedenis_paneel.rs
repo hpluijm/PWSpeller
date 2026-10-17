@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Eindreview: inactiviteitswis met eigen teller van de app, ook bij een lege geschiedenis.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 17 fixronde 1: wissen na inactiviteit wist ook het huidige resultaat; invoer telt als gebruik.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -19,7 +22,7 @@ use eframe::egui::{self, FontFamily, FontId, RichText};
 use pwspeller_kern::generator::{Gegenereerd, Modus};
 use pwspeller_kern::geschiedenis::ItemInfo;
 use pwspeller_kern::talen::{catalogus, interfacetekst};
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant, SystemTime};
 use zeroize::Zeroizing;
 
 const MASKER: &str = "••••••••";
@@ -47,12 +50,20 @@ impl PwApp {
             .geschiedenis_minuten
             .map(|m| Duration::from_secs(u64::from(m) * 60));
         self.geschiedenis.zet_time_out(time_out);
-        if self.geschiedenis.controleer_inactiviteit(nu) {
+        let had_items = !self.geschiedenis.items().is_empty();
+        let kern_gewist = self.geschiedenis.controleer_inactiviteit(nu);
+        // De eigen teller van de app, los van de geschiedenis: ook met een lege geschiedenis
+        // (na "Wis geschiedenis", of alleen eigen tekst) moet het resultaat verdwijnen.
+        let app_inactief = time_out.is_some_and(|t| self.inactief_sinds_invoer(nu) >= t)
+            && self.is_er_iets_te_wissen();
+        if kern_gewist || app_inactief {
+            self.geschiedenis.wis();
             self.getoond.clear();
             // Ook wat nu in beeld staat gaat weg, en de voorleesmodus sluit.
             self.wis_resultaat();
-            self.gewist_melding = true;
-            log::info!("geschiedenis gewist na inactiviteit");
+            self.gewist_melding = had_items;
+            self.markeer_invoer(nu);
+            log::info!("geschiedenis en resultaat gewist na inactiviteit");
             ctx.request_repaint();
         }
         // Elke invoer telt als gebruik (muisbewegen alleen niet).
@@ -74,12 +85,40 @@ impl PwApp {
         });
         if invoer {
             self.geschiedenis.markeer_gebruik(nu);
+            self.markeer_invoer(nu);
         }
         let ids: Vec<u64> = self.geschiedenis.items().iter().map(|i| i.id).collect();
         self.getoond.retain(|(id, _)| ids.contains(id));
-        if time_out.is_some() && !ids.is_empty() {
+        if time_out.is_some() && self.is_er_iets_te_wissen() {
             ctx.request_repaint_after(Duration::from_secs(1));
         }
+    }
+
+    /// Zet de inactiviteitsteller van de app op `nu` (en de wandklok op nu).
+    pub(crate) fn markeer_invoer(&mut self, nu: Instant) {
+        self.laatste_invoer = nu;
+        self.laatste_invoer_wand = SystemTime::now();
+    }
+
+    /// De langste van de twee klokken: de wandklok loopt door tijdens slaapstand, `Instant`
+    /// niet. Staat de wandklok achteruit, dan telt alleen `nu`.
+    fn inactief_sinds_invoer(&self, nu: Instant) -> Duration {
+        let instant = nu.saturating_duration_since(self.laatste_invoer);
+        let wand = SystemTime::now()
+            .duration_since(self.laatste_invoer_wand)
+            .unwrap_or(Duration::ZERO);
+        instant.max(wand)
+    }
+
+    /// Staat er iets in beeld of in de geschiedenis dat na inactiviteit weg moet?
+    fn is_er_iets_te_wissen(&self) -> bool {
+        let h = &self.hoofd;
+        !self.geschiedenis.items().is_empty()
+            || h.wachtwoord.is_some()
+            || h.wachtzin.is_some()
+            || h.cache.is_some()
+            || !h.eigen_tekst.is_empty()
+            || self.voorlezen.is_some()
     }
 
     /// Tekent het paneel als het open staat; bij sluiten verdwijnen de ontsleutelde items.

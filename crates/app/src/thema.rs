@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Eindreview: labels niet selecteerbaar, zodat egui geen wachtwoord naar het klembord kopieert.
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Taak 12: thema aangemaakt.
 // ──────────────────────────────────────────────────────────
 
@@ -44,6 +47,9 @@ pub fn zet_thema(ctx: &egui::Context) {
     ctx.set_fonts(lettertypen());
     ctx.set_visuals_of(egui::Theme::Light, visuals_licht());
     ctx.set_visuals_of(egui::Theme::Dark, visuals_donker());
+    // Labels (resultaat, spelling) zijn niet selecteerbaar: egui zou er met Cmd/Ctrl+C een
+    // wachtwoord mee naar het systeemklembord zetten, buiten het klembordbeheer om.
+    ctx.all_styles_mut(|s| s.interaction.selectable_labels = false);
     ctx.set_theme(ThemePreference::System);
 }
 
@@ -124,6 +130,17 @@ pub fn contrast(a: Color32, b: Color32) -> f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn labels_zijn_niet_selecteerbaar() {
+        // Selecteerbare labels zouden via Cmd/Ctrl+C het wachtwoord ongemarkeerd naar het
+        // systeemklembord zetten, langs ons eigen klembordbeheer.
+        let ctx = egui::Context::default();
+        zet_thema(&ctx);
+        for thema in [egui::Theme::Light, egui::Theme::Dark] {
+            assert!(!ctx.style_of(thema).interaction.selectable_labels);
+        }
+    }
 
     #[test]
     fn tekensoorten_halen_4_5_tegen_elke_achtergrond() {

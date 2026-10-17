@@ -6,6 +6,9 @@
 # Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 #
 # 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+#   Eindreview: eframe-feature clipboard, zodat plakken uit het systeemklembord werkt.
+#
+# 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 #   Taak 18: winresource (build-dependency) toegevoegd voor het Windows-icoon.
 #
 # 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -37,7 +40,7 @@ publish.workspace = true
 [dependencies]
 pwspeller-kern = { path = "../kern", features = ["serde"] }
 pwspeller-data = { path = "../data" }
-eframe = { version = "0.37.0", default-features = false, features = ["glow", "accesskit", "wayland", "x11"] }
+eframe = { version = "0.37.0", default-features = false, features = ["glow", "accesskit", "clipboard", "wayland", "x11"] }
 serde = { version = "1.0.229", features = ["derive"] }
 toml = "1.1.8"
 directories = "6.0.0"

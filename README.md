@@ -15,6 +15,7 @@ geven zijn. Versie 2 is opnieuw gebouwd in Rust voor Windows, macOS en Linux.
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Eindreview: F5 opent de voorleesmodus (niet genereren); Linux-minimum Ubuntu 22.04. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 19: README compleet voor v2.0.0 (gebruik, eerste start, taal toevoegen, uitrollen, alle documenten). |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 18 fixronde: release controleert eerst, releasenotes-sectie verplicht. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Taak 18: sectie Uitrollen/downloaden. |
@@ -60,7 +61,8 @@ waarschuwt bij de eerste start. Dat is te verwachten en geen teken dat er iets m
   en is hier niet op een macOS 26-scherm nagelezen. De app draait in de macOS-sandbox zonder netwerktoegang;
   instellingen en logboek staan dan onder `~/Library/Containers/nl.petisys.pwspeller/`.
 - **Linux:** geen waarschuwing; het bestand moet wel uitvoerbaar zijn. Nodig is een desktop met X11
-  of Wayland en OpenGL.
+  of Wayland en OpenGL, en een distributie met glibc 2.35 of nieuwer (het bestand wordt op
+  Ubuntu 22.04 gebouwd), dus Ubuntu 22.04, Debian 12, Fedora 36 of nieuwer.
 
 Over het ondertekenen en de app stores: zie het [ontwerp](docs/superpowers/specs/2026-10-16-pwspeller-rust-design.md), hoofdstuk 14.
 
@@ -79,7 +81,7 @@ Verder:
 
 - **Spellingstaal:** Nederlands, Vlaams, Frans, Duits, Engels of NAVO-alfabet. De interface zelf is
   Nederlands of Engels (volgt het systeem, instelbaar).
-- **Sneltoetsen:** `Enter` of `F5` genereert, `Cmd+C` (macOS) of `Ctrl+C` kopieert het resultaat. Ze
+- **Sneltoetsen:** `Enter` genereert, `F5` opent de voorleesmodus, `Cmd+C` (macOS) of `Ctrl+C` kopieert het resultaat. Ze
   werken als geen invoerveld focus heeft.
 - **Voorleesmodus** (*Lees voor*): toont één teken of woord tegelijk, groot, met de spelling erbij.
   `Spatie` of pijl rechts is volgende, pijl links vorige, `Esc` stopt.

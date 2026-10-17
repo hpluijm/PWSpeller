@@ -6,6 +6,9 @@
 // Copyright: onderaan dit bestand. Overige rechthebbenden: NOTICE.md.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
+//   Eindreview: klembordstap verhuisd naar app.rs (elk beeld).
+//
+// 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
 //   Fix 2: groepjes van vier alleen bij het wachtwoord; eigen tekst (en een wachtzin zonder woorden) als één doorlopende regel.
 //
 // 2026-10-17  Hans van der Pluijm (Petisys)  [Claude Code]
@@ -307,10 +310,6 @@ impl PwApp {
             ui.ctx().request_repaint();
         }
         self.wis_eigen_tekst_indien_nodig();
-        if let Some(moment) = self.klembord_stap(nu) {
-            ui.ctx()
-                .request_repaint_after(moment.saturating_duration_since(nu));
-        }
         if self.instellingen != self.bewaard {
             self.bewaar_instellingen();
             self.bewaard = self.instellingen.clone();
