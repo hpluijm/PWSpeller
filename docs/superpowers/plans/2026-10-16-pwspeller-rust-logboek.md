@@ -8,6 +8,7 @@
 
 | Wanneer | Wie | Met | Wat |
 |---|---|---|---|
+| 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Logboek bijgewerkt tot en met fase D en de eindreview. |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Logboek bijgewerkt tot en met fase C (taak 12–17). |
 | 2026-10-17 | Hans van der Pluijm (Petisys) | Claude Code | Logboek bijgewerkt tot en met fase B (taak 5–11). |
 | 2026-10-16 | Hans van der Pluijm (Petisys) | Claude Code | Logboek tot en met Taak 5 vastgelegd voor de overdracht. |
@@ -154,6 +155,25 @@ FIX_BASE groepjes: 0ba3337
 Fix groepjes: wachtzin in hele woorden (5b972bf); controller zag schermafbeelding: OK. Open: label 'Cijfer aan elk woord' misleidend (één cijfer); nummering spelling per woord springt (8→15, telt tekens); Hans beslist over groepjes bij wachtwoord.
 Fix 2 (31666c9) + spatie als markering (f48e79f): groepjes alleen gegenereerd wachtwoord, eigen tekst doorlopend, wachtzin hele woorden, splash 1,5 s (afspraak 24 globaal aangepast in mac-setup), 'Cijfer toevoegen', spelling doorlopend genummerd. Controller zag schermafbeeldingen: OK.
 Fase C: opnieuw afgerond na visuele controle — stoppunt, wacht op akkoord Hans voor fase D.
+Hans: akkoord fase D (2026-10-17).
+BASE taak 18: 1268243
+Hans: licentie-uitzonderingen BSL-1.0 en MPL-2.0 (option-ext) akkoord (2026-10-17).
+Task 18: review spec ✅; Important: ${{ github.ref_name }} in run-scripts (injectie) + geen tagvalidatie; BSL/MPL → akkoord Hans (NOTICE: crates noemen).
+CI-run 38983165519: macOS ✅, deny ✅, Windows ❌ (region LockGuard unlock SystemCall(158) — gedeelde pagina, kern/geschiedenis), Linux ❌ (test: 'gegenereerde tekst in logboek' — oorzaak onbekend).
+Ruling: één fixronde voor taak 18-review + beide CI-fouten; Linux-fout eerst diagnosticeren (systematic debugging), geen test verzwakken zonder bewijs dat het een valse treffer is.
+Ruling: advisories in aparte, niet-blokkerende CI-job — nieuwe RustSec-melding mag niet elke push rood maken, maar moet wel zichtbaar zijn — kost: kwetsbaarheid valt minder op (wel in release-job blokkerend).
+FIX_BASE taak 18: 3b755ee
+Task 18: fix round 1/5 (A Windows-lock, B Linux valse treffer 'verzoek', C 8 reviewpunten; re-review opus: alles ADDRESSED; CI 38984950574 groen op ca48464)
+Task 18: minor (deferred): droptest vangt oude bug niet meer (uitlijningstest wel); filter vaste logteksten laat woord gelijk aan vaste tekst ontsnappen; release.yml nog nooit gedraaid.
+Task 18: complete (commits 1268243..ca48464, review clean)
+Ruling: taak 19 hernoemt 'Nog niet uitgebracht' naar '## v2.0.0 — 2026-10-17' vóór het taggen, zodat release.yml de notes vindt; de tag zelf pas na akkoord Hans — kost: als Hans niet tagt, noemt de releasenotes een versie die nog niet bestaat (eenvoudig terug te zetten).
+BASE taak 19: ca48464
+Task 19: complete (cbb5686; CI groen; controller: rapport + CI gecontroleerd)
+Eindreview (opus): eerst oplossen — Important: plakken uit systeemklembord werkt niet (eframe zonder feature clipboard); klembord niet gewist in voorleesmodus. Minor vóór release: README F5; inactiviteitswis bij lege geschiedenis; Linux op ubuntu-22.04; rc-tag kan niet proefdraaien; tag≠Cargo-versie niet gecontroleerd.
+Ruling: één fixgolf voor 1–5 en 7; 6 oplossen door releasenotes.sh bij prerelease-tag (vX.Y.Z-…) terug te laten vallen op de sectie '## vX.Y.Z', zodat een proef-tag v2.0.0-rc1 kan — kost: niets.
+FIX_BASE eind: cbb5686
+Eindreview: fixgolf (7 addressed; re-review sonnet: geen nieuwe breuk; CI 38986738990 groen). Plakcontrole met de hand niet gelukt (venster kreeg geen focus) → bij Hans.
+Fase D: klaar — wacht op akkoord Hans voor merge naar master en tag v2.0.0 (eventueel eerst proef-tag v2.0.0-rc1).
 
 ---
 
